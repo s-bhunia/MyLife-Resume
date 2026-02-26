@@ -90,7 +90,6 @@ export default function App() {
 
           {/* Pass the state to the House so the GeometricDoor knows when to swing */}
           <House entranceOpen={doorOpen} />
-
           <PerspectiveCamera makeDefault fov={55} />
 
           {/* Intro Animation */}
