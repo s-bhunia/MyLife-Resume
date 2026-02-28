@@ -1,5 +1,5 @@
 import { Box, Plane, Cylinder, Sphere, useTexture } from "@react-three/drei";
-import { useRef, useState, useEffect, memo } from "react";
+import { useRef, useState, useEffect, memo, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Geometry, Base, Subtraction } from "@react-three/csg";
@@ -16,8 +16,206 @@ const THICKNESS = 0.2;
 const PORCH_W = 3;
 const PORCH_D = 1.5;
 
-// --- UTILITY COMPONENTS ---
+// ---------------------------------------------------------------------------
+// MODULE-LEVEL SHARED MATERIALS
+// Defining materials outside components means they are created ONCE and shared
+// across all instances. No new THREE.Material objects on re-render.
+// ---------------------------------------------------------------------------
+const MAT_PLASTER = new THREE.MeshStandardMaterial({
+  color: "#ffffff",
+  roughness: 0.9,
+});
+const MAT_CLADDING = new THREE.MeshStandardMaterial({
+  color: "#d4cbb8",
+  roughness: 1,
+});
+const MAT_BAND = new THREE.MeshStandardMaterial({
+  color: "#c0c0c0",
+  roughness: 0.1,
+});
+const MAT_FRAME = new THREE.MeshStandardMaterial({
+  color: "#1a1a1a",
+  roughness: 0.4,
+});
+const MAT_SILL = new THREE.MeshStandardMaterial({
+  color: "#d4cbb8",
+  roughness: 0.8,
+});
+// Simple transparent material instead of expensive meshPhysicalMaterial + transmission.
+// transmission=0.9 forces an extra "background texture" render pass for EVERY window — 6 passes
+// gone. This looks almost identical from normal viewing distances.
+const MAT_GLASS = new THREE.MeshStandardMaterial({
+  color: "#aaccff",
+  transparent: true,
+  opacity: 0.25,
+  roughness: 0.05,
+  metalness: 0.1,
+});
+const MAT_DOOR_DARK = new THREE.MeshStandardMaterial({
+  color: "#3d2613",
+  roughness: 0.8,
+});
+const MAT_DOOR_MAIN = new THREE.MeshStandardMaterial({
+  color: "#6b4423",
+  roughness: 0.7,
+});
+const MAT_DOOR_PANEL = new THREE.MeshStandardMaterial({
+  color: "#54351b",
+  roughness: 0.8,
+});
+const MAT_HANDLE = new THREE.MeshStandardMaterial({
+  color: "#111111",
+  metalness: 0.8,
+  roughness: 0.2,
+});
+const MAT_TRUNK = new THREE.MeshStandardMaterial({
+  color: "#5c4033",
+  roughness: 0.9,
+});
+const MAT_LEAF = new THREE.MeshStandardMaterial({
+  color: "#2d5a27",
+  side: THREE.DoubleSide,
+});
+const MAT_SHRUB_STEM = new THREE.MeshStandardMaterial({ color: "#3d2817" });
+const MAT_SHRUB_LO = new THREE.MeshStandardMaterial({
+  color: "#4a7c3b",
+  roughness: 0.8,
+});
+const MAT_SHRUB_HI = new THREE.MeshStandardMaterial({
+  color: "#5c9a49",
+  roughness: 0.8,
+});
+const MAT_STONE = new THREE.MeshStandardMaterial({
+  color: "#8a8a8a",
+  roughness: 0.8,
+});
+const MAT_GOLD = new THREE.MeshStandardMaterial({
+  color: "#e8c338",
+  roughness: 0.5,
+});
+const MAT_PORCH_TILE = new THREE.MeshStandardMaterial({
+  color: "#1a1a1a",
+  roughness: 0.7,
+});
+const MAT_ROOF = new THREE.MeshStandardMaterial({
+  color: "#e0e0e0",
+  roughness: 0.9,
+});
+const MAT_ROOF_RING = new THREE.MeshBasicMaterial({ color: "#6a0dad" });
 
+// ---------------------------------------------------------------------------
+// WALL SEGMENT
+// ⚠️  MUST live OUTSIDE House so its identity is stable across re-renders.
+// When it was defined inside House, every prop change (e.g. entranceOpen) gave
+// React a brand-new component type → full unmount+remount of all walls →
+// every CSG boolean operation re-ran simultaneously → GPU spike to 99%.
+// ---------------------------------------------------------------------------
+interface CutoutDef {
+  position: [number, number, number];
+  args: [number, number, number];
+}
+
+interface WallSegmentProps {
+  args: [number, number, number];
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  cutouts?: CutoutDef[];
+}
+
+const WallSegment = memo(
+  ({
+    args,
+    position,
+    rotation = [0, 0, 0],
+    cutouts = [],
+  }: WallSegmentProps) => {
+    const [w, , d] = args;
+    return (
+      <group position={position} rotation={rotation}>
+        {/* Lower cladding band */}
+        <mesh
+          castShadow
+          receiveShadow
+          position={[0, H_BASE / 2, 0]}
+          material={MAT_CLADDING}
+        >
+          <Geometry>
+            <Base>
+              <boxGeometry args={[w, H_BASE, d]} />
+            </Base>
+            {cutouts.map((cut, i) => (
+              <Subtraction
+                key={`base-${i}`}
+                position={[
+                  cut.position[0],
+                  cut.position[1] - H_BASE / 2,
+                  cut.position[2],
+                ]}
+              >
+                <boxGeometry args={cut.args} />
+              </Subtraction>
+            ))}
+          </Geometry>
+        </mesh>
+
+        {/* Upper plaster band */}
+        <mesh
+          castShadow
+          receiveShadow
+          position={[0, H_BASE + H_UPPER / 2, 0]}
+          material={MAT_PLASTER}
+        >
+          <Geometry>
+            <Base>
+              <boxGeometry args={[w, H_UPPER, d]} />
+            </Base>
+            {cutouts.map((cut, i) => (
+              <Subtraction
+                key={`plaster-${i}`}
+                position={[
+                  cut.position[0],
+                  cut.position[1] - (H_BASE + H_UPPER / 2),
+                  cut.position[2],
+                ]}
+              >
+                <boxGeometry args={cut.args} />
+              </Subtraction>
+            ))}
+          </Geometry>
+        </mesh>
+
+        {/* Decorative band */}
+        <mesh
+          castShadow
+          position={[0, H_BASE + H_UPPER + H_BAND / 2, 0]}
+          material={MAT_BAND}
+        >
+          <Geometry>
+            <Base>
+              <boxGeometry args={[w + 0.02, H_BAND, d + 0.02]} />
+            </Base>
+            {cutouts.map((cut, i) => (
+              <Subtraction
+                key={`band-${i}`}
+                position={[
+                  cut.position[0],
+                  cut.position[1] - (H_BASE + H_UPPER + H_BAND / 2),
+                  cut.position[2],
+                ]}
+              >
+                <boxGeometry args={cut.args} />
+              </Subtraction>
+            ))}
+          </Geometry>
+        </mesh>
+      </group>
+    );
+  },
+);
+
+// ---------------------------------------------------------------------------
+// TALL WINDOW
+// ---------------------------------------------------------------------------
 const TallWindow = memo(
   ({
     position,
@@ -26,82 +224,78 @@ const TallWindow = memo(
     position: [number, number, number];
     rotation?: [number, number, number];
   }) => {
-    const frameColor = "#1a1a1a";
     const F_DEPTH = THICKNESS + 0.05;
-
     return (
       <group position={position} rotation={rotation}>
-        {/* Outer Hollow Frame */}
+        {/* Frame — top/bottom rails */}
         <Box
           args={[0.8, 0.05, F_DEPTH]}
           position={[0, 1.075, 0]}
           castShadow
           receiveShadow
-        >
-          <meshStandardMaterial color={frameColor} roughness={0.4} />
-        </Box>
+          material={MAT_FRAME}
+        />
         <Box
           args={[0.8, 0.05, F_DEPTH]}
           position={[0, -1.075, 0]}
           castShadow
           receiveShadow
-        >
-          <meshStandardMaterial color={frameColor} roughness={0.4} />
-        </Box>
+          material={MAT_FRAME}
+        />
+        {/* Frame — side stiles */}
         <Box
           args={[0.05, 2.1, F_DEPTH]}
           position={[-0.375, 0, 0]}
           castShadow
           receiveShadow
-        >
-          <meshStandardMaterial color={frameColor} roughness={0.4} />
-        </Box>
+          material={MAT_FRAME}
+        />
         <Box
           args={[0.05, 2.1, F_DEPTH]}
           position={[0.375, 0, 0]}
           castShadow
           receiveShadow
-        >
-          <meshStandardMaterial color={frameColor} roughness={0.4} />
-        </Box>
-
-        {/* Stone Window Sill */}
+          material={MAT_FRAME}
+        />
+        {/* Stone sill */}
         <Box
           args={[0.9, 0.06, 0.3]}
           position={[0, -1.13, 0.05]}
           castShadow
           receiveShadow
-        >
-          <meshStandardMaterial color="#d4cbb8" roughness={0.8} />
-        </Box>
-
-        {/* Crossbars (Mullions) */}
-        <Box args={[0.03, 2.1, 0.05]} position={[0, 0, 0]} castShadow>
-          <meshStandardMaterial color={frameColor} roughness={0.4} />
-        </Box>
-        <Box args={[0.7, 0.03, 0.05]} position={[0, 0.3, 0]} castShadow>
-          <meshStandardMaterial color={frameColor} roughness={0.4} />
-        </Box>
-        <Box args={[0.7, 0.03, 0.05]} position={[0, -0.4, 0]} castShadow>
-          <meshStandardMaterial color={frameColor} roughness={0.4} />
-        </Box>
-
-        {/* Glass Pane */}
-        <mesh position={[0, 0, 0]}>
+          material={MAT_SILL}
+        />
+        {/* Mullions */}
+        <Box
+          args={[0.03, 2.1, 0.05]}
+          position={[0, 0, 0]}
+          castShadow
+          material={MAT_FRAME}
+        />
+        <Box
+          args={[0.7, 0.03, 0.05]}
+          position={[0, 0.3, 0]}
+          castShadow
+          material={MAT_FRAME}
+        />
+        <Box
+          args={[0.7, 0.03, 0.05]}
+          position={[0, -0.4, 0]}
+          castShadow
+          material={MAT_FRAME}
+        />
+        {/* Glass — simple transparent, NOT transmission (saves one render pass per window) */}
+        <mesh position={[0, 0, 0]} material={MAT_GLASS}>
           <boxGeometry args={[0.7, 2.1, 0.02]} />
-          <meshPhysicalMaterial
-            color="#ffffff"
-            transmission={0.9}
-            opacity={0.4}
-            roughness={0.1}
-            transparent
-          />
         </mesh>
       </group>
     );
   },
 );
 
+// ---------------------------------------------------------------------------
+// GEOMETRIC DOOR
+// ---------------------------------------------------------------------------
 const GeometricDoor = memo(
   ({
     position,
@@ -113,18 +307,16 @@ const GeometricDoor = memo(
     const [isOpen, setIsOpen] = useState(false);
     const doorRef = useRef<THREE.Group>(null);
 
-    // Listen to the prop from App.tsx to trigger the swing
     useEffect(() => {
       setIsOpen(entranceOpen);
     }, [entranceOpen]);
 
-    useFrame((state, delta) => {
+    useFrame((_, delta) => {
       if (doorRef.current) {
-        // Swing inward by -90 degrees
-        const targetRotation = isOpen ? -Math.PI / 2 : 0;
+        const target = isOpen ? -Math.PI / 2 : 0;
         doorRef.current.rotation.y = THREE.MathUtils.damp(
           doorRef.current.rotation.y,
-          targetRotation,
+          target,
           5,
           delta,
         );
@@ -135,21 +327,30 @@ const GeometricDoor = memo(
       <group position={position}>
         {/* Static Door Frame */}
         <group position={[0, 1.2, 0]}>
-          <mesh position={[0, 1.2 - 0.025, 0]} castShadow>
+          <mesh
+            position={[0, 1.2 - 0.025, 0]}
+            castShadow
+            material={MAT_DOOR_DARK}
+          >
             <boxGeometry args={[1.2, 0.05, THICKNESS + 0.05]} />
-            <meshStandardMaterial color="#3d2613" roughness={0.8} />
           </mesh>
-          <mesh position={[-0.6 + 0.025, 0, 0]} castShadow>
+          <mesh
+            position={[-0.6 + 0.025, 0, 0]}
+            castShadow
+            material={MAT_DOOR_DARK}
+          >
             <boxGeometry args={[0.05, 2.4, THICKNESS + 0.05]} />
-            <meshStandardMaterial color="#3d2613" roughness={0.8} />
           </mesh>
-          <mesh position={[0.6 - 0.025, 0, 0]} castShadow>
+          <mesh
+            position={[0.6 - 0.025, 0, 0]}
+            castShadow
+            material={MAT_DOOR_DARK}
+          >
             <boxGeometry args={[0.05, 2.4, THICKNESS + 0.05]} />
-            <meshStandardMaterial color="#3d2613" roughness={0.8} />
           </mesh>
         </group>
 
-        {/* Swinging Door - Hinge set to left edge (-0.6) */}
+        {/* Swinging Door — hinge at left edge */}
         <group position={[-0.6, 0, 0]}>
           <group
             ref={doorRef}
@@ -166,37 +367,34 @@ const GeometricDoor = memo(
               document.body.style.cursor = "auto";
             }}
           >
-            {/* Main Door Slab */}
-            <mesh position={[0.6, 1.175, 0]} castShadow>
+            <mesh
+              position={[0.6, 1.175, 0]}
+              castShadow
+              material={MAT_DOOR_MAIN}
+            >
               <boxGeometry args={[1.1, 2.35, 0.1]} />
-              <meshStandardMaterial color="#6b4423" roughness={0.7} />
             </mesh>
-
-            {/* Stacked Square Panels */}
             {[0.4, 0.9, 1.4, 1.9].map((y, i) => (
-              <mesh key={i} position={[0.6, y - 0.025, 0.06]} castShadow>
+              <mesh
+                key={i}
+                position={[0.6, y - 0.025, 0.06]}
+                castShadow
+                material={MAT_DOOR_PANEL}
+              >
                 <boxGeometry args={[0.7, 0.35, 0.02]} />
-                <meshStandardMaterial color="#54351b" roughness={0.8} />
               </mesh>
             ))}
-
-            {/* Door Handle */}
+            {/* Door handle */}
             <group position={[1.05, 1.175, 0.06]}>
-              <mesh castShadow>
+              <mesh castShadow material={MAT_HANDLE}>
                 <boxGeometry args={[0.06, 0.25, 0.02]} />
-                <meshStandardMaterial
-                  color="#111111"
-                  metalness={0.8}
-                  roughness={0.2}
-                />
               </mesh>
-              <mesh position={[-0.04, 0, 0.03]} castShadow>
+              <mesh
+                position={[-0.04, 0, 0.03]}
+                castShadow
+                material={MAT_HANDLE}
+              >
                 <boxGeometry args={[0.12, 0.03, 0.03]} />
-                <meshStandardMaterial
-                  color="#111111"
-                  metalness={0.8}
-                  roughness={0.2}
-                />
               </mesh>
             </group>
           </group>
@@ -206,14 +404,18 @@ const GeometricDoor = memo(
   },
 );
 
-// --- LANDSCAPING COMPONENTS ---
-
+// ---------------------------------------------------------------------------
+// LANDSCAPING
+// ---------------------------------------------------------------------------
 const PalmTree = memo(
   ({ position }: { position: [number, number, number] }) => (
     <group position={position}>
-      <Cylinder args={[0.15, 0.25, 3]} position={[0, 1.5, 0]} castShadow>
-        <meshStandardMaterial color="#5c4033" roughness={0.9} />
-      </Cylinder>
+      <Cylinder
+        args={[0.15, 0.25, 3]}
+        position={[0, 1.5, 0]}
+        castShadow
+        material={MAT_TRUNK}
+      />
       {[0, 1, 2, 3, 4].map((i) => (
         <Plane
           key={i}
@@ -221,9 +423,8 @@ const PalmTree = memo(
           position={[0, 3, 0]}
           rotation={[Math.PI / 4, (i * Math.PI * 2) / 5, 0]}
           castShadow
-        >
-          <meshStandardMaterial color="#2d5a27" side={THREE.DoubleSide} />
-        </Plane>
+          material={MAT_LEAF}
+        />
       ))}
     </group>
   ),
@@ -232,131 +433,73 @@ const PalmTree = memo(
 const OrnamentalShrub = memo(
   ({ position }: { position: [number, number, number] }) => (
     <group position={position}>
-      <Cylinder args={[0.05, 0.05, 1]} position={[0, 0.5, 0]} castShadow>
-        <meshStandardMaterial color="#3d2817" />
-      </Cylinder>
-      <Sphere args={[0.4]} position={[0, 1, 0]} castShadow>
-        <meshStandardMaterial color="#4a7c3b" roughness={0.8} />
-      </Sphere>
-      <Sphere args={[0.3]} position={[0, 1.5, 0]} castShadow>
-        <meshStandardMaterial color="#5c9a49" roughness={0.8} />
-      </Sphere>
+      <Cylinder
+        args={[0.05, 0.05, 1]}
+        position={[0, 0.5, 0]}
+        castShadow
+        material={MAT_SHRUB_STEM}
+      />
+      <Sphere
+        args={[0.4]}
+        position={[0, 1, 0]}
+        castShadow
+        material={MAT_SHRUB_LO}
+      />
+      <Sphere
+        args={[0.3]}
+        position={[0, 1.5, 0]}
+        castShadow
+        material={MAT_SHRUB_HI}
+      />
     </group>
   ),
 );
 
-// --- MAIN HOUSE COMPONENT ---
-
+// ---------------------------------------------------------------------------
+// MAIN HOUSE COMPONENT
+// ---------------------------------------------------------------------------
 export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
-  const matPlaster = <meshStandardMaterial color="#ffffff" roughness={0.9} />;
-  const matCladding = <meshStandardMaterial color="#d4cbb8" roughness={1} />;
-  const matPinkBand = <meshStandardMaterial color="#c0c0c0" roughness={0.1} />;
-
-  // House floor texture
   const floorTexture = useTexture("/textures/floor.jpg");
-  floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
-  floorTexture.repeat.set(2, 2);
 
-  const WallSegment = memo(
-    ({ args, position, rotation = [0, 0, 0], cutouts = [] }: any) => {
-      const [w, , d] = args;
-      return (
-        <group position={position} rotation={rotation}>
-          <mesh castShadow receiveShadow position={[0, H_BASE / 2, 0]}>
-            <Geometry>
-              <Base>
-                <boxGeometry args={[w, H_BASE, d]} />
-              </Base>
-              {cutouts.map((cut: any, i: number) => (
-                <Subtraction
-                  key={`base-${i}`}
-                  position={[
-                    cut.position[0],
-                    cut.position[1] - H_BASE / 2,
-                    cut.position[2],
-                  ]}
-                >
-                  <boxGeometry args={cut.args} />
-                </Subtraction>
-              ))}
-            </Geometry>
-            {matCladding}
-          </mesh>
+  // Memoize texture setup so it only runs once
+  useMemo(() => {
+    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
+    floorTexture.repeat.set(2, 2);
+  }, [floorTexture]);
 
-          <mesh
-            castShadow
-            receiveShadow
-            position={[0, H_BASE + H_UPPER / 2, 0]}
-          >
-            <Geometry>
-              <Base>
-                <boxGeometry args={[w, H_UPPER, d]} />
-              </Base>
-              {cutouts.map((cut: any, i: number) => (
-                <Subtraction
-                  key={`plaster-${i}`}
-                  position={[
-                    cut.position[0],
-                    cut.position[1] - (H_BASE + H_UPPER / 2),
-                    cut.position[2],
-                  ]}
-                >
-                  <boxGeometry args={cut.args} />
-                </Subtraction>
-              ))}
-            </Geometry>
-            {matPlaster}
-          </mesh>
-
-          <mesh castShadow position={[0, H_BASE + H_UPPER + H_BAND / 2, 0]}>
-            <Geometry>
-              <Base>
-                <boxGeometry args={[w + 0.02, H_BAND, d + 0.02]} />
-              </Base>
-              {cutouts.map((cut: any, i: number) => (
-                <Subtraction
-                  key={`band-${i}`}
-                  position={[
-                    cut.position[0],
-                    cut.position[1] - (H_BASE + H_UPPER + H_BAND / 2),
-                    cut.position[2],
-                  ]}
-                >
-                  <boxGeometry args={cut.args} />
-                </Subtraction>
-              ))}
-            </Geometry>
-            {matPinkBand}
-          </mesh>
-        </group>
-      );
-    },
+  // Memoize floor material to avoid new object each render
+  const matFloor = useMemo(
+    () => new THREE.MeshStandardMaterial({ map: floorTexture }),
+    [floorTexture],
   );
 
   return (
-    <group position={[0, 0, 0]}>
+    <group>
       {/* 1. PLATFORM & SURROUNDINGS */}
       <group>
-        <Box args={[W + 2, 0.4, D + 2]} position={[0, 0.2, 0]} receiveShadow>
-          <meshStandardMaterial color="#8a8a8a" roughness={0.8} />
-        </Box>
-        <Box args={[W + 2.1, 0.05, D + 2.1]} position={[0, 0.38, 0]}>
-          <meshStandardMaterial color="#e8c338" roughness={0.5} />
-        </Box>
+        <Box
+          args={[W + 2, 0.4, D + 2]}
+          position={[0, 0.2, 0]}
+          receiveShadow
+          material={MAT_STONE}
+        />
+        <Box
+          args={[W + 2.1, 0.05, D + 2.1]}
+          position={[0, 0.38, 0]}
+          material={MAT_GOLD}
+        />
         <Box
           args={[4, 0.15, 0.6]}
           position={[0, 0.075, D / 2 + 1.3]}
           receiveShadow
-        >
-          <meshStandardMaterial color="#8a8a8a" />
-        </Box>
+          material={MAT_STONE}
+        />
         <Box
           args={[4, 0.3, 0.6]}
           position={[0, 0.15, D / 2 + 0.7]}
           receiveShadow
-        >
-          <meshStandardMaterial color="#8a8a8a" />
-        </Box>
+          material={MAT_STONE}
+        />
         <Plane
           args={[30, 30]}
           rotation={[-Math.PI / 2, 0, 0]}
@@ -368,17 +511,19 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
       </group>
 
       {/* 2. HOUSE STRUCTURE */}
-      <group position={[0, 0, 0]}>
-        {/* House Floor */}
+      <group>
         <Plane
           args={[W, D]}
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, H_BASE - 0.39, 0]}
           receiveShadow
         >
-          <meshStandardMaterial map={floorTexture} />
+          <primitive object={matFloor} attach="material" />
         </Plane>
+
         <Bookshelf position={[0, 1.35, -3.5]} scale={0.3} />
+
+        {/* Side walls with window cutouts */}
         <WallSegment
           args={[THICKNESS, 0, D]}
           position={[-W / 2, 0, 0]}
@@ -395,8 +540,11 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
             { position: [0, 1.5, 2], args: [THICKNESS + 0.2, 2.2, 0.8] },
           ]}
         />
+
+        {/* Rear wall */}
         <WallSegment args={[W, 0, THICKNESS]} position={[0, 0, -D / 2]} />
 
+        {/* Front wall — left & right of porch opening */}
         <WallSegment
           args={[(W - PORCH_W) / 2, 0, THICKNESS]}
           position={[-(W + PORCH_W) / 4, 0, D / 2]}
@@ -412,6 +560,7 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
           ]}
         />
 
+        {/* Porch side walls */}
         <WallSegment
           args={[THICKNESS, 0, PORCH_D]}
           position={[-PORCH_W / 2, 0, D / 2 - PORCH_D / 2]}
@@ -421,6 +570,7 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
           position={[PORCH_W / 2, 0, D / 2 - PORCH_D / 2]}
         />
 
+        {/* Porch front wall with door cutout */}
         <WallSegment
           args={[PORCH_W, 0, THICKNESS]}
           position={[0, 0, D / 2 - PORCH_D]}
@@ -429,19 +579,20 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
           ]}
         />
 
+        {/* Porch floor */}
         <Plane
           args={[PORCH_W, PORCH_D]}
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, 0.01, D / 2 - PORCH_D / 2]}
-        >
-          <meshStandardMaterial color="#1a1a1a" roughness={0.7} />
-        </Plane>
+          material={MAT_PORCH_TILE}
+        />
 
         <GeometricDoor
           position={[0, 0, D / 2 - PORCH_D]}
           entranceOpen={entranceOpen}
         />
 
+        {/* Windows */}
         <TallWindow
           position={[-W / 2, 1.5, -2]}
           rotation={[0, Math.PI / 2, 0]}
@@ -463,20 +614,23 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
       </group>
 
       {/* 3. ROOF & LIGHTING */}
-      <group position={[0, 0 + H_TOTAL, 0]}>
+      <group position={[0, H_TOTAL, 0]}>
         <Box
           args={[W + 1.2, 0.25, D + 1.2]}
           position={[0, 0.125, 0]}
           castShadow
+          material={MAT_ROOF}
+        />
+        <mesh
+          position={[0, -0.01, 0]}
+          rotation={[Math.PI / 2, 0, 0]}
+          material={MAT_ROOF_RING}
         >
-          <meshStandardMaterial color="#e0e0e0" roughness={0.9} />
-        </Box>
-        <mesh position={[0, -0.01, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <ringGeometry
             args={[Math.max(W, D) / 2, Math.max(W, D) / 2 + 0.4, 4]}
           />
-          <meshBasicMaterial color="#6a0dad" />
         </mesh>
+        {/* rectAreaLight is kept but intensity reduced — it's expensive but unique-looking */}
         <rectAreaLight
           width={W + 1}
           height={D + 1}
@@ -502,9 +656,8 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
           args={[0.3]}
           position={[x, 0.3, D / 2 + 1.5]}
           castShadow
-        >
-          <meshStandardMaterial color="#5c9a49" roughness={0.9} />
-        </Sphere>
+          material={MAT_SHRUB_HI}
+        />
       ))}
     </group>
   );

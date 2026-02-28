@@ -1,0 +1,205 @@
+import { useState, useEffect } from "react";
+
+import { PingPongDotLoader } from "./PingPongLoader";
+import { ProfileIcon } from "./ProfileIcon";
+import { ResumeButton } from "./ResumeButton";
+import { ExploreHouseButton } from "./myLifeButton";
+
+export default function Loader() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // 1. Add state to track window width for responsiveness
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1200,
+  );
+
+  useEffect(() => {
+    // 2. Keep track of screen size
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+
+    // Trigger the explosive pop-out animation shortly after load
+    const mountTimer = setTimeout(() => setIsMounted(true), 150);
+
+    // Simulate network request ending (Changed to 'false' to end loading)
+    const loadTimer = setTimeout(() => setIsLoading(true), 8000);
+
+    return () => {
+      clearTimeout(mountTimer);
+      clearTimeout(loadTimer);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  // 3. Calculate a dynamic scale based on screen width (max 1 for desktop)
+  const scale = Math.min(windowWidth / 1400, 1);
+
+  // Configure your icons here - multiplying by 'scale' keeps them on-screen!
+  const socialData = [
+    {
+      name: "Meta",
+      url: "#",
+      pngSrc: "/loader/meta.svg",
+      x: -600 * scale,
+      y: -150 * scale,
+      delay: "0.1s",
+    },
+    {
+      name: "LinkedIn",
+      url: "https://www.linkedin.com/in/s-bhunia/",
+      pngSrc: "/loader/linkedin.svg",
+      x: -680 * scale,
+      y: 0,
+      delay: "0.2s",
+    },
+    {
+      name: "GitHub",
+      url: "https://github.com/s-bhunia",
+      pngSrc: "/loader/github.svg",
+      x: -600 * scale,
+      y: 150 * scale,
+      delay: "0.3s",
+    },
+    {
+      name: "YouTube",
+      url: "#",
+      pngSrc: "/loader/youtube.svg",
+      x: 600 * scale,
+      y: -150 * scale,
+      delay: "0.6s",
+    },
+    {
+      name: "Twitter",
+      url: "#",
+      pngSrc: "/loader/medium.svg",
+      x: 680 * scale,
+      y: 0,
+      delay: "0.5s",
+    },
+    {
+      name: "Discord",
+      url: "#",
+      pngSrc: "/loader/discord.svg",
+      x: 600 * scale,
+      y: 150 * scale,
+      delay: "0.4s",
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="loader-screen">
+        <style>{`
+          .loader-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0d0d14;
+            overflow: hidden;
+            position: relative; /* Anchor for the absolute buttons */
+          }
+
+          /* The Neon Spring Animation Setup */
+          .neon-profile-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 1; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: #12121c;
+            border: 2px solid #2a2a40;
+            border-radius: 50%;
+            transition: all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 20px 2px rgba(255, 255, 255, 0.6);
+            z-index: 20;
+          }
+
+          /* Neon Glow Hover Effect */
+          .neon-profile-icon:hover {
+            border-color: #ffffff;
+            background: #1a1a24;
+            box-shadow: 0 0 20px 2px rgba(0, 255, 255, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2);
+            z-index: 20; 
+          }
+
+          /* Button Styles */
+          .action-btn {
+            padding: 12px 28px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #fff;
+            background: transparent;
+            border: 1px solid #ffffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+          
+          .action-btn:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 25px rgba(255,255,255,0.4);
+            transform: translateY(-2px);
+          }
+
+          /* Mobile adjustments for buttons */
+          @media (max-width: 768px) {
+            .action-btn {
+              padding: 10px 20px;
+              font-size: 1em;
+            }
+          }
+        `}</style>
+
+        {/* Center Stage: Loader + Icons */}
+        <div style={{ position: "relative" }}>
+          <PingPongDotLoader dotSize={12} />
+
+          {socialData.map((icon, idx) => (
+            <ProfileIcon
+              key={idx}
+              name={icon.name}
+              url={icon.url}
+              pngSrc={icon.pngSrc}
+              xOffset={icon.x}
+              yOffset={icon.y}
+              delay={icon.delay}
+              isMounted={isMounted}
+            />
+          ))}
+        </div>
+
+        {/* 4. Buttons are now absolutely positioned at the bottom */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "12%",
+            display: "flex",
+            gap: "40px",
+            alignItems:
+              "flex-end" /* This keeps the text of both buttons aligned on the bottom! */,
+            justifyContent: "center",
+            opacity: isMounted ? 1 : 0,
+            transform: isMounted ? "translateY(0)" : "translateY(20px)",
+            transition: "all 0.8s ease 0.6s",
+          }}
+        >
+          <ExploreHouseButton onClick={() => setIsLoading(false)} />
+          <ResumeButton
+            onClick={() => window.open("/loader/resume.pdf", "_blank")}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return <div>Data loaded successfully! Welcome to the site.</div>;
+}
