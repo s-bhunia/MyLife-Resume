@@ -5,11 +5,15 @@ import { ProfileIcon } from "./ProfileIcon";
 import { ResumeButton } from "./ResumeButton";
 import { ExploreHouseButton } from "./myLifeButton";
 
-export default function Loader() {
-  const [isLoading, setIsLoading] = useState(true);
+export default function Loader({
+  onEnter,
+  isSceneReady,
+}: {
+  onEnter: () => void;
+  isSceneReady: boolean;
+}) {
   const [isMounted, setIsMounted] = useState(false);
-
-  // 1. Add state to track window width for responsiveness
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1200,
   );
@@ -23,11 +27,16 @@ export default function Loader() {
     const mountTimer = setTimeout(() => setIsMounted(true), 150);
 
     // Simulate network request ending (Changed to 'false' to end loading)
-    const loadTimer = setTimeout(() => setIsLoading(true), 8000);
+    // const loadTimer = setTimeout(() => setIsLoading(true), 8000);
+
+    // Set minimum time elapsed
+    const minLoadTimeTimer = setTimeout(() => {
+      setMinTimeElapsed(true);
+    }, 3000); // Set your desired minimum time here (e.g., 3000 for 3 seconds)
 
     return () => {
       clearTimeout(mountTimer);
-      clearTimeout(loadTimer);
+      clearTimeout(minLoadTimeTimer); // Cleanup the new timer
       window.removeEventListener("resize", handleResize);
     };
   }, []);
@@ -86,11 +95,9 @@ export default function Loader() {
       delay: "0.4s",
     },
   ];
-
-  if (isLoading) {
-    return (
-      <div className="loader-screen">
-        <style>{`
+  return (
+    <div className="loader-screen">
+      <style>{`
           .loader-screen {
             display: flex;
             flex-direction: column;
@@ -100,7 +107,10 @@ export default function Loader() {
             height: 100vh;
             background-color: #0d0d14;
             overflow: hidden;
-            position: relative; /* Anchor for the absolute buttons */
+            position: absolute; 
+          top: 0;
+          left: 0;
+          z-index: 999; 
           }
 
           /* The Neon Spring Animation Setup */
@@ -159,47 +169,45 @@ export default function Loader() {
           }
         `}</style>
 
-        {/* Center Stage: Loader + Icons */}
-        <div style={{ position: "relative" }}>
-          <PingPongDotLoader dotSize={12} />
+      {/* Center Stage: Loader + Icons */}
+      <div style={{ position: "relative" }}>
+        {!isSceneReady ||
+          (minTimeElapsed && <PingPongDotLoader dotSize={12} />)}
 
-          {socialData.map((icon, idx) => (
-            <ProfileIcon
-              key={idx}
-              name={icon.name}
-              url={icon.url}
-              pngSrc={icon.pngSrc}
-              xOffset={icon.x}
-              yOffset={icon.y}
-              delay={icon.delay}
-              isMounted={isMounted}
-            />
-          ))}
-        </div>
-
-        {/* 4. Buttons are now absolutely positioned at the bottom */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "12%",
-            display: "flex",
-            gap: "40px",
-            alignItems:
-              "flex-end" /* This keeps the text of both buttons aligned on the bottom! */,
-            justifyContent: "center",
-            opacity: isMounted ? 1 : 0,
-            transform: isMounted ? "translateY(0)" : "translateY(20px)",
-            transition: "all 0.8s ease 0.6s",
-          }}
-        >
-          <ExploreHouseButton onClick={() => setIsLoading(false)} />
-          <ResumeButton
-            onClick={() => window.open("/loader/resume.pdf", "_blank")}
+        {socialData.map((icon, idx) => (
+          <ProfileIcon
+            key={idx}
+            name={icon.name}
+            url={icon.url}
+            pngSrc={icon.pngSrc}
+            xOffset={icon.x}
+            yOffset={icon.y}
+            delay={icon.delay}
+            isMounted={isMounted}
           />
-        </div>
+        ))}
       </div>
-    );
-  }
 
-  return <div>Data loaded successfully! Welcome to the site.</div>;
+      {/* 4. Buttons are now absolutely positioned at the bottom */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "12%",
+          display: "flex",
+          gap: "40px",
+          alignItems:
+            "flex-end" /* This keeps the text of both buttons aligned on the bottom! */,
+          justifyContent: "center",
+          opacity: isMounted ? 1 : 0,
+          transform: isMounted ? "translateY(0)" : "translateY(20px)",
+          transition: "all 0.8s ease 0.6s",
+        }}
+      >
+        <ExploreHouseButton onClick={onEnter} />
+        <ResumeButton
+          onClick={() => window.open("/loader/resume.pdf", "_blank")}
+        />
+      </div>
+    </div>
+  );
 }

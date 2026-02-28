@@ -83,6 +83,8 @@ export default function App() {
   const [introFinished, setIntroFinished] = useState(false);
   const [doorOpen, setDoorOpen] = useState(false);
 
+  const [hasEntered, setHasEntered] = useState(false);
+
   const handleSceneReady = useCallback(() => setSceneReady(true), []);
   const handleOpenDoor = useCallback(() => setDoorOpen(true), []);
   const handleIntroFinish = useCallback(() => setIntroFinished(true), []);
@@ -91,26 +93,28 @@ export default function App() {
     <div style={{ width: "100vw", height: "100vh", background: "#87CEEB" }}>
       {/* Optional: You can pass sceneReady to your Loader to keep it on screen until the GPU is ready */}
       {/* <Loader isReady={!sceneReady} /> */}
-      <Loader />
+      {!hasEntered && (
+        <Loader
+          onEnter={() => setHasEntered(true)}
+          isSceneReady={sceneReady} // Optional: Pass this down to show true loading status
+        />
+      )}
 
       <Canvas shadows>
         <Suspense fallback={null}>
-          {/* 1. Silently compile everything to the GPU */}
           <ScenePreloader onSceneReady={handleSceneReady} />
 
           <Environment />
           <House entranceOpen={doorOpen} />
           <PerspectiveCamera makeDefault fov={55} />
-
-          {/* 2. Only mount and start the camera animation AFTER the GPU is fully ready */}
-          {sceneReady && !introFinished && (
+          {sceneReady && hasEntered && !introFinished && (
             <CameraDirector
               onOpenDoor={handleOpenDoor}
               onIntroFinish={handleIntroFinish}
             />
           )}
 
-          {sceneReady && introFinished && (
+          {sceneReady && hasEntered && introFinished && (
             <OrbitControls
               target={[0, 1.5, -2]}
               enablePan={true}
