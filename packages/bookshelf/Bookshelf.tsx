@@ -29,14 +29,14 @@ const BookshelfModel: React.FC<BookshelfProps> = ({
   plyTexture.wrapT = THREE.RepeatWrapping;
 
   // Optional: Adjust how many times the texture repeats (tiles) across the surface
-  // plyTexture.repeat.set(2, 2);
+  plyTexture.repeat.set(0, 1);
 
   // 3. Apply the texture to our material
   const materialProps: THREE.MeshStandardMaterialParameters = {
     map: plyTexture,
     // We keep the whitish color! Three.js will mathematically blend this color
     // WITH your plywood texture, giving you a whitewashed plywood effect.
-    color: "#fbfbfb",
+    // color: "#fbfbfb",
     roughness: 0.85,
     metalness: 0.05,
   };

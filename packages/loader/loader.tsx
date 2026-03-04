@@ -122,13 +122,12 @@ export default function Loader({
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             background: #12121c;
-            border: 2px solid #2a2a40;
             border-radius: 50%;
-            transition: all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 0 20px 2px rgba(255, 255, 255, 0.6);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.6);
             z-index: 20;
           }
 
@@ -136,7 +135,7 @@ export default function Loader({
           .neon-profile-icon:hover {
             border-color: #ffffff;
             background: #1a1a24;
-            box-shadow: 0 0 20px 2px rgba(0, 255, 255, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px 15px rgba(0, 255, 255, 0.6);
             z-index: 20; 
           }
 
@@ -171,9 +170,7 @@ export default function Loader({
 
       {/* Center Stage: Loader + Icons */}
       <div style={{ position: "relative" }}>
-        {!isSceneReady ||
-          (minTimeElapsed && <PingPongDotLoader dotSize={12} />)}
-
+        {!isSceneReady || <PingPongDotLoader dotSize={12} />}v
         {socialData.map((icon, idx) => (
           <ProfileIcon
             key={idx}
