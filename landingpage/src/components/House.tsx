@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Geometry, Base, Subtraction } from "@react-three/csg";
 import { Bookshelf } from "@mylife/bookshelf";
-import { tube_clock } from "@mylife/tube-clock";
+import { TubeClock } from "@mylife/tube-clock";
 
 // --- ARCHITECTURAL CONSTANTS ---
 const W = 10;
@@ -523,7 +523,7 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
         </Plane>
 
         <Bookshelf position={[0, 1.35, -3.5]} scale={0.3} />
-        <tube_clock />
+        <TubeClock />
 
         {/* Side walls with window cutouts */}
         <WallSegment
