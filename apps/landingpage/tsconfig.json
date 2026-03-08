@@ -15,7 +15,10 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@mylife/globe": ["../packages/globe/src/index.ts"]
+      "@mylife/*": [
+        "../../packages/*/src/index.ts",
+        "../../packages/*/src/index.tsx"
+      ]
     },
 
     /* Linting */
@@ -24,5 +27,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "../packages/loader/src/components/ui/dot-loader.tsx", "../packages/landing-animation/src/components/IntroAnimationUI.tsx", "../packages/landing-animation/src/components/hooks/useIntroAnimation.ts"]
+  "include": ["src"],
+  "references": [
+    { "path": "../../packages/bookshelf" },
+    { "path": "../../packages/loader" },
+    { "path": "../../packages/tube-clock" }
+  ]
 }

@@ -1,0 +1,14 @@
+{
+  "name": "mylife-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter landingpage dev",
+    "build": "pnpm --filter landingpage build",
+    "lint": "pnpm --filter \"./packages/**\" lint",
+    "typecheck": "pnpm --filter \"./packages/**\" typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.2"
+  }
+}

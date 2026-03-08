@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
 import { COLORS, CHIMNEY_PROFILE, TANK_PROFILE } from "./constants";
@@ -20,7 +20,7 @@ export const LampBody = () => {
       const angle = (i / count) * Math.PI * 2;
       items.push(
         <mesh
-          key={i}
+          key={`vent-${i}`}
           position={[Math.cos(angle) * 1.5, 0.5, Math.sin(angle) * 1.5]}
           rotation={[0, -angle, 0]}
         >

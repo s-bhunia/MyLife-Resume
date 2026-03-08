@@ -19,16 +19,15 @@ export const PingPongDotLoader: React.FC<PingPongDotLoaderProps> = ({
   const colorBall = "#ffffff";
   const colorPaddle = "#ffffff";
 
-  const gapSize = Math.max(2, dotSize * 0.25);
   const glowSmall = dotSize * 0.6;
   const glowLarge = dotSize * 1.5;
 
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
-  const [isMounted, setIsMounted] = useState(false);
+  const [_isMounted, _setIsMounted] = useState(false);
 
   // Trigger animations shortly after mount
   useEffect(() => {
-    const timer = setTimeout(() => setIsMounted(true), 100);
+    const timer = setTimeout(() => _setIsMounted(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
@@ -216,36 +215,37 @@ export const PingPongDotLoader: React.FC<PingPongDotLoaderProps> = ({
   }, [rows, cols, paddleHeight, baseSpeed, dotSize, glowSmall, glowLarge]);
 
   // Social Links Data (side: -1 is left, 1 is right)
-  const socialLinks = [
-    {
-      name: "GitHub",
-      url: "https://github.com",
-      side: -1,
-      yOffset: -50,
-      delay: "0.1s",
-    },
-    {
-      name: "LinkedIn",
-      url: "https://linkedin.com",
-      side: -1,
-      yOffset: 50,
-      delay: "0.2s",
-    },
-    {
-      name: "YouTube",
-      url: "https://youtube.com",
-      side: 1,
-      yOffset: -50,
-      delay: "0.3s",
-    },
-    {
-      name: "Twitter",
-      url: "https://twitter.com",
-      side: 1,
-      yOffset: 50,
-      delay: "0.4s",
-    },
-  ];
+  // Currently unused but keeping for future reference
+  // const socialLinks = [
+  //   {
+  //     name: "GitHub",
+  //     url: "https://github.com",
+  //     side: -1,
+  //     yOffset: -50,
+  //     delay: "0.1s",
+  //   },
+  //   {
+  //     name: "LinkedIn",
+  //     url: "https://linkedin.com",
+  //     side: -1,
+  //     yOffset: 50,
+  //     delay: "0.2s",
+  //   },
+  //   {
+  //     name: "YouTube",
+  //     url: "https://youtube.com",
+  //     side: 1,
+  //     yOffset: -50,
+  //     delay: "0.3s",
+  //   },
+  //   {
+  //     name: "Twitter",
+  //     url: "https://twitter.com",
+  //     side: 1,
+  //     yOffset: 50,
+  //     delay: "0.4s",
+  //   },
+  // ];
 
   return (
     <div

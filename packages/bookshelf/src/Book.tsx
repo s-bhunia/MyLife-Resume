@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -32,7 +32,7 @@ export default function Book({
 
   // 3. Define the target Z position.
   // If hovered, we pull the book forward by 0.2 units. Otherwise, it stays at its original position.
-  const targetZ = hovered ? position[2] + 0.90 : position[2];
+  const targetZ = hovered ? position[2] + 0.9 : position[2];
 
   // 4. useFrame runs on every single frame (like 60fps)
   useFrame(() => {
@@ -52,17 +52,17 @@ export default function Book({
       position={position}
       rotation={tiltAngle}
       // --- Interaction Events ---
-      onPointerOver={(e) => {
-        e.stopPropagation(); // Prevents triggering hover on objects behind the book
+      onPointerOver={(_e) => {
+        _e.stopPropagation(); // Prevents triggering hover on objects behind the book
         setHovered(true);
         document.body.style.cursor = "pointer"; // Change to hand cursor
       }}
-      onPointerOut={(e) => {
+      onPointerOut={(_e) => {
         setHovered(false);
         document.body.style.cursor = "auto"; // Revert cursor
       }}
-      onClick={(e) => {
-        e.stopPropagation();
+      onClick={(_e) => {
+        _e.stopPropagation();
         if (onClick) {
           onClick();
         } else {

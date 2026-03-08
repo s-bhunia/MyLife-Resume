@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -30,13 +30,13 @@ export default function TubeClock() {
         currentBrightness={brightness}
       />
 
-      <pointLight
+      {/* <pointLight
         position={[0, 2, 0]}
         color="#ffaa00"
         intensity={brightness === 0 ? 0 : 1 + brightness * 0.5}
         distance={10}
         decay={2}
-      />
+      /> */}
     </group>
   );
 }

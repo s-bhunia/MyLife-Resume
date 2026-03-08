@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Cylinder } from "@react-three/drei";
-import { useSpring, animated } from "@react-spring/three"; // Optional: for smooth snap animation
+// import { extend } from "@react-three/fiber";
 import { COLORS } from "./constants";
 
 // Map your percentages to actual Light Intensity values

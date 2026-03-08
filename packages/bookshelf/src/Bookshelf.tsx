@@ -1,6 +1,4 @@
-import React, { Suspense } from "react";
-import { Canvas } from "@react-three/fiber";
-import { RoundedBox, OrbitControls, useTexture } from "@react-three/drei";
+import { RoundedBox, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 
 interface BookshelfProps {
@@ -22,7 +20,7 @@ const BookshelfModel: React.FC<BookshelfProps> = ({
 }) => {
   // 1. Load the texture.
   // R3F will automatically suspend rendering until this is downloaded.
-  const plyTexture = useTexture("/bookshelf/plywood.jpg");
+  const plyTexture = useTexture("./bookshelf/plywood.jpg");
 
   // 2. Configure texture wrapping so it doesn't stretch awkwardly on long panels
   plyTexture.wrapS = THREE.RepeatWrapping;

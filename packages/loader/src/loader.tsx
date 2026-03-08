@@ -13,7 +13,7 @@ export default function Loader({
   isSceneReady: boolean;
 }) {
   const [isMounted, setIsMounted] = useState(false);
-  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  const [_minTimeElapsed, _setMinTimeElapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1200,
   );
@@ -31,7 +31,7 @@ export default function Loader({
 
     // Set minimum time elapsed
     const minLoadTimeTimer = setTimeout(() => {
-      setMinTimeElapsed(true);
+      _setMinTimeElapsed(true);
     }, 3000); // Set your desired minimum time here (e.g., 3000 for 3 seconds)
 
     return () => {

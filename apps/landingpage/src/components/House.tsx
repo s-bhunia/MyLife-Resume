@@ -523,7 +523,9 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
         </Plane>
 
         <Bookshelf position={[0, 1.35, -3.5]} scale={0.3} />
-        <TubeClock />
+        {/* <group position={[3, 1, 3]} scale={0.01}>
+          <TubeClock />
+        </group> */}
 
         {/* Side walls with window cutouts */}
         <WallSegment

@@ -1,25 +1,25 @@
-import React, { Suspense, useState } from "react";
+import { Suspense, useState } from "react";
 import BookshelfModel from "./Bookshelf";
 import Book from "./Book";
 
-export function Bookshelf(props) {
-  const [books, setBooks] = useState([
+export function Bookshelf(props: any) {
+  const [books] = useState([
     // Row 1 (Bottom shelf)
     {
       id: 1,
       position: [-1, 2.42, -0.2] as [number, number, number],
-      coverUrl: "/bookshelf/book1.jpg",
+      coverUrl: "./bookshelf/book1.jpg",
     },
     {
       id: 2,
       position: [1, 2.42, -0.2] as [number, number, number],
-      coverUrl: "/bookshelf/book2.jpg",
+      coverUrl: "./bookshelf/book2.jpg",
     },
     // Row 2
     {
       id: 3,
       position: [0, 1.2, -0.2] as [number, number, number],
-      coverUrl: "/bookshelf/book3.jpg",
+      coverUrl: "./bookshelf/book3.jpg",
     },
     // {
     //   id: 3,
@@ -30,17 +30,17 @@ export function Bookshelf(props) {
     {
       id: 4,
       position: [1, -0.03, -0.2] as [number, number, number],
-      coverUrl: "/bookshelf/book4.jpg",
+      coverUrl: "./bookshelf/book4.jpg",
     },
     {
       id: 4,
       position: [-1, -0.03, -0.2] as [number, number, number],
-      coverUrl: "/bookshelf/book4.jpg",
+      coverUrl: "./bookshelf/book4.jpg",
     },
     {
       id: 4,
       position: [0, -1.23, -0.2] as [number, number, number],
-      coverUrl: "/bookshelf/book5.jpg",
+      coverUrl: "./bookshelf/book5.jpg",
     },
   ]);
 

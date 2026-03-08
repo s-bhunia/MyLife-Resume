@@ -60,7 +60,7 @@ const Digit = ({
 
         return (
           <RoundedBox
-            key={i}
+            key={`segment-${value}-${i}`}
             args={[len, thickness, thickness]}
             radius={thickness / 2}
             position={[s[0] as number, s[1] as number, 0]}
@@ -117,7 +117,7 @@ const LetterM = ({
 
         return (
           <RoundedBox
-            key={i}
+            key={`letter-m-${i}`}
             args={[currentLen, thickness, thickness]}
             radius={thickness / 2}
             position={[s[0] as number, s[1] as number, 0]}
