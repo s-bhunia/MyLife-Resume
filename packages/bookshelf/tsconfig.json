@@ -6,7 +6,10 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "composite": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true
   },
   "include": ["src/**/*.tsx", "src/**/*.ts"],
   "exclude": ["node_modules"]

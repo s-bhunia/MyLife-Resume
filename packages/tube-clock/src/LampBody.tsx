@@ -1,9 +1,8 @@
-import { useMemo } from "react";
-import { MeshTransmissionMaterial } from "@react-three/drei";
+import { useMemo, memo } from "react";
 import * as THREE from "three";
 import { COLORS, CHIMNEY_PROFILE, TANK_PROFILE } from "./constants";
 
-export const LampBody = () => {
+export const LampBody = memo(() => {
   const wirePath = useMemo(() => {
     return new THREE.CatmullRomCurve3([
       new THREE.Vector3(0, 8.5, 0),
@@ -15,7 +14,7 @@ export const LampBody = () => {
 
   const vents = useMemo(() => {
     const items = [];
-    const count = 12;
+    const count = 8; // Reduced from 12 to 8
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2;
       items.push(
@@ -47,25 +46,26 @@ export const LampBody = () => {
 
   return (
     <group>
-      {/* 1. GLASS CHIMNEY */}
+      {/* 1. GLASS CHIMNEY - OPTIMIZED */}
       <mesh receiveShadow castShadow position={[0, 0.5, 0]}>
-        <latheGeometry args={[CHIMNEY_PROFILE, 64]} />
-        <MeshTransmissionMaterial
-          backside
-          side={THREE.DoubleSide}
-          thickness={0.05}
-          roughness={0.1}
-          transmission={1}
-          ior={1.5}
-          chromaticAberration={0.02}
+        <latheGeometry args={[CHIMNEY_PROFILE, 16]} />
+        <meshPhysicalMaterial
           color={COLORS.glass}
+          transmission={0.9}
+          opacity={1}
+          transparent={true}
+          roughness={0.1}
+          metalness={0.1}
+          ior={1.5}
+          thickness={0.5}
+          side={THREE.DoubleSide}
         />
       </mesh>
 
       {/* 2. BURNER */}
       <group position={[0, 0, 0]}>
         <mesh position={[0, 0.25, 0]}>
-          <cylinderGeometry args={[1.5, 1.6, 1.5, 32]} />
+          <cylinderGeometry args={[1.5, 1.6, 1.5, 8]} />
           <meshStandardMaterial
             color={COLORS.brass}
             metalness={0.6}
@@ -77,28 +77,25 @@ export const LampBody = () => {
 
       {/* 3. FUEL TANK ASSEMBLY */}
       <group position={[0, 0, 0]}>
-        {/* Outer Glass Tank - OPTIMIZED FOR VISIBILITY */}
+        {/* Outer Glass Tank - OPTIMIZED */}
         <mesh position={[0, 0.1, 0]}>
-          <latheGeometry args={[TANK_PROFILE, 64]} />
-          <MeshTransmissionMaterial
-            backside
-            side={THREE.DoubleSide}
-            // Reduced thickness prevents heavy distortion/refraction
-            thickness={0.5}
-            // Low roughness for clarity, but not 0 to avoid artifacts
-            roughness={0.3}
-            transmission={1}
-            ior={1.5}
+          <latheGeometry args={[TANK_PROFILE, 16]} />
+          <meshPhysicalMaterial
             color={COLORS.glass}
-            // REMOVED clearcoat to stop the "shiny" surface reflection
-            clearcoat={0}
-            chromaticAberration={0} // Removed rainbow edges for clarity
+            transmission={0.9}
+            opacity={1}
+            transparent={true}
+            roughness={0.3}
+            metalness={0.1}
+            ior={1.5}
+            thickness={0.5}
+            side={THREE.DoubleSide}
           />
         </mesh>
 
-        {/* Inner Fuel Liquid - MADE DENSER */}
+        {/* Inner Fuel Liquid - OPTIMIZED */}
         <mesh position={[0, 0.1, 0]}>
-          <latheGeometry args={[halfFuelProfile, 64]} />
+          <latheGeometry args={[halfFuelProfile, 16]} />
           <meshPhysicalMaterial
             color={COLORS.fuel}
             emissive={COLORS.fuel}
@@ -115,10 +112,10 @@ export const LampBody = () => {
         </mesh>
       </group>
 
-      {/* 4. METAL WIRE FRAME */}
+      {/* 4. METAL WIRE FRAME - OPTIMIZED */}
       <group position={[0, 6, 0]}>
         <mesh>
-          <tubeGeometry args={[wirePath, 64, 0.07, 8, false]} />
+          <tubeGeometry args={[wirePath, 12, 0.07, 8, false]} />
           <meshStandardMaterial
             color={COLORS.darkMetal}
             roughness={0.7}
@@ -126,7 +123,7 @@ export const LampBody = () => {
           />
         </mesh>
         <mesh scale={[-1, 1, 1]}>
-          <tubeGeometry args={[wirePath, 64, 0.06, 8, false]} />
+          <tubeGeometry args={[wirePath, 12, 0.06, 8, false]} />
           <meshStandardMaterial
             color={COLORS.darkMetal}
             roughness={0.7}
@@ -136,4 +133,4 @@ export const LampBody = () => {
       </group>
     </group>
   );
-};
+});

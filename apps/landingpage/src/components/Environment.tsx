@@ -1,5 +1,4 @@
-import { Sky, Plane, useTexture, Float } from "@react-three/drei";
-import * as THREE from "three";
+import { Sky, Plane } from "@react-three/drei";
 
 // Low Poly Procedural Palm Tree
 // Low Poly Procedural Palm Tree
@@ -80,7 +79,7 @@ export const Environment = () => {
         position={sunPosition}
         intensity={1.5}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
       />
 
       {/* Manicured Lawn */}

@@ -8,6 +8,7 @@
     ".": "./src/loader.tsx"
   },
   "scripts": {
+    "build": "tsc",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

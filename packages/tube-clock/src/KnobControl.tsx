@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Cylinder } from "@react-three/drei";
 // import { extend } from "@react-three/fiber";
 import { COLORS } from "./constants";
@@ -17,24 +17,16 @@ interface KnobProps {
   currentBrightness: number;
 }
 
-export const KnobControl = ({ setBrightness }: KnobProps) => {
+export const KnobControl = memo(({ setBrightness }: KnobProps) => {
   const [stepIndex, setStepIndex] = useState(3); // Start at index 3 (70% brightness)
 
-  // Use simple spring for clicking animation (or just standard rotation if preferred)
-  // If you don't want to install react-spring, you can just use standard rotation prop.
-  // Here is the standard version without extra dependencies for simplicity:
-
   const handleClick = (e: any) => {
-    e.stopPropagation(); // Crucial: Stop camera from moving
-
-    // Cycle to next step: 0 -> 1 -> 2 -> 3 -> 4 -> 0
+    e.stopPropagation();
     const nextIndex = (stepIndex + 1) % INTENSITY_MAP.length;
-
     setStepIndex(nextIndex);
     setBrightness(INTENSITY_MAP[nextIndex]);
   };
 
-  // Calculate rotation based on step (convert degrees to radians)
   const currentRotation = (STEPS_DEG[stepIndex] * Math.PI) / 180;
 
   return (
@@ -48,13 +40,13 @@ export const KnobControl = ({ setBrightness }: KnobProps) => {
       {/* The Knob Head (Clickable) */}
       <group
         position={[0.3, 0, 0]}
-        rotation={[currentRotation, 0, Math.PI / 2]} // Rotate around X axis (which is local Z here)
+        rotation={[currentRotation, 0, Math.PI / 2]}
         onClick={handleClick}
         onPointerOver={() => (document.body.style.cursor = "pointer")}
         onPointerOut={() => (document.body.style.cursor = "auto")}
       >
         {/* Main Knob Body */}
-        <Cylinder args={[0.2, 0.2, 0.1, 32]}>
+        <Cylinder args={[0.2, 0.2, 0.1, 8]}>
           <meshStandardMaterial
             color={COLORS.brass}
             roughness={0.3}
@@ -63,13 +55,13 @@ export const KnobControl = ({ setBrightness }: KnobProps) => {
         </Cylinder>
 
         {/* Visual Grip Ridges (Decor) */}
-        <Cylinder args={[0.22, 0.22, 0.02, 16]} position={[0, 0, 0]}>
+        <Cylinder args={[0.22, 0.22, 0.02, 8]} position={[0, 0, 0]}>
           <meshStandardMaterial color="#000" />
         </Cylinder>
 
         {/* Position Marker (Small dot to show rotation) */}
         <mesh position={[0.15, 0.06, 0]}>
-          <sphereGeometry args={[0.03]} />
+          <sphereGeometry args={[0.03, 8, 8]} />
           <meshStandardMaterial
             color="#ffffff"
             emissive="#ffffff"
@@ -79,4 +71,4 @@ export const KnobControl = ({ setBrightness }: KnobProps) => {
       </group>
     </group>
   );
-};
+});
