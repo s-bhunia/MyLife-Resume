@@ -5,7 +5,7 @@ import * as THREE from 'three';
 export const COLORS = {
   brass: "#b8860b",      // Vintage brass/gold
   darkMetal: "#1a1a1a",  // Aged iron for the cage
-  glass: "#ffffff",
+  glass: "#d2cdcd",
   fuel: "#0044ff",       // Deep Blue Dyed Kerosene (UPDATED)
   neonOff: "#2a1a1a",    
   neonOn: "#ff4400",     

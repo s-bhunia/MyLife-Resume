@@ -1,0 +1,13 @@
+{
+    "origin": {
+      "lat": 21.791274,
+      "lon": 87.773051,
+      "label": "New York"
+    },
+    "destinations": [
+      { "lat": 30.723917, "lon": 79.093829, "label": "Paris" },
+      { "lat": 26.829546 , "lon": 80.891515, "label": "Tokyo" },
+      { "lat": 19.869403, "lon": 85.928733, "label": "Sydney" },
+      { "lat": 51.5074, "lon": -0.1278, "label": "London" }
+    ]
+  }

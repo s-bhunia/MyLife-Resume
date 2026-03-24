@@ -85,7 +85,7 @@ const Digit = memo(
 
 // Custom 'M' component that matches Digit geometry exactly
 const LetterM = memo(
-  ({ size = 0.5, brightness }: { size?: number; brightness: number }) => {
+  ({ size = 0.5, brightness}: { size?: number; brightness: number}) => {
     const thickness = size * 0.12;
     const len = size * 0.85; // Match Digit length
 
@@ -127,7 +127,7 @@ const LetterM = memo(
               <meshStandardMaterial
                 color={COLORS.neonOn}
                 emissive="#ffaa00"
-                emissiveIntensity={brightness * 2}
+                emissiveIntensity={brightness * 6}
                 roughness={0.2}
                 toneMapped={false}
               />

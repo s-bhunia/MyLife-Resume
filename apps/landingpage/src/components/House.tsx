@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { Geometry, Base, Subtraction } from "@react-three/csg";
 import { Bookshelf } from "@mylife/bookshelf";
 import { TubeClock } from "@mylife/tube-clock";
+import { TravelGlobe } from "@mylife/globe";
 
 // --- ARCHITECTURAL CONSTANTS ---
 const W = 10;
@@ -17,11 +18,7 @@ const THICKNESS = 0.2;
 const PORCH_W = 3;
 const PORCH_D = 1.5;
 
-// ---------------------------------------------------------------------------
-// MODULE-LEVEL SHARED MATERIALS
-// Defining materials outside components means they are created ONCE and shared
-// across all instances. No new THREE.Material objects on re-render.
-// ---------------------------------------------------------------------------
+
 const MAT_PLASTER = new THREE.MeshStandardMaterial({
   color: "#ffffff",
   roughness: 0.9,
@@ -42,9 +39,7 @@ const MAT_SILL = new THREE.MeshStandardMaterial({
   color: "#d4cbb8",
   roughness: 0.8,
 });
-// Simple transparent material instead of expensive meshPhysicalMaterial + transmission.
-// transmission=0.9 forces an extra "background texture" render pass for EVERY window — 6 passes
-// gone. This looks almost identical from normal viewing distances.
+
 const MAT_GLASS = new THREE.MeshStandardMaterial({
   color: "#aaccff",
   transparent: true,
@@ -103,14 +98,6 @@ const MAT_ROOF = new THREE.MeshStandardMaterial({
   roughness: 0.9,
 });
 const MAT_ROOF_RING = new THREE.MeshBasicMaterial({ color: "#6a0dad" });
-
-// ---------------------------------------------------------------------------
-// WALL SEGMENT
-// ⚠️  MUST live OUTSIDE House so its identity is stable across re-renders.
-// When it was defined inside House, every prop change (e.g. entranceOpen) gave
-// React a brand-new component type → full unmount+remount of all walls →
-// every CSG boolean operation re-ran simultaneously → GPU spike to 99%.
-// ---------------------------------------------------------------------------
 interface CutoutDef {
   position: [number, number, number];
   args: [number, number, number];
@@ -524,8 +511,17 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
 
         <Bookshelf position={[0, 1.35, -3.5]} scale={0.3} />
         {/* TubeClock - scaled appropriately for visibility */}
-        <group position={[-3, 1.3, -3.7]} scale={0.09}>
+        <group position={[-3, 1.9, -3.7]} scale={0.06}>
           <TubeClock />
+        </group>
+        <group position={[3, 1.25, -1]} scale={0.19}>
+          <TravelGlobe
+            origin={{ lat: 34.0522, lon: -118.2437, label: "Los Angeles" }}
+            destinations={[
+              { lat: 40.7128, lon: -74.0060, label: "New York" },
+              { lat: 51.5074, lon: -0.1278, label: "London" },
+            ]}
+          />
         </group>
 
         {/* Side walls with window cutouts */}

@@ -14,7 +14,7 @@ export const LampBody = memo(() => {
 
   const vents = useMemo(() => {
     const items = [];
-    const count = 8; // Reduced from 12 to 8
+    const count = 8;
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2;
       items.push(
@@ -24,17 +24,16 @@ export const LampBody = memo(() => {
           rotation={[0, -angle, 0]}
         >
           <capsuleGeometry args={[0.08, 0.3, 4, 8]} />
-          <meshStandardMaterial color="#000000" roughness={0.8} />
+          <meshStandardMaterial color="#000000" roughness={1} />
         </mesh>,
       );
     }
     return items;
   }, []);
 
-  // Custom Profile for Half-Filled Tank
   const halfFuelProfile = useMemo(() => {
-    const liquidLevel = -1.5; // Slightly higher to be more visible
-    const tankRadius = 2.75; // Matches the glass width closely
+    const liquidLevel = -1.5;
+    const tankRadius = 2.75;
 
     return [
       new THREE.Vector2(0, liquidLevel),
@@ -46,21 +45,41 @@ export const LampBody = memo(() => {
 
   return (
     <group>
-      {/* 1. GLASS CHIMNEY - OPTIMIZED */}
-      <mesh receiveShadow castShadow position={[0, 0.5, 0]}>
-        <latheGeometry args={[CHIMNEY_PROFILE, 16]} />
-        <meshPhysicalMaterial
-          color={COLORS.glass}
-          transmission={0.9}
-          opacity={1}
-          transparent={true}
-          roughness={0.1}
-          metalness={0.1}
-          ior={1.5}
-          thickness={0.5}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
+   {/* 1. GLASS CHIMNEY - CLEAR FRONT, FROSTED BACK */}
+      <group position={[0, 0.5, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        
+        {/* Front Half: Clear Transparent Glass */}
+        <mesh receiveShadow castShadow>
+          <latheGeometry args={[CHIMNEY_PROFILE, 16, 0, Math.PI]} />
+          <meshPhysicalMaterial
+            color={COLORS.glass}
+            transmission={0.9}
+            opacity={1}
+            transparent={true}
+            roughness={0.1} // Low roughness keeps it crystal clear
+            metalness={0.1}
+            ior={1.5}
+            thickness={0.5}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* Back Half: Frosted/Blurry Glass */}
+        <mesh receiveShadow castShadow>
+          <latheGeometry args={[CHIMNEY_PROFILE, 16, Math.PI, Math.PI]} />
+          <meshPhysicalMaterial
+            color={COLORS.glass}
+            transmission={0.9} // Still lets light through
+            opacity={1}
+            transparent={true}
+            roughness={0.9}    // High roughness creates the blur/frosted effect
+            metalness={0.1}
+            ior={1.5}
+            thickness={0.5}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      </group>
 
       {/* 2. BURNER */}
       <group position={[0, 0, 0]}>
@@ -77,7 +96,7 @@ export const LampBody = memo(() => {
 
       {/* 3. FUEL TANK ASSEMBLY */}
       <group position={[0, 0, 0]}>
-        {/* Outer Glass Tank - OPTIMIZED */}
+        {/* Outer Glass Tank */}
         <mesh position={[0, 0.1, 0]}>
           <latheGeometry args={[TANK_PROFILE, 16]} />
           <meshPhysicalMaterial
@@ -93,14 +112,13 @@ export const LampBody = memo(() => {
           />
         </mesh>
 
-        {/* Inner Fuel Liquid - OPTIMIZED */}
+        {/* Inner Fuel Liquid */}
         <mesh position={[0, 0.1, 0]}>
           <latheGeometry args={[halfFuelProfile, 16]} />
           <meshPhysicalMaterial
             color={COLORS.fuel}
             emissive={COLORS.fuel}
             emissiveIntensity={0.1}
-            // Reduced transmission makes it look like dense liquid, not colored air
             transmission={0.1}
             transparent={true}
             opacity={1}
@@ -112,7 +130,7 @@ export const LampBody = memo(() => {
         </mesh>
       </group>
 
-      {/* 4. METAL WIRE FRAME - OPTIMIZED */}
+      {/* 4. METAL WIRE FRAME */}
       <group position={[0, 6, 0]}>
         <mesh>
           <tubeGeometry args={[wirePath, 12, 0.07, 8, false]} />

@@ -48,7 +48,7 @@ const TubeClockAnimated = memo(
     });
 
     return (
-      <group ref={groupRef} position={[0, 2, 0]}>
+      <group  position={[0, 2, 0]}>
         <TubeClockContent
           brightness={brightness}
           setBrightness={setBrightness}
