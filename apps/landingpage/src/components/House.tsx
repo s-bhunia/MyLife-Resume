@@ -1,4 +1,4 @@
-import { Box, Plane, Cylinder, Sphere, useTexture } from "@react-three/drei";
+import { Box, Plane, Cylinder, Sphere, useTexture, Text, RoundedBox} from "@react-three/drei";
 import { useRef, useState, useEffect, memo, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -18,6 +18,109 @@ const THICKNESS = 0.2;
 const PORCH_W = 3;
 const PORCH_D = 1.5;
 
+// ---------------------------------------------------------------------------
+// HEXAGON PROJECT CARDS (FIXED)
+// ---------------------------------------------------------------------------
+const HexProjectCard = memo(({ 
+  position, 
+  title, 
+  subtitle,
+  symbol,
+  scale = 1
+}: { 
+  position: [number, number, number]; 
+  title: string; 
+  subtitle: string;
+  symbol: string;
+  scale?: number;
+}) => {
+  const [hovered, setHovered] = useState(false);
+  const groupRef = useRef<THREE.Group>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
+
+  useFrame((_, delta) => {
+    if (groupRef.current) {
+      // Pop out on the Z axis when hovered
+      const targetZ = hovered ? position[2] + 0.15 : position[2];
+      groupRef.current.position.z = THREE.MathUtils.damp(groupRef.current.position.z, targetZ, 6, delta);
+    }
+    
+    if (glowRef.current) {
+      // Fade the glow in and out
+      const material = glowRef.current.material as THREE.MeshBasicMaterial;
+      const targetOpacity = hovered ? 0.6 : 0.0;
+      material.opacity = THREE.MathUtils.damp(material.opacity, targetOpacity, 6, delta);
+    }
+  });
+
+  // The rotation [Math.PI / 2, 0, Math.PI / 2] creates a perfect "Pointy-Top" hexagon.
+  // If you prefer a "Flat-Top" hexagon, change the last value to 0: [Math.PI / 2, 0, 0]
+  const hexRotation: [number, number, number] = [Math.PI / 2, 0, Math.PI / 1];
+
+  // Pushed text and accents further out to Z = 0.06 to prevent clipping (Z-fighting)
+  const contentZ = 0.06; 
+
+  return (
+    <group 
+      ref={groupRef}
+      position={position} 
+      scale={scale}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation();
+        setHovered(false);
+        document.body.style.cursor = "auto";
+      }}
+    >
+      {/* 1. Backside Glow Effect */}
+      <mesh ref={glowRef} position={[0, 0, -0.02]} rotation={hexRotation}>
+        <cylinderGeometry args={[0.78, 0.78, 0.02, 6]} />
+        <meshBasicMaterial 
+          color="#d4af37" 
+          transparent 
+          opacity={0} 
+          depthWrite={false} 
+          blending={THREE.AdditiveBlending} 
+        />
+      </mesh>
+
+      {/* 2. Soft Drop Shadow Fake */}
+      <mesh position={[0.02, -0.02, -0.03]} rotation={hexRotation}>
+        <cylinderGeometry args={[0.7, 0.7, 0.04, 6]} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.15} />
+      </mesh>
+
+      {/* 3. Main Creamy Hexagon Body */}
+      <mesh rotation={hexRotation} castShadow receiveShadow>
+        <cylinderGeometry args={[0.7, 0.7, 0.06, 6]} />
+        <meshStandardMaterial color="#ddd0b5" roughness={0.6} />
+      </mesh>
+      
+      {/* 4. Gold Accent Line */}
+      <mesh position={[0, -0.4, contentZ]}>
+         <boxGeometry args={[0.4, 0.03, 0.02]} />
+         <meshStandardMaterial color="#d4af37" />
+      </mesh>
+
+      {/* 5. Project Content (Z-axis pushed out to prevent hiding) */}
+      <Text position={[0, 0.25, contentZ]} fontSize={0.25} color="#2d2d2d" anchorX="center" anchorY="middle">
+        {symbol}
+      </Text>
+
+      <Text position={[0, 0, contentZ]} fontSize={0.15} color="#222222" anchorX="center" anchorY="middle">
+        {title}
+      </Text>
+
+      <Text position={[0, -0.2, contentZ]} fontSize={0.08} color="#666666" anchorX="center" anchorY="middle">
+        {subtitle}
+      </Text>
+    </group>
+  );
+});
 
 const MAT_PLASTER = new THREE.MeshStandardMaterial({
   color: "#ffffff",
@@ -201,6 +304,85 @@ const WallSegment = memo(
   },
 );
 
+// ---------------------------------------------------------------------------
+// NAME PLATES
+// ---------------------------------------------------------------------------
+const MAT_WOOD_PLATE = new THREE.MeshStandardMaterial({
+  color: "#5c3a21", // Deep wood base
+  roughness: 0.9,
+});
+const MAT_WOOD_GRAIN = new THREE.MeshStandardMaterial({
+  color: "#4a2f1a", // Darker inset grain lines
+  roughness: 0.95,
+});
+const MAT_PLATE_BORDER = new THREE.MeshStandardMaterial({
+  color: "#e6bb11", // Brass/Gold border
+  emissive: "#cc8f00", // The color it glows
+  emissiveIntensity: 0.9,
+  metalness: 0.2,
+  roughness: 0.2,
+});
+
+const NamePlate = memo(({
+  position,
+  text,
+  symbol,
+  scale = 1
+}: {
+  position: [number, number, number];
+  text: string;
+  symbol: string;
+  scale?: number;
+}) => {
+  return (
+    <group position={position} scale={scale}>
+      {/* Brass Backing/Border */}
+      <mesh castShadow receiveShadow position={[0, 0, -0.02]}>
+        <boxGeometry args={[1.8, 0.6, 0.02]} />
+        <primitive object={MAT_PLATE_BORDER} attach="material" />
+      </mesh>
+
+      {/* Wooden Plate */}
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[1.7, 0.5, 0.04]} />
+        <primitive object={MAT_WOOD_PLATE} attach="material" />
+      </mesh>
+
+      {/* Stylized Wood Grain Textures (Geometric) */}
+      <mesh position={[0, 0.1, 0.02]}>
+        <boxGeometry args={[1.7, 0.02, 0.01]} />
+        <primitive object={MAT_WOOD_GRAIN} attach="material" />
+      </mesh>
+      <mesh position={[0, -0.15, 0.02]}>
+        <boxGeometry args={[1.7, 0.02, 0.01]} />
+        <primitive object={MAT_WOOD_GRAIN} attach="material" />
+      </mesh>
+
+      {/* Symbol */}
+      <Text
+        position={[-0.6, 0, 0.03]}
+        fontSize={0.25}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="middle"
+      >
+        {symbol}
+      </Text>
+
+      {/* Text */}
+      <Text
+        position={[0.1, 0, 0.03]}
+        fontSize={0.2}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="middle"
+        letterSpacing={0.1}
+      >
+        {text}
+      </Text>
+    </group>
+  );
+});
 // ---------------------------------------------------------------------------
 // TALL WINDOW
 // ---------------------------------------------------------------------------
@@ -508,13 +690,81 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
         >
           <primitive object={matFloor} attach="material" />
         </Plane>
+        <NamePlate position={[-2.5, 2.5, -3.85]} text="PROJECTS" symbol="💻" scale={0.7} />
+        <NamePlate position={[2.5, 2.5, -3.85]} text="SKILLS" symbol="⚡" scale={0.7} />
 
+       {/* --- PROJECT CARDS --- */}
+        {/* Top Hexagon */}
+        <HexProjectCard 
+          position={[-2.5, 1.9, -3.85]} 
+          title="SupplyLink" 
+          subtitle="Full-Stack Web" 
+          symbol="🔗" 
+          scale={0.3}
+        />
+        
+        {/* Bottom Left Hexagon */}
+        <HexProjectCard 
+          position={[-2.7, 1.55, -3.85]} 
+          title="Link Saver" 
+          subtitle="Android App" 
+          symbol="💾" 
+          scale={0.3}
+        />
+        
+        {/* Bottom Right Hexagon */}
+        <HexProjectCard 
+          position={[-2.3, 1.55, -3.85]} 
+          title="Python Engine" 
+          subtitle="ML Model" 
+          symbol="🤖" 
+          scale={0.3}
+        />
+        <HexProjectCard 
+          position={[-2.5, 1.2, -3.85]} 
+          title="SupplyLink" 
+          subtitle="Full-Stack Web" 
+          symbol="🔗" 
+          scale={0.3}
+        />
         <Bookshelf position={[0, 1.35, -3.5]} scale={0.3} />
-        {/* TubeClock - scaled appropriately for visibility */}
-        <group position={[-3, 1.9, -3.7]} scale={0.06}>
+        {/* --- Skill CARDS --- */}
+         <HexProjectCard 
+          position={[2.5, 1.9, -3.85]} 
+          title="Python" 
+          subtitle="Programming Language" 
+          symbol="🔗" 
+          scale={0.4}
+        />
+        
+        
+        {/* Bottom Right Hexagon */}
+        <HexProjectCard 
+          position={[2.1, 1.45, -3.85]} 
+          title="fastAPI" 
+          subtitle="Backend Framework" 
+          symbol="🤖" 
+          scale={0.4}
+        />
+        <HexProjectCard 
+          position={[2.9, 1.45, -3.85]} 
+          title="AI/ML" 
+          subtitle="LLMOps & Models" 
+          symbol="💾" 
+          scale={0.4}
+        /> 
+
+        <HexProjectCard 
+          position={[2.5, 1, -3.85]} 
+          title="SQL" 
+          subtitle="Database Management" 
+          symbol="🔗" 
+          scale={0.4}
+        />
+        <group position={[4.6, 2, -3.7]} scale={0.06}>
           <TubeClock />
         </group>
-        <group position={[3, 1.25, -1]} scale={0.19}>
+        <group position={[3.9, 1.25, 0]} scale={0.19}>
           <TravelGlobe
             origin={{ lat: 34.0522, lon: -118.2437, label: "Los Angeles" }}
             destinations={[

@@ -28,6 +28,7 @@ interface TravelGlobeProps {
   autoRotateSpeed?: number;
 }
 
+
 const TravelGlobe: React.FC<TravelGlobeProps> = ({
   origin,
   destinations,
