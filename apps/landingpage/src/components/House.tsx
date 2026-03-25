@@ -727,33 +727,48 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
           symbol="🔗" 
           scale={0.3}
         />
+        <HexProjectCard 
+          position={[-2.9, 1.2, -3.85]} 
+          title="SupplyLink" 
+          subtitle="Full-Stack Web" 
+          symbol="🔗" 
+          scale={0.3}
+        />
+        <HexProjectCard 
+          position={[-2.1, 1.2, -3.85]} 
+          title="SupplyLink" 
+          subtitle="Full-Stack Web" 
+          symbol="🔗" 
+          scale={0.3}
+        />
         <Bookshelf position={[0, 1.35, -3.5]} scale={0.3} />
         {/* --- Skill CARDS --- */}
+        {/* --- 1 skill hexagon--- */}
          <HexProjectCard 
-          position={[2.5, 1.9, -3.85]} 
+          position={[2.5, 2, -3.85]} 
           title="Python" 
           subtitle="Programming Language" 
           symbol="🔗" 
           scale={0.4}
         />
         
-        
-        {/* Bottom Right Hexagon */}
+        {/* --- 2.1 skill hexagon --- */}
         <HexProjectCard 
-          position={[2.1, 1.45, -3.85]} 
+          position={[2.2, 1.5, -3.85]} 
           title="fastAPI" 
           subtitle="Backend Framework" 
           symbol="🤖" 
           scale={0.4}
         />
+           {/* --- 2.2 skill hexagon --- */}
         <HexProjectCard 
-          position={[2.9, 1.45, -3.85]} 
+          position={[2.8, 1.5, -3.85]} 
           title="AI/ML" 
           subtitle="LLMOps & Models" 
           symbol="💾" 
           scale={0.4}
         /> 
-
+    {/* --- 3 skill hexagon --- */}
         <HexProjectCard 
           position={[2.5, 1, -3.85]} 
           title="SQL" 
