@@ -78,25 +78,100 @@ const ScenePreloader = ({ onSceneReady }: { onSceneReady: () => void }) => {
 };
 
 // --- MAIN APP ---
+// ... (keep all your existing imports, CameraDirector, and ScenePreloader as they are) ...
+
 export default function App() {
   const [sceneReady, setSceneReady] = useState(false);
   const [introFinished, setIntroFinished] = useState(false);
   const [doorOpen, setDoorOpen] = useState(false);
-
   const [hasEntered, setHasEntered] = useState(false);
 
   const handleSceneReady = useCallback(() => setSceneReady(true), []);
   const handleOpenDoor = useCallback(() => setDoorOpen(true), []);
   const handleIntroFinish = useCallback(() => setIntroFinished(true), []);
 
+  // --- NEW: Fullscreen and Orientation Logic ---
+  const handleEnter = async () => {
+    setHasEntered(true);
+
+    const elem = document.documentElement as any;
+
+    // 1. Request Fullscreen
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen().catch((err: any) => console.log("FS Error:", err));
+    } else if (elem.webkitRequestFullscreen) { /* Safari */
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE11 */
+      elem.msRequestFullscreen();
+    }
+
+    // 2. Attempt to lock orientation (Works on Android, fails silently on iOS)
+    if (
+      window.screen &&
+      window.screen.orientation &&
+      (window.screen.orientation as any).lock
+    ) {
+      try {
+        await (window.screen.orientation as any).lock("landscape");
+      } catch (error) {
+        console.warn("Screen orientation lock unsupported or failed.", error);
+      }
+    }
+  };
+
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#87CEEB" }}>
-      {/* Optional: You can pass sceneReady to your Loader to keep it on screen until the GPU is ready */}
-      {/* <Loader isReady={!sceneReady} /> */}
+      
+      {/* NEW: CSS for the Portrait Rotate Warning */}
+      <style>{`
+        .portrait-overlay {
+          display: none; 
+        }
+        /* Only show on mobile screens when in portrait mode */
+        @media (max-width: 850px) and (orientation: portrait) {
+          .portrait-overlay {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0d0d14;
+            color: white;
+            z-index: 99999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-family: sans-serif;
+          }
+          .rotate-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: spin 2s infinite ease-in-out;
+          }
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(-90deg); }
+            100% { transform: rotate(-90deg); }
+          }
+        }
+      `}</style>
+
+      {/* The Overlay itself (only renders if they have clicked Enter) */}
+      {hasEntered && (
+        <div className="portrait-overlay">
+          <div className="rotate-icon">📱</div>
+          <h2>Please rotate your device</h2>
+          <p>This experience is best viewed in landscape mode.</p>
+        </div>
+      )}
+
+      {/* Updated Loader to use handleEnter */}
       {!hasEntered && (
         <Loader
-          onEnter={() => setHasEntered(true)}
-          isSceneReady={sceneReady} // Optional: Pass this down to show true loading status
+          onEnter={handleEnter}
+          isSceneReady={sceneReady} 
         />
       )}
 
@@ -107,6 +182,7 @@ export default function App() {
           <Environment />
           <House entranceOpen={doorOpen} />
           <PerspectiveCamera makeDefault fov={55} />
+          
           {sceneReady && hasEntered && !introFinished && (
             <CameraDirector
               onOpenDoor={handleOpenDoor}

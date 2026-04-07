@@ -126,17 +126,23 @@ export default function Loader({
             height: 60px;
             background: #12121c;
             border-radius: 50%;
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 15px 4px rgba(255, 255, 255, 0.5);
             z-index: 20;
+            cursor: pointer;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, box-shadow 0.35s ease, filter 0.35s ease;
           }
 
           /* Neon Glow Hover Effect */
-          .neon-profile-icon:hover {
-            border-color: #ffffff;
+          .neon-profile-icon.icon-hovered {
             background: #1a1a24;
-            box-shadow: 0 0 20px 15px rgba(0, 255, 255, 0.6);
-            z-index: 20; 
+            box-shadow: 0 0 25px 12px rgba(0, 255, 255, 0.7), 0 0 50px 25px rgba(0, 255, 255, 0.3);
+            filter: brightness(1.15);
+          }
+
+          /* Active/Press Effect */
+          .neon-profile-icon.icon-pressed {
+            box-shadow: 0 0 35px 20px rgba(0, 255, 255, 0.9), 0 0 70px 35px rgba(0, 255, 255, 0.4);
+            filter: brightness(1.35);
           }
 
           /* Button Styles */
