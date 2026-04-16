@@ -79,8 +79,8 @@ export default function Loader({
       delay: "0.6s",
     },
     {
-      name: "Twitter",
-      url: "#",
+      name: "Medium",
+      url: "https://medium.com/@santanubhunia9836",
       pngSrc: "/loader/medium.svg",
       x: 680 * scale,
       y: 0,
