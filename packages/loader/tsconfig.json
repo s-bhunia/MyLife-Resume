@@ -9,7 +9,8 @@
     "skipLibCheck": true,
     "composite": true,
     "noEmit": false,
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*.tsx", "src/**/*.ts"],
   "exclude": ["node_modules"]

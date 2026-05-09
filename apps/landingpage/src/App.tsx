@@ -85,6 +85,39 @@ export default function App() {
   const [introFinished, setIntroFinished] = useState(false);
   const [doorOpen, setDoorOpen] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
+  const [canvasReady, setCanvasReady] = useState(false);
+  
+  // Staggered component rendering
+  const [envReady, setEnvReady] = useState(false);
+  const [houseReady, setHouseReady] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
+
+  useEffect(() => {
+    // Delay Canvas rendering by 100ms to let loader mount first
+    const timer = setTimeout(() => {
+      setCanvasReady(true);
+    }, 1);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Stagger component rendering: ScenePreloader → Environment → House → Camera
+  useEffect(() => {
+    if (!canvasReady) return;
+    const timer1 = setTimeout(() => setEnvReady(true), 20);
+    return () => clearTimeout(timer1);
+  }, [canvasReady]);
+
+  useEffect(() => {
+    if (!envReady) return;
+    const timer2 = setTimeout(() => setHouseReady(true), 40);
+    return () => clearTimeout(timer2);
+  }, [envReady]);
+
+  useEffect(() => {
+    if (!houseReady) return;
+    const timer3 = setTimeout(() => setCameraReady(true), 60);
+    return () => clearTimeout(timer3);
+  }, [houseReady]);
 
   const handleSceneReady = useCallback(() => setSceneReady(true), []);
   const handleOpenDoor = useCallback(() => setDoorOpen(true), []);
@@ -175,13 +208,15 @@ export default function App() {
         />
       )}
 
-      <Canvas shadows>
+      {/* Defer Canvas rendering to give loader priority */}
+      {canvasReady && (
+        <Canvas shadows frameloop={!sceneReady ? "demand" : "always"}>
         <Suspense fallback={null}>
           <ScenePreloader onSceneReady={handleSceneReady} />
 
-          <Environment />
-          <House entranceOpen={doorOpen} />
-          <PerspectiveCamera makeDefault fov={55} />
+          {envReady && <Environment />}
+          {houseReady && <House entranceOpen={doorOpen} />}
+          {cameraReady && <PerspectiveCamera makeDefault fov={55} />}
           
           {sceneReady && hasEntered && !introFinished && (
             <CameraDirector
@@ -206,6 +241,7 @@ export default function App() {
           )}
         </Suspense>
       </Canvas>
+      )}
     </div>
   );
 }

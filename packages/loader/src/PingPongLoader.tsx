@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useEffect } from "react";
 
 export interface PingPongDotLoaderProps {
   rows?: number;
@@ -6,6 +6,7 @@ export interface PingPongDotLoaderProps {
   paddleHeight?: number;
   baseSpeed?: number;
   dotSize?: number;
+  isVisible?: boolean;
 }
 
 export const PingPongDotLoader: React.FC<PingPongDotLoaderProps> = ({
@@ -14,273 +15,246 @@ export const PingPongDotLoader: React.FC<PingPongDotLoaderProps> = ({
   paddleHeight = 3,
   baseSpeed = 0.25,
   dotSize = 9,
+  isVisible = true,
 }) => {
-  const colorInactive = "#1a1a24";
-  const colorBall = "#ffffff";
-  const colorPaddle = "#ffffff";
+  const containerRef = useRef<HTMLDivElement>(null);
+  const workerRef = useRef<Worker | null>(null);
 
-  const glowSmall = dotSize * 0.6;
-  const glowLarge = dotSize * 1.5;
-
-  const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
-  const [_isMounted, _setIsMounted] = useState(false);
-
-  // Trigger animations shortly after mount
-  useEffect(() => {
-    const timer = setTimeout(() => _setIsMounted(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (
-    cellRefs.current.length !== rows ||
-    cellRefs.current[0]?.length !== cols
-  ) {
-    cellRefs.current = Array.from({ length: rows }, () =>
-      Array(cols).fill(null),
-    );
-  }
-
-  function getInitialBallState() {
-    const direction = Math.random() > 0.5 ? 1 : -1;
-    const initialAngle = (Math.random() - 0.5) * (Math.PI / 4);
-    return {
-      x: Math.floor(cols / 2),
-      y: Math.floor(rows / 2),
-      dx: baseSpeed * Math.cos(initialAngle) * direction,
-      dy: baseSpeed * Math.sin(initialAngle),
-    };
-  }
-
-  const gameState = useRef({
-    ball: getInitialBallState(),
-    paddleL: { x: 1, y: (rows - paddleHeight) / 2 },
-    paddleR: { x: cols - 2, y: (rows - paddleHeight) / 2 },
-  });
-
-  const requestRef = useRef<number | null>(null);
+  const gap = Math.max(2, dotSize * 0.25);
+  const padding = dotSize;
+  const canvasWidth = cols * dotSize + (cols - 1) * gap + padding * 2;
+  const canvasHeight = rows * dotSize + (rows - 1) * gap + padding * 2;
 
   useEffect(() => {
-    const state = gameState.current;
-    const maxBounceAngle = Math.PI / 3;
+    const container = containerRef.current;
+    if (!container || !window.OffscreenCanvas) return;
 
-    state.paddleL.x = 0;
-    state.paddleR.x = cols - 1;
+    // 1. FIX THE "TWO BOXES" BUG
+    // Force clear the container to kill any zombie canvases left by React HMR/Strict Mode
+    container.innerHTML = "";
 
-    const resetBall = () => {
-      const direction = Math.random() > 0.5 ? 1 : -1;
-      const initialAngle = (Math.random() - 0.5) * (Math.PI / 4);
-      state.ball.x = Math.floor(cols / 2);
-      state.ball.y = Math.floor(rows / 2);
-      state.ball.dx = baseSpeed * Math.cos(initialAngle) * direction;
-      state.ball.dy = baseSpeed * Math.sin(initialAngle);
-    };
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
 
-    if (
-      state.ball.x < 0 ||
-      state.ball.x >= cols ||
-      state.ball.y < 0 ||
-      state.ball.y >= rows ||
-      (state.ball.dx === 0 && state.ball.dy === 0)
-    ) {
-      resetBall();
-    }
+    canvas.style.position = "relative";
+    canvas.style.zIndex = "10";
+    canvas.style.backgroundColor = "#050508";
+    canvas.style.borderRadius = `${dotSize * 0.8}px`;
+    canvas.style.border = "1px solid #1f1f2e";
+    canvas.style.boxShadow = "0 10px 40px rgba(0,0,0,0.8)";
 
-    let lastTime = performance.now();
-    const targetFPS = 60;
-    const frameDuration = 1000 / targetFPS;
+    container.appendChild(canvas);
 
-    const updatePhysics = (dt: number) => {
-      const speedScale = dt / (1000 / 60);
-      state.ball.x += state.ball.dx * speedScale;
-      state.ball.y += state.ball.dy * speedScale;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      if (state.ball.dx < 0) {
-        state.paddleL.y +=
-          (state.ball.y - (state.paddleL.y + paddleHeight / 2)) *
-          0.12 *
-          speedScale;
-      }
-      if (state.ball.dx > 0) {
-        state.paddleR.y +=
-          (state.ball.y - (state.paddleR.y + paddleHeight / 2)) *
-          0.12 *
-          speedScale;
-      }
+    // 2. FIX THE "NO RENDER" BUG (Blob Worker)
+    // By wrapping the worker logic in a string Blob, we completely bypass Vite/Next.js 
+    // file-loading rules. This guarantees the worker initializes successfully.
+    const workerCode = `
+      let canvas, ctx, animationId, lastTime;
+      let rows, cols, paddleHeight, baseSpeed, dotSize, isVisible, prefersReducedMotion;
+      let gap, padding;
+      let state;
 
-      state.paddleL.y = Math.max(
-        0,
-        Math.min(state.paddleL.y, rows - paddleHeight),
-      );
-      state.paddleR.y = Math.max(
-        0,
-        Math.min(state.paddleR.y, rows - paddleHeight),
-      );
-
-      if (state.ball.y <= 0) {
-        state.ball.y = 0;
-        state.ball.dy *= -1;
-      } else if (state.ball.y >= rows - 1) {
-        state.ball.y = rows - 1;
-        state.ball.dy *= -1;
+      function initGame() {
+        const direction = Math.random() > 0.5 ? 1 : -1;
+        const initialAngle = (Math.random() - 0.5) * (Math.PI / 4);
+        state = {
+          ball: {
+            x: Math.floor(cols / 2),
+            y: Math.floor(rows / 2),
+            dx: baseSpeed * Math.cos(initialAngle) * direction,
+            dy: baseSpeed * Math.sin(initialAngle),
+          },
+          paddleL: { x: 0, y: (rows - paddleHeight) / 2 },
+          paddleR: { x: cols - 1, y: (rows - paddleHeight) / 2 },
+        };
       }
 
-      const checkCollision = (
-        paddle: { x: number; y: number },
-        isLeft: boolean,
-      ) => {
-        const ballGridX = Math.round(state.ball.x);
-        if (
-          (isLeft && ballGridX <= paddle.x) ||
-          (!isLeft && ballGridX >= paddle.x)
-        ) {
-          if (
-            state.ball.y >= paddle.y - 0.5 &&
-            state.ball.y <= paddle.y + paddleHeight + 0.5
-          ) {
-            const intersectY = paddle.y + paddleHeight / 2 - state.ball.y;
-            const normalizedIntersect = intersectY / (paddleHeight / 2);
-            const bounceAngle = normalizedIntersect * maxBounceAngle;
-            const direction = isLeft ? 1 : -1;
-            const angleJitter = (Math.random() - 0.5) * 0.1;
+      function updatePhysics(dt) {
+        const speedScale = dt / (1000 / 60);
+        const maxBounceAngle = Math.PI / 3;
 
-            state.ball.dx =
-              baseSpeed * Math.cos(bounceAngle + angleJitter) * direction;
-            state.ball.dy = baseSpeed * -Math.sin(bounceAngle + angleJitter);
-            state.ball.x = isLeft ? paddle.x + 1 : paddle.x - 1;
+        state.ball.x += state.ball.dx * speedScale;
+        state.ball.y += state.ball.dy * speedScale;
+
+        // AI Paddles
+        if (state.ball.dx < 0) {
+          state.paddleL.y += (state.ball.y - (state.paddleL.y + paddleHeight / 2)) * 0.12 * speedScale;
+        }
+        if (state.ball.dx > 0) {
+          state.paddleR.y += (state.ball.y - (state.paddleR.y + paddleHeight / 2)) * 0.12 * speedScale;
+        }
+
+        state.paddleL.y = Math.max(0, Math.min(state.paddleL.y, rows - paddleHeight));
+        state.paddleR.y = Math.max(0, Math.min(state.paddleR.y, rows - paddleHeight));
+
+        // Wall Bounces
+        if (state.ball.y <= 0) {
+          state.ball.y = 0;
+          state.ball.dy *= -1;
+        } else if (state.ball.y >= rows - 1) {
+          state.ball.y = rows - 1;
+          state.ball.dy *= -1;
+        }
+
+        // Paddle Collisions
+        const checkCollision = (paddle, isLeft) => {
+          const ballGridX = Math.round(state.ball.x);
+          if ((isLeft && ballGridX <= paddle.x) || (!isLeft && ballGridX >= paddle.x)) {
+            if (state.ball.y >= paddle.y - 0.5 && state.ball.y <= paddle.y + paddleHeight + 0.5) {
+              const intersectY = paddle.y + paddleHeight / 2 - state.ball.y;
+              const normalizedIntersect = intersectY / (paddleHeight / 2);
+              const bounceAngle = normalizedIntersect * maxBounceAngle;
+              const direction = isLeft ? 1 : -1;
+              const angleJitter = (Math.random() - 0.5) * 0.1;
+
+              state.ball.dx = baseSpeed * Math.cos(bounceAngle + angleJitter) * direction;
+              state.ball.dy = baseSpeed * -Math.sin(bounceAngle + angleJitter);
+              state.ball.x = isLeft ? paddle.x + 1 : paddle.x - 1;
+            }
+          }
+        };
+
+        checkCollision(state.paddleL, true);
+        checkCollision(state.paddleR, false);
+
+        // Reset if ball escapes
+        if (state.ball.x < -1 || state.ball.x > cols) {
+          initGame();
+        }
+      }
+
+      function drawDot(col, row, color, glow) {
+        const x = padding + col * (dotSize + gap) + dotSize / 2;
+        const y = padding + row * (dotSize + gap) + dotSize / 2;
+        
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = glow;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, dotSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw grid
+        ctx.shadowBlur = 0;
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            drawDot(c, r, "#1a1a24", 0);
+          }
+        }
+
+        const lY = Math.round(state.paddleL.y);
+        const rY = Math.round(state.paddleR.y);
+        const glowSmall = dotSize * 0.6;
+
+        for (let i = 0; i < paddleHeight; i++) {
+          drawDot(state.paddleL.x, lY + i, "#ffffff", glowSmall);
+          drawDot(state.paddleR.x, rY + i, "#ffffff", glowSmall);
+        }
+
+        const bX = Math.round(state.ball.x);
+        const bY = Math.round(state.ball.y);
+        drawDot(bX, bY, "#ffffff", dotSize * 1.5);
+      }
+
+      function loop(now) {
+        if (!isVisible || prefersReducedMotion) {
+          draw(); 
+          return;
+        }
+
+        const dt = now - lastTime;
+        const targetFPS = 30; 
+        const frameDuration = 1000 / targetFPS;
+
+        if (dt >= frameDuration) {
+          updatePhysics(dt);
+          draw();
+          lastTime = now;
+        }
+        
+        animationId = self.requestAnimationFrame(loop);
+      }
+
+      self.onmessage = (e) => {
+        if (e.data.type === 'INIT') {
+          canvas = e.data.canvas;
+          ctx = canvas.getContext('2d');
+          
+          ({ rows, cols, paddleHeight, baseSpeed, dotSize, isVisible, prefersReducedMotion } = e.data);
+          gap = Math.max(2, dotSize * 0.25);
+          padding = dotSize;
+
+          initGame();
+          lastTime = performance.now();
+          loop(performance.now());
+        } 
+        
+        if (e.data.type === 'VISIBILITY') {
+          isVisible = e.data.isVisible;
+          if (isVisible && !prefersReducedMotion) {
+            lastTime = performance.now();
+            self.cancelAnimationFrame(animationId);
+            loop(performance.now());
+          } else {
+            self.cancelAnimationFrame(animationId);
           }
         }
       };
+    `;
 
-      checkCollision(state.paddleL, true);
-      checkCollision(state.paddleR, false);
+    // Initialize the Blob URL
+    const blob = new Blob([workerCode], { type: "application/javascript" });
+    const workerUrl = URL.createObjectURL(blob);
 
-      if (state.ball.x < -1 || state.ball.x > cols) resetBall();
-    };
+    workerRef.current = new Worker(workerUrl);
 
-    const draw = () => {
-      const cells = cellRefs.current;
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (cells[r]?.[c]) {
-            cells[r][c]!.style.backgroundColor = colorInactive;
-            cells[r][c]!.style.boxShadow = "none";
-          }
-        }
-      }
+    const offscreenCanvas = canvas.transferControlToOffscreen();
 
-      const lY = Math.round(state.paddleL.y);
-      const rY = Math.round(state.paddleR.y);
-
-      for (let i = 0; i < paddleHeight; i++) {
-        if (cells[lY + i]?.[state.paddleL.x]) {
-          cells[lY + i][state.paddleL.x]!.style.backgroundColor = colorPaddle;
-          cells[lY + i][state.paddleL.x]!.style.boxShadow =
-            `0 0 ${glowSmall}px ${colorPaddle}`;
-        }
-        if (cells[rY + i]?.[state.paddleR.x]) {
-          cells[rY + i][state.paddleR.x]!.style.backgroundColor = colorPaddle;
-          cells[rY + i][state.paddleR.x]!.style.boxShadow =
-            `0 0 ${glowSmall}px ${colorPaddle}`;
-        }
-      }
-
-      const bX = Math.round(state.ball.x);
-      const bY = Math.round(state.ball.y);
-      if (cells[bY]?.[bX]) {
-        cells[bY][bX]!.style.backgroundColor = colorBall;
-        cells[bY][bX]!.style.boxShadow =
-          `0 0 ${glowSmall}px ${colorBall}, 0 0 ${glowLarge}px ${colorBall}`;
-      }
-    };
-
-    const loop = (now: number) => {
-      const dt = now - lastTime;
-      if (dt >= frameDuration) {
-        updatePhysics(dt);
-        draw();
-        lastTime = now;
-      } else {
-        draw();
-      }
-      requestRef.current = requestAnimationFrame(loop);
-    };
-
-    if (requestRef.current) cancelAnimationFrame(requestRef.current);
-    lastTime = performance.now();
-    requestRef.current = requestAnimationFrame(loop);
+    workerRef.current.postMessage(
+      {
+        type: "INIT",
+        canvas: offscreenCanvas,
+        rows,
+        cols,
+        paddleHeight,
+        baseSpeed,
+        dotSize,
+        isVisible,
+        prefersReducedMotion,
+      },
+      [offscreenCanvas],
+    );
 
     return () => {
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      // Cleanup on unmount
+      if (workerRef.current) {
+        workerRef.current.terminate();
+        URL.revokeObjectURL(workerUrl); // Free up memory
+      }
+      if (container && canvas.parentNode) {
+        container.removeChild(canvas);
+      }
     };
-  }, [rows, cols, paddleHeight, baseSpeed, dotSize, glowSmall, glowLarge]);
+  }, [canvasWidth, canvasHeight, rows, cols, paddleHeight, baseSpeed, dotSize]);
 
-  // Social Links Data (side: -1 is left, 1 is right)
-  // Currently unused but keeping for future reference
-  // const socialLinks = [
-  //   {
-  //     name: "GitHub",
-  //     url: "https://github.com",
-  //     side: -1,
-  //     yOffset: -50,
-  //     delay: "0.1s",
-  //   },
-  //   {
-  //     name: "LinkedIn",
-  //     url: "https://linkedin.com",
-  //     side: -1,
-  //     yOffset: 50,
-  //     delay: "0.2s",
-  //   },
-  //   {
-  //     name: "YouTube",
-  //     url: "https://youtube.com",
-  //     side: 1,
-  //     yOffset: -50,
-  //     delay: "0.3s",
-  //   },
-  //   {
-  //     name: "Twitter",
-  //     url: "https://twitter.com",
-  //     side: 1,
-  //     yOffset: 50,
-  //     delay: "0.4s",
-  //   },
-  // ];
+  useEffect(() => {
+    if (workerRef.current) {
+      workerRef.current.postMessage({ type: "VISIBILITY", isVisible });
+    }
+  }, [isVisible]);
 
   return (
     <div
-      style={{
-        // Purely the game board styling now
-        position: "relative",
-        zIndex: 10, // Keeps the board above the icons
-        display: "grid",
-        gridTemplateColumns: `repeat(${cols}, ${dotSize}px)`,
-        gridTemplateRows: `repeat(${rows}, ${dotSize}px)`,
-        gap: `${Math.max(2, dotSize * 0.25)}px`,
-        padding: `${dotSize}px`,
-        backgroundColor: "#050508",
-        borderRadius: `${dotSize * 0.8}px`,
-        border: "1px solid #1f1f2e",
-        boxShadow: "0 10px 40px rgba(0,0,0,0.8)",
-      }}
-    >
-      {Array.from({ length: rows }).map((_, r) =>
-        Array.from({ length: cols }).map((_, c) => (
-          <div
-            key={`${r}-${c}`}
-            ref={(el) => {
-              if (cellRefs.current[r]) cellRefs.current[r][c] = el;
-            }}
-            style={{
-              width: "100%",
-              height: "100%",
-              borderRadius: "40%",
-              backgroundColor: "#1a1a24",
-              transition: "background-color 0.15s ease, box-shadow 0.15s ease",
-            }}
-          />
-        )),
-      )}
-    </div>
+      ref={containerRef}
+      style={{ display: isVisible ? "block" : "none" }}
+    />
   );
 };

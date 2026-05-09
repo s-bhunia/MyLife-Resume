@@ -53,11 +53,20 @@ export const ProfileIcon: React.FC<ProfileIconProps> = ({
           ? `translate(calc(-50% + ${xOffset}px), calc(-50% + ${yOffset}px)) scale(${scale}) rotate(0deg)`
           : `translate(-50%, -50%) scale(0.2) rotate(-45deg)`,
         opacity: isMounted ? 1 : 0,
-        transitionDelay: !isMounted ? delay : "0s",
-        transition: "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, box-shadow 0.35s ease, filter 0.35s ease",
+        transitionDelay: isMounted ? delay : "0s", // Apply delay *after* mounting
+        transition: "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease",
       }}
     >
-      <img src={pngSrc} alt={name} style={{ width: "5vw", height: "5vh", pointerEvents: "none" }} />
+      <img 
+        src={pngSrc} 
+        alt={name} 
+        style={{ width: "5vw", height: "5vh", pointerEvents: "none" }}
+        onError={(e) => {
+          // Fallback: hide image on error to prevent broken image icon
+          const img = e.target as HTMLImageElement;
+          img.style.display = "none";
+        }}
+      />
     </a>
   );
 };

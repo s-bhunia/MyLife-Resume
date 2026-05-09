@@ -2,9 +2,18 @@ import React from "react";
 
 interface ResumeButtonProps {
   onClick?: () => void;
+  resumePath?: string;
 }
 
-export const ResumeButton: React.FC<ResumeButtonProps> = ({ onClick }) => {
+export const ResumeButton: React.FC<ResumeButtonProps> = ({
+  onClick,
+  resumePath = "loader/Resume_S_Bhunia.pdf",
+}) => {
+  const handleClick = () => {
+    window.open(resumePath, "_blank");
+    onClick?.();
+  };
+
   return (
     <>
       <style>{`
@@ -72,6 +81,11 @@ export const ResumeButton: React.FC<ResumeButtonProps> = ({ onClick }) => {
           transform: scale(1);
         }
 
+        .magic-resume-btn:focus-visible {
+          outline: 2px solid rgba(255, 255, 255, 0.8);
+          outline-offset: 2px;
+        }
+
         .magic-resume-btn .dots_border {
           --size_border: calc(100% + 2px);
           overflow: hidden;
@@ -127,9 +141,21 @@ export const ResumeButton: React.FC<ResumeButtonProps> = ({ onClick }) => {
           font-weight: 600;
           color: transparent;
         }
+
+        /* Respect user's motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+          .magic-resume-btn,
+          .magic-resume-btn::before,
+          .magic-resume-btn::after,
+          .magic-resume-btn .dots_border::before,
+          .magic-resume-btn .text_button {
+            animation: none;
+            transition: none;
+          }
+        }
       `}</style>
 
-      <button className="magic-resume-btn" onClick={onClick}>
+      <button className="magic-resume-btn" onClick={handleClick}>
         <div className="dots_border"></div>
 
         {/* Replace this SVG with your preferred Resume icon */}

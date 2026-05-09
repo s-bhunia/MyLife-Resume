@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 import { PingPongDotLoader } from "./PingPongLoader";
+import { GlitchGreeting } from "./GlitchTextLoader";
 import { ProfileIcon } from "./ProfileIcon";
 import { ResumeButton } from "./ResumeButton";
 import { ExploreHouseButton } from "./myLifeButton";
@@ -13,10 +14,10 @@ export default function Loader({
   isSceneReady: boolean;
 }) {
   const [isMounted, setIsMounted] = useState(false);
-  const [_minTimeElapsed, _setMinTimeElapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1200,
   );
+  const [showLoaderAfterDelay, setShowLoaderAfterDelay] = useState(false);
 
   useEffect(() => {
     // 2. Keep track of screen size
@@ -26,23 +27,28 @@ export default function Loader({
     // Trigger the explosive pop-out animation shortly after load
     const mountTimer = setTimeout(() => setIsMounted(true), 150);
 
-    // Simulate network request ending (Changed to 'false' to end loading)
-    // const loadTimer = setTimeout(() => setIsLoading(true), 8000);
-
-    // Set minimum time elapsed
-    const minLoadTimeTimer = setTimeout(() => {
-      _setMinTimeElapsed(true);
-    }, 3000); // Set your desired minimum time here (e.g., 3000 for 3 seconds)
-
     return () => {
       clearTimeout(mountTimer);
-      clearTimeout(minLoadTimeTimer); // Cleanup the new timer
       window.removeEventListener("resize", handleResize);
     };
   }, []);
 
-  // 3. Calculate a dynamic scale based on screen width (max 1 for desktop)
-  const scale = Math.min(windowWidth / 1400, 1);
+  useEffect(() => {
+    const delayTimer = setTimeout(() => {
+      setShowLoaderAfterDelay(true);
+    }, 7000); // 3 seconds delay
+    return () => clearTimeout(delayTimer);
+  }, []);
+
+  useEffect(() => {
+    // Stop loader animation once scene is ready
+    if (isSceneReady && showLoaderAfterDelay) {
+      // Loader will be hidden by parent component
+    }
+  }, [isSceneReady, showLoaderAfterDelay]);
+
+  // 3. Calculate a dynamic scale based on screen width (clamped between 0.3 and 1)
+  const scale = Math.max(0.3, Math.min(windowWidth / 1400, 1));
 
   // Configure your icons here - multiplying by 'scale' keeps them on-screen!
   const socialData = [
@@ -60,7 +66,7 @@ export default function Loader({
       pngSrc: "/loader/linkedin.svg",
       x: -680 * scale,
       y: 0,
-      delay: "0.2s",
+      delay: "0.3s",
     },
     {
       name: "GitHub",
@@ -68,7 +74,7 @@ export default function Loader({
       pngSrc: "/loader/github.svg",
       x: -600 * scale,
       y: 150 * scale,
-      delay: "0.3s",
+      delay: "0.5s",
     },
     {
       name: "YouTube",
@@ -76,7 +82,7 @@ export default function Loader({
       pngSrc: "/loader/youtube.svg",
       x: 600 * scale,
       y: -150 * scale,
-      delay: "0.6s",
+      delay: "1.1s",
     },
     {
       name: "Medium",
@@ -84,7 +90,7 @@ export default function Loader({
       pngSrc: "/loader/medium.svg",
       x: 680 * scale,
       y: 0,
-      delay: "0.5s",
+      delay: "0.9s",
     },
     {
       name: "Discord",
@@ -92,7 +98,7 @@ export default function Loader({
       pngSrc: "/loader/discord.svg",
       x: 600 * scale,
       y: 150 * scale,
-      delay: "0.4s",
+      delay: "0.7s",
     },
   ];
   return (
@@ -132,6 +138,12 @@ export default function Loader({
             transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, box-shadow 0.35s ease, filter 0.35s ease;
           }
 
+          /* Keyboard focus indicator for social icons */
+          .neon-profile-icon:focus-visible {
+            outline: 2px solid rgba(0, 255, 255, 0.8);
+            outline-offset: 2px;
+          }
+
           /* Neon Glow Hover Effect */
           .neon-profile-icon.icon-hovered {
             background: #1a1a24;
@@ -165,6 +177,20 @@ export default function Loader({
             transform: translateY(-2px);
           }
 
+          /* Keyboard focus indicator for buttons */
+          .action-btn:focus-visible {
+            outline: 2px solid rgba(255, 255, 255, 0.8);
+            outline-offset: 2px;
+          }
+
+          /* Respect user's motion preferences */
+          @media (prefers-reduced-motion: reduce) {
+            .neon-profile-icon,
+            .action-btn {
+              transition: none;
+            }
+          }
+
           /* Mobile adjustments for buttons */
           @media (max-width: 768px) {
             .action-btn {
@@ -175,8 +201,12 @@ export default function Loader({
         `}</style>
 
       {/* Center Stage: Loader + Icons */}
-      <div style={{ position: "relative" }}>
-        {!isSceneReady || <PingPongDotLoader dotSize={12} />}v
+     <div style={{ position: "relative" }} aria-hidden="true">
+        {(!isSceneReady || !showLoaderAfterDelay) ? (
+          <PingPongDotLoader dotSize={12} />
+        ) : (
+          <GlitchGreeting />
+        )}
         {socialData.map((icon, idx) => (
           <ProfileIcon
             key={idx}
