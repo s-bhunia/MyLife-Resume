@@ -8,6 +8,8 @@
     "@mylife/loader": "workspace:*",
     "@mylife/tube-clock": "workspace:*",
     "@mylife/globe": "workspace:*",
+    "@mylife/book-slider": "workspace:*",
+    "@mylife/scroll": "workspace:*",
     "@react-three/csg": "^4.0.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",

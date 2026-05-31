@@ -9,7 +9,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ["react", "react-dom", "three"],
-    exclude: ["@mylife/bookshelf", "@mylife/loader", "@mylife/tube-clock", "@mylife/globe"],
+    exclude: ["@mylife/bookshelf", "@mylife/loader", "@mylife/tube-clock", "@mylife/globe", "@mylife/book-slider"],
   },
   server: {
     fs: {

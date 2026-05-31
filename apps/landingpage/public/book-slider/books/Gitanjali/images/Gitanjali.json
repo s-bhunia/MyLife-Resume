@@ -1,0 +1,38 @@
+{
+  "languages": [
+    {
+      "id": 1,
+      "code": "en",
+      "name": "English",
+      "pictures": [
+        "Gitanjali_page-0001",
+        "Gitanjali_page-0002",
+        "Gitanjali_page-0003",
+        "Gitanjali_page-0004",
+        "Gitanjali_page-0005",
+        "Gitanjali_page-0006",
+        "Gitanjali_page-0007",
+        "Gitanjali_page-0008",
+        "Gitanjali_page-0009",
+        "Gitanjali_page-0010"
+      ]
+    },
+    {
+      "id": 0,
+      "code": "bn",
+      "name": "Bengali",
+      "pictures": [
+        "Gitanjali_page-0001",
+        "Gitanjali_page-0002",
+        "Gitanjali_page-0003",
+        "Gitanjali_page-0004",
+        "Gitanjali_page-0005",
+        "Gitanjali_page-0006",
+        "Gitanjali_page-0007",
+        "Gitanjali_page-0008",
+        "Gitanjali_page-0009",
+        "Gitanjali_page-0010"
+      ]
+    }
+  ]
+}

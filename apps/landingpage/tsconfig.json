@@ -32,6 +32,8 @@
     { "path": "../../packages/bookshelf" },
     { "path": "../../packages/loader" },
     { "path": "../../packages/tube-clock" },
-    { "path": "../../packages/globe" }
+    { "path": "../../packages/globe" },
+    { "path": "../../packages/book-slider" },
+    { "path": "../../packages/scroll" }
   ]
 }

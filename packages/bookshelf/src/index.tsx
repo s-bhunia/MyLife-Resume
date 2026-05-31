@@ -2,7 +2,21 @@ import { Suspense, useState } from "react";
 import BookshelfModel from "./Bookshelf";
 import Book from "./Book";
 
-export function Bookshelf(props: any) {
+// Book name mapping - maps cover URLs to book names
+const BOOK_NAME_MAP: { [key: string]: string } = {
+  "./bookshelf/book1.jpg": "Gitanjali",
+  "./bookshelf/book2.jpg": "Srija_Snigdha",
+  "./bookshelf/book3.jpg": "Gitanjali",
+  "./bookshelf/book4.jpg": "Gitanjali",
+  "./bookshelf/book5.jpg": "Gitanjali",
+};
+
+interface BookshelfProps {
+  onBookClick?: (bookName: string) => void;
+  [key: string]: any;
+}
+
+export function Bookshelf({ onBookClick, ...props }: BookshelfProps) {
   const [books] = useState([
     // Row 1 (Bottom shelf)
     {
@@ -21,11 +35,6 @@ export function Bookshelf(props: any) {
       position: [0, 1.2, -0.2] as [number, number, number],
       coverUrl: "./bookshelf/book3.jpg",
     },
-    // {
-    //   id: 3,
-    //   position: [0, 1.2, -0.2] as [number, number, number],
-    //   coverUrl: "/book3.jpg",
-    // },
     // Row 3
     {
       id: 4,
@@ -33,12 +42,12 @@ export function Bookshelf(props: any) {
       coverUrl: "./bookshelf/book4.jpg",
     },
     {
-      id: 4,
+      id: 5,
       position: [-1, -0.03, -0.2] as [number, number, number],
       coverUrl: "./bookshelf/book4.jpg",
     },
     {
-      id: 4,
+      id: 6,
       position: [0, -1.23, -0.2] as [number, number, number],
       coverUrl: "./bookshelf/book5.jpg",
     },
@@ -57,7 +66,10 @@ export function Bookshelf(props: any) {
             position={book.position}
             coverUrl={book.coverUrl}
             onClick={() => {
-              alert(`Opening 3D viewer for ${book.coverUrl}...`);
+              const bookName = BOOK_NAME_MAP[book.coverUrl] || book.coverUrl;
+              if (onBookClick) {
+                onBookClick(bookName);
+              }
             }}
           />
         ))}

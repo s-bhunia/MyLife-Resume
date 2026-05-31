@@ -40,6 +40,12 @@
     },
     {
       "path": "./packages/globe"
+    },
+    {
+      "path": "./packages/book-slider"
+    },
+    {
+      "path": "./packages/scroll"
     }
   ]
 }

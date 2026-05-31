@@ -6,8 +6,9 @@ import * as THREE from "three";
 import { Environment } from "./components/Environment";
 import { House } from "./components/House";
 import Loader from "@mylife/loader";
+import { ScrollUI } from "@mylife/scroll";
+import { BookViewer } from "@mylife/book-slider";
 
-// --- CAMERA DIRECTOR (Unchanged) ---
 const CameraDirector = ({
   onIntroFinish,
   onOpenDoor,
@@ -61,7 +62,7 @@ const CameraDirector = ({
   return null;
 };
 
-// --- SCENE PRELOADER (New) ---
+// --- SCENE PRELOADER ---
 const ScenePreloader = ({ onSceneReady }: { onSceneReady: () => void }) => {
   const { gl, scene, camera } = useThree();
 
@@ -78,8 +79,6 @@ const ScenePreloader = ({ onSceneReady }: { onSceneReady: () => void }) => {
 };
 
 // --- MAIN APP ---
-// ... (keep all your existing imports, CameraDirector, and ScenePreloader as they are) ...
-
 export default function App() {
   const [sceneReady, setSceneReady] = useState(false);
   const [introFinished, setIntroFinished] = useState(false);
@@ -92,15 +91,19 @@ export default function App() {
   const [houseReady, setHouseReady] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
 
+  const [activeScrollId, setActiveScrollId] = useState<string | null>(null);
+  
+  // --- NEW: State for Book Transition ---
+  const [activeBook, setActiveBook] = useState<string | null>(null);
+  const [bookOpacity, setBookOpacity] = useState(false);
+
   useEffect(() => {
-    // Delay Canvas rendering by 100ms to let loader mount first
     const timer = setTimeout(() => {
       setCanvasReady(true);
     }, 1);
     return () => clearTimeout(timer);
   }, []);
 
-  // Stagger component rendering: ScenePreloader → Environment → House → Camera
   useEffect(() => {
     if (!canvasReady) return;
     const timer1 = setTimeout(() => setEnvReady(true), 20);
@@ -123,22 +126,18 @@ export default function App() {
   const handleOpenDoor = useCallback(() => setDoorOpen(true), []);
   const handleIntroFinish = useCallback(() => setIntroFinished(true), []);
 
-  // --- NEW: Fullscreen and Orientation Logic ---
   const handleEnter = async () => {
     setHasEntered(true);
-
     const elem = document.documentElement as any;
 
-    // 1. Request Fullscreen
     if (elem.requestFullscreen) {
       elem.requestFullscreen().catch((err: any) => console.log("FS Error:", err));
-    } else if (elem.webkitRequestFullscreen) { /* Safari */
+    } else if (elem.webkitRequestFullscreen) {
       elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) { /* IE11 */
+    } else if (elem.msRequestFullscreen) {
       elem.msRequestFullscreen();
     }
 
-    // 2. Attempt to lock orientation (Works on Android, fails silently on iOS)
     if (
       window.screen &&
       window.screen.orientation &&
@@ -152,46 +151,37 @@ export default function App() {
     }
   };
 
+  // --- NEW: Book Handlers for smooth transitions ---
+  const handleBookOpen = useCallback((bookName: string) => {
+    setActiveBook(bookName);
+    // Slight delay to ensure BookViewer mounts before starting the CSS fade-in
+    setTimeout(() => setBookOpacity(true), 10);
+  }, []);
+
+  const handleBookClose = useCallback(() => {
+    setBookOpacity(false);
+    
+    setTimeout(() => {
+      setActiveBook(null);
+    }, 500); 
+  }, []);
+
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "#87CEEB" }}>
+    <div style={{ width: "100vw", height: "100vh", background: "#87CEEB", position: "relative", overflow: "hidden" }}>
       
-      {/* NEW: CSS for the Portrait Rotate Warning */}
       <style>{`
-        .portrait-overlay {
-          display: none; 
-        }
-        /* Only show on mobile screens when in portrait mode */
+        .portrait-overlay { display: none; }
         @media (max-width: 850px) and (orientation: portrait) {
           .portrait-overlay {
-            display: flex;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #0d0d14;
-            color: white;
-            z-index: 99999;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-family: sans-serif;
+            display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #0d0d14; color: white; z-index: 99999; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center; font-family: sans-serif;
           }
-          .rotate-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            animation: spin 2s infinite ease-in-out;
-          }
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            50% { transform: rotate(-90deg); }
-            100% { transform: rotate(-90deg); }
-          }
+          .rotate-icon { font-size: 3rem; margin-bottom: 20px; animation: spin 2s infinite ease-in-out; }
+          @keyframes spin { 0% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } 100% { transform: rotate(-90deg); } }
         }
       `}</style>
 
-      {/* The Overlay itself (only renders if they have clicked Enter) */}
       {hasEntered && (
         <div className="portrait-overlay">
           <div className="rotate-icon">📱</div>
@@ -199,49 +189,87 @@ export default function App() {
           <p>This experience is best viewed in landscape mode.</p>
         </div>
       )}
-
-      {/* Updated Loader to use handleEnter */}
+      
       {!hasEntered && (
-        <Loader
-          onEnter={handleEnter}
-          isSceneReady={sceneReady} 
-        />
+        <Loader onEnter={handleEnter} isSceneReady={sceneReady} />
       )}
 
-      {/* Defer Canvas rendering to give loader priority */}
-      {canvasReady && (
-        <Canvas shadows frameloop={!sceneReady ? "demand" : "always"}>
-        <Suspense fallback={null}>
-          <ScenePreloader onSceneReady={handleSceneReady} />
+      {/* --- NEW: Main Scene Wrapper with Fade Out & Pause --- */}
+      <div 
+        style={{
+          position: "absolute",
+          inset: 0,
+          opacity: bookOpacity ? 0 : 1,
+          visibility: bookOpacity ? "hidden" : "visible",
+          transitionProperty: "opacity, visibility",
+          transitionDuration: "0.5s",
+          transitionTimingFunction: "ease",
+          pointerEvents: bookOpacity ? "none" : "auto",
+        }}
+      >
+        {canvasReady && (
+          // Notice frameloop: when activeBook is true, it switches to "demand" to stop rendering and save GPU memory
+          <Canvas shadows frameloop={(!sceneReady || activeBook) ? "demand" : "always"}>
+            <Suspense fallback={null}>
+              <ScenePreloader onSceneReady={handleSceneReady} />
 
-          {envReady && <Environment />}
-          {houseReady && <House entranceOpen={doorOpen} />}
-          {cameraReady && <PerspectiveCamera makeDefault fov={55} />}
-          
-          {sceneReady && hasEntered && !introFinished && (
-            <CameraDirector
-              onOpenDoor={handleOpenDoor}
-              onIntroFinish={handleIntroFinish}
-            />
-          )}
+              {envReady && <Environment />}
+              
+              {/* Passed the new handler here */}
+              {houseReady && <House entranceOpen={doorOpen} onOpenScroll={setActiveScrollId} onBookClick={handleBookOpen} />}
+              
+              {cameraReady && <PerspectiveCamera makeDefault fov={55} />}
+              
+              {sceneReady && hasEntered && !introFinished && (
+                <CameraDirector onOpenDoor={handleOpenDoor} onIntroFinish={handleIntroFinish} />
+              )}
 
-          {sceneReady && hasEntered && introFinished && (
-            <OrbitControls
-              target={[0, 1.5, -2]}
-              enablePan={true}
-              maxPolarAngle={Math.PI / 2 - 0.05}
-              minDistance={1}
-              maxDistance={15}
-              mouseButtons={{
-                LEFT: THREE.MOUSE.ROTATE,
-                MIDDLE: THREE.MOUSE.DOLLY,
-                RIGHT: THREE.MOUSE.PAN,
-              }}
-            />
-          )}
-        </Suspense>
-      </Canvas>
+              {sceneReady && hasEntered && introFinished && (
+                <OrbitControls
+                  target={[0, 1.5, -2]}
+                  enablePan={true}
+                  maxPolarAngle={Math.PI / 2 - 0.05}
+                  minDistance={1}
+                  maxDistance={15}
+                  mouseButtons={{
+                    LEFT: THREE.MOUSE.ROTATE,
+                    MIDDLE: THREE.MOUSE.DOLLY,
+                    RIGHT: THREE.MOUSE.PAN,
+                  }}
+                />
+              )}
+            </Suspense>
+          </Canvas>
+        )}
+      </div>
+
+      {activeScrollId && (
+        <ScrollUI id={activeScrollId} onClose={() => setActiveScrollId(null)} speed={60} />
       )}
+
+      {/* --- NEW: Book Viewer Wrapper with Fade In --- */}
+     <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          opacity: bookOpacity ? 1 : 0,
+          visibility: activeBook ? "visible" : "hidden",
+          transitionProperty: "opacity",
+          transitionDuration: "0.5s",
+          transitionTimingFunction: "ease",
+          pointerEvents: bookOpacity ? "auto" : "none",
+          background: "radial-gradient(circle at center, #FFE4C4 0%, #2054c4 60%)",
+          zIndex: 50,
+        }}
+      >
+        {activeBook && (
+          <BookViewer
+            bookName={activeBook}
+            onClose={handleBookClose}
+          />
+        )}
+      </div>
+
     </div>
   );
 }

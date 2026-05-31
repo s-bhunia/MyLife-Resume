@@ -26,13 +26,15 @@ const HexProjectCard = memo(({
   title, 
   subtitle,
   symbol,
-  scale = 1
+  scale = 1,
+  onClick,
 }: { 
   position: [number, number, number]; 
   title: string; 
   subtitle: string;
   symbol: string;
   scale?: number;
+  onClick?: () => void;
 }) => {
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<THREE.Group>(null);
@@ -65,6 +67,7 @@ const HexProjectCard = memo(({
       ref={groupRef}
       position={position} 
       scale={scale}
+      onClick={(e) => { e.stopPropagation(); onClick?.(); }}
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
@@ -628,7 +631,7 @@ const OrnamentalShrub = memo(
 // ---------------------------------------------------------------------------
 // MAIN HOUSE COMPONENT
 // ---------------------------------------------------------------------------
-export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
+export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { entranceOpen?: boolean; onOpenScroll?: (id: string) => void; onBookClick?: (bookName: string) => void }) => {
   const floorTexture = useTexture("/textures/floor.jpg");
 
   // Memoize texture setup so it only runs once
@@ -701,6 +704,7 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
           subtitle="Full-Stack Web" 
           symbol="🔗" 
           scale={0.3}
+          onClick={() => onOpenScroll?.('supplylink')}
         />
         
         {/* Bottom Left Hexagon */}
@@ -710,29 +714,39 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
           subtitle="Android App" 
           symbol="💾" 
           scale={0.3}
+          onClick={() => onOpenScroll?.('Link Saver')}
         />
         
         {/* Bottom Right Hexagon */}
         <HexProjectCard 
           position={[-2.3, 1.55, -3.85]} 
-          title="Python Engine" 
-          subtitle="ML Model" 
+          title="
+
+    Insurance
+    Premium 
+    " 
+          subtitle="
+          
+    ML Model" 
           symbol="🤖" 
           scale={0.3}
+          onClick={() => onOpenScroll?.('insurance_premium_prediction_model')}
         />
         <HexProjectCard 
           position={[-2.5, 1.2, -3.85]} 
-          title="SupplyLink" 
-          subtitle="Full-Stack Web" 
+          title="MQCMaker"
+          subtitle="Quiz Generator" 
           symbol="🔗" 
           scale={0.3}
+          onClick={() => onOpenScroll?.('MQCMaker')}
         />
         <HexProjectCard 
           position={[-2.9, 1.2, -3.85]} 
-          title="SupplyLink" 
+          title="BiteLO" 
           subtitle="Full-Stack Web" 
           symbol="🔗" 
           scale={0.3}
+          onClick={() => onOpenScroll?.('BiteLO')}
         />
         <HexProjectCard 
           position={[-2.1, 1.2, -3.85]} 
@@ -740,16 +754,18 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
           subtitle="Full-Stack Web" 
           symbol="🔗" 
           scale={0.3}
+          onClick={() => onOpenScroll?.('supplylink_extra3')}
         />
-        <Bookshelf position={[0, 1.35, -3.5]} scale={0.3} />
+        <Bookshelf position={[0, 1.35, -3.5]} scale={0.3} onBookClick={onBookClick} />
         {/* --- Skill CARDS --- */}
         {/* --- 1 skill hexagon--- */}
-         <HexProjectCard 
+        <HexProjectCard 
           position={[2.5, 2, -3.85]} 
           title="Python" 
           subtitle="Programming Language" 
           symbol="🔗" 
           scale={0.4}
+          onClick={() => onOpenScroll?.('python_skill')}
         />
         
         {/* --- 2.1 skill hexagon --- */}
@@ -759,6 +775,7 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
           subtitle="Backend Framework" 
           symbol="🤖" 
           scale={0.4}
+          onClick={() => onOpenScroll?.('fastapi_skill')}
         />
            {/* --- 2.2 skill hexagon --- */}
         <HexProjectCard 
@@ -767,6 +784,7 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
           subtitle="LLMOps & Models" 
           symbol="💾" 
           scale={0.4}
+          onClick={() => onOpenScroll?.('ai_ml_skill')}
         /> 
     {/* --- 3 skill hexagon --- */}
         <HexProjectCard 
@@ -775,6 +793,7 @@ export const House = ({ entranceOpen = false }: { entranceOpen?: boolean }) => {
           subtitle="Database Management" 
           symbol="🔗" 
           scale={0.4}
+          onClick={() => onOpenScroll?.('sql_skill')}
         />
         <group position={[4.6, 2, -3.7]} scale={0.06}>
           <TubeClock />

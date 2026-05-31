@@ -1,0 +1,137 @@
+.mylife-scroll-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 8, 15, 0.7); /* Slightly darker, cinematic backdrop */
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; 
+}
+
+/* Wrapper to stack the rollers and paper */
+.mylife-scroll-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  max-width: 650px;
+  position: relative;
+  /* Adds a soft glowing drop shadow to the entire scroll */
+  filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.8));
+}
+
+/* --- The Cream-Colored Rolled Bars --- */
+.mylife-scroll-roller {
+  width: 100%; 
+  height: 4.5vh;
+  /* Creamy, bone-colored 3D gradient */
+  background: linear-gradient(to bottom, #fefae0 0%, #e9edc9 40%, #ccd5ae 60%, #fefae0 100%);
+  border-radius: 20px;
+  position: relative;
+  z-index: 2;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.5);
+}
+
+/* --- The Gold Ornamental Caps --- */
+.roller-cap {
+  position: absolute;
+  top: -4px;
+  width: 24px;
+  height: 40px;
+  /* Metallic Gold Gradient */
+  background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+  border-radius: 6px;
+  box-shadow: inset 0 0 5px rgba(100, 50, 0, 0.5), 0 5px 10px rgba(0,0,0,0.6);
+  border: 1px solid #8a6519;
+}
+/* Positioning the caps slightly outside the cream bars */
+.roller-cap.left { left: -10px; }
+.roller-cap.right { right: -10px; }
+
+/* --- The Warm Beige Parchment Surface --- */
+.mylife-scroll-paper {
+  /* Warm beige with soft, smooth edges */
+  background: linear-gradient(to right, #e8d0a9 0%, #f5e4c3 5%, #f5e4c3 95%, #e8d0a9 100%);
+  color: #3b2f21;
+  width: 94%; /* Slightly narrower than the cream bars */
+  max-height: 95vh;  /* Increases height by ~23% */
+  padding: 40px 50px;
+  /* Inset shadow creates the illusion of curved paper and smooth 3D lighting */
+  box-shadow: inset 0 0 40px rgba(166, 138, 100, 0.4);
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+  /* Tucks the paper perfectly under the thick cream bars */
+  margin-top: -20px; 
+  margin-bottom: -20px; 
+  
+  /* Classic RPG Book Font */
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif; 
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+/* Custom Scrollbar to match the RPG aesthetic */
+.mylife-scroll-paper::-webkit-scrollbar {
+  width: 8px;
+}
+.mylife-scroll-paper::-webkit-scrollbar-track {
+  background: transparent;
+}
+.mylife-scroll-paper::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #bf953f, #aa771c);
+  border-radius: 4px;
+  border: 1px solid #3b2f21;
+}
+
+/* Elegant Close Button */
+.mylife-scroll-close {
+  position: absolute;
+  top: 25px;
+  right: 30px;
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  color: #8a6519; /* Dull gold */
+  transition: all 0.2s;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.mylife-scroll-close:hover {
+  color: #bf953f; /* Bright gold on hover */
+  transform: scale(1.1);
+}
+
+/* Typography Styling */
+.mylife-scroll-title {
+  margin-top: 0;
+  color: #2c1e16;
+  border-bottom: 2px solid #c8a97e;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 2rem;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+}
+
+.mylife-scroll-content strong {
+  color: #5c1a06; /* A deep, royal reddish-brown for emphasis */
+  font-weight: bold;
+}
+
+.mylife-scroll-content a {
+  color: #aa771c;
+  text-decoration: none;
+  border-bottom: 1px dashed #aa771c;
+}
+
+.mylife-scroll-content a:hover {
+  color: #bf943f;
+  border-bottom: 1px solid #bf953f;
+}

@@ -1,0 +1,25 @@
+{
+  "supplylink": {
+    "title": "SupplyLink",
+    "content": "# H1 Heading\n\n## H2 Heading\n\n### H3 Heading\n\n#### H4 Heading\n\nThis is a paragraph with **bold text**, *italic text*, and ***bold italic***.\n\n---\n\n## Bullet List\n\n- First item\n- Second item\n  - Nested item\n  - Another nested item\n- Third item\n\n---\n\n## Numbered List\n\n1. Step one\n2. Step two\n3. Step three\n\n---\n\n## Checklist\n\n- [x] Completed task\n- [ ] Pending task\n\n---\n\n## Blockquote\n\n> This is a markdown blockquote.\n> Useful for quotes or highlighted text.\n\n---\n\n## Inline Code\n\nUse `npm install` to install packages.\n\n---\n\n## Code Block\n\n```tsx\nconst hello = () => {\n  console.log('Hello World');\n};\n```\n\n---\n\n## Table\n\n| Technology | Type |\n|------------|------|\n| React | Frontend |\n| Node.js | Backend |\n| MongoDB | Database |\n\n---\n\n## Links\n\n[OpenAI](https://openai.com)\n\n---\n\n## Mixed Formatting\n\nTHIS IS UPPERCASE TEXT.\n\n**IMPORTANT:** Markdown works perfectly inside JSON strings.\n\nYou can even combine:\n- **Bold**\n- *Italic*\n- `Code`\n- [Links](https://example.com)\n"
+  },
+
+
+  "insurance_premium_prediction_model": {
+    "title": "Insurance Premium Prediction Model",
+    "content": "🔗 **[Try out](https://insurance-premium-prediction-model.vercel.app/)**\n\n### **What?**\n\nA machine learning model that predicts user's insurance premiums based on their basic details.\n\n## **Why?**\nI wanted to step my foot into the world of machine learning and data science, and this project was a great way to apply those skills in a practical way. This gives me an idea that how big is the sea.\n\n## Techs\n### **Model** - Scikit-learn | NumPy | Pandas | Python\n### **Frontend** - React | TypeScript\n### **API** - FastAPI | Pydantic\n\n## **Rating by me** : ⭐ **3.5/5**"
+  },
+
+  "Link Saver": {
+    "title": "Link Saver",
+    "content": "� **[Try out](https://ai-link-sever.vercel.app/)**\n\n### **What?**\n\nA simple Android app to auto save and organize web links using a LLM and webscraping.\n\n## **Why?**\n Often I find a useful link and wanted to save that for future but there was not any proper place and platform to store and organize that, so i devloped this web + android platform,\n\n## ***Techs***\n### **Frontend** - React Native | TypeScript\n### **Backend** - Node.js | Express\n **LLM** - Gemini free tire api\n## **Rating by me** : ⭐ **4.5/5**"
+  },
+  "MQCMaker": {
+    "title": "MQCMaker",
+    "content": " **[Try out](https://mcq-maker-hazel.vercel.app/)**\n\n### **What?**\n\nA simple web and android app to generate multiple-choice question-set from any topic or customized text using an LLM.\n\n## **Why?**\n I wanted a handy and simple to tool to test and revise my learnings in daily basis or after a session where no login and cache required yet secured.\n\n## Techs\n### **Frontend** - React | TypeScript\n### **Backend** - Node.js | Express\n**LLM** - Gemini free tire api\n## **Rating by me** : ⭐ **4/5**"
+  },
+  "BiteLO": {
+    "title": "BiteLO",
+    "content": " **[Try out](https://bite-lo.vercel.app/)**\n\n### **What?**\n\nA online food ordering platform with a modern and attractive UI.\n\n## **Why?**\n Wanted to test my skills in building a full-stack application using modern technologies like React, MongoDB, node.js and wanted to dive into the web development world to gain its core idea for first time .\n\n## Techs\n### **Frontend** - React | TypeScript\n### **Backend** - Node.js | Express\n**Database** - MongoDB\n## **Rating by me** : ⭐ **4/5**"
+  }
+}
