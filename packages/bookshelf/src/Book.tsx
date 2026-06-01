@@ -21,6 +21,8 @@ export default function Book({
   onClick,
 }: BookProps) {
   const coverTexture = useTexture(coverUrl);
+coverTexture.colorSpace = THREE.SRGBColorSpace;
+coverTexture.anisotropy = 16;
 
   // 1. Create a reference to directly manipulate the mesh in the render loop
   const meshRef = useRef<THREE.Mesh>(null);
@@ -94,10 +96,12 @@ export default function Book({
         color="#f5f5dc"
         roughness={0.9}
       />
-      <meshStandardMaterial
+      <meshBasicMaterial
         attach="material-4"
         map={coverTexture}
-        roughness={0.4}
+        toneMapped={false}
+        color="#ffffff"
+       
       />
       <meshStandardMaterial
         attach="material-5"

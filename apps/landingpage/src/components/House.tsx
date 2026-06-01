@@ -106,19 +106,19 @@ const HexProjectCard = memo(({
       {/* 4. Gold Accent Line */}
       <mesh position={[0, -0.4, contentZ]}>
          <boxGeometry args={[0.4, 0.03, 0.02]} />
-         <meshStandardMaterial color="#d4af37" />
+         <meshStandardMaterial color="#d48337" />
       </mesh>
 
       {/* 5. Project Content (Z-axis pushed out to prevent hiding) */}
-      <Text position={[0, 0.25, contentZ]} fontSize={0.25} color="#2d2d2d" anchorX="center" anchorY="middle">
+      <Text position={[0, 0.25, contentZ]} fontSize={0.28} color="#2d2d2d" anchorX="center" anchorY="middle">
         {symbol}
       </Text>
 
-      <Text position={[0, 0, contentZ]} fontSize={0.15} color="#222222" anchorX="center" anchorY="middle">
+      <Text position={[0, 0, contentZ]} fontSize={0.16} color="#242323" anchorX="center" anchorY="middle" outlineWidth={0.001} outlineColor="#d75959">
         {title}
       </Text>
 
-      <Text position={[0, -0.2, contentZ]} fontSize={0.08} color="#666666" anchorX="center" anchorY="middle">
+      <Text position={[0, -0.2, contentZ]} fontSize={0.1} color="#7a0c0c" anchorX="center" anchorY="middle">
         {subtitle}
       </Text>
     </group>
@@ -765,7 +765,7 @@ export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { ent
           subtitle="Programming Language" 
           symbol="🔗" 
           scale={0.4}
-          onClick={() => onOpenScroll?.('python_skill')}
+          onClick={() => onOpenScroll?.('python')}
         />
         
         {/* --- 2.1 skill hexagon --- */}
@@ -775,7 +775,7 @@ export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { ent
           subtitle="Backend Framework" 
           symbol="🤖" 
           scale={0.4}
-          onClick={() => onOpenScroll?.('fastapi_skill')}
+          onClick={() => onOpenScroll?.('fastapi')}
         />
            {/* --- 2.2 skill hexagon --- */}
         <HexProjectCard 
@@ -784,7 +784,7 @@ export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { ent
           subtitle="LLMOps & Models" 
           symbol="💾" 
           scale={0.4}
-          onClick={() => onOpenScroll?.('ai_ml_skill')}
+          onClick={() => onOpenScroll?.('ai_ml')}
         /> 
     {/* --- 3 skill hexagon --- */}
         <HexProjectCard 
@@ -793,7 +793,7 @@ export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { ent
           subtitle="Database Management" 
           symbol="🔗" 
           scale={0.4}
-          onClick={() => onOpenScroll?.('sql_skill')}
+          onClick={() => onOpenScroll?.('sql')}
         />
         <group position={[4.6, 2, -3.7]} scale={0.06}>
           <TubeClock />

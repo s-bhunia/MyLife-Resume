@@ -1,5 +1,5 @@
 // src/components/UI.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { atom, useAtom } from "jotai";
 import { fetchBookData } from "../services/api";
 
@@ -40,6 +40,7 @@ export const UI = ({ bookName, onClose }: UIProps): React.JSX.Element => {
   const [, setPicturesByLang] = useAtom(picturesAtom);
   const [pages] = useAtom(pagesAtom);
   const [flipping, setFlipping] = useState(false);
+  const previousPageRef = useRef<number>(page);
 
   // Fetch the specific book's JSON
   useEffect(() => {
@@ -52,6 +53,16 @@ export const UI = ({ bookName, onClose }: UIProps): React.JSX.Element => {
     };
     loadData();
   }, [bookName, setPicturesByLang, setPage]);
+
+  // Play page flip sound when page changes
+  useEffect(() => {
+    if (previousPageRef.current !== page && previousPageRef.current >= 0) {
+      const audio = new Audio("/book-slider/audios/page-flip-01a.mp3");
+      audio.volume = 0.5; // Set volume to 50%
+      audio.play().catch((err) => console.warn("Failed to play page flip sound:", err));
+    }
+    previousPageRef.current = page;
+  }, [page]);
 
   return (
     <>
@@ -98,84 +109,76 @@ export const UI = ({ bookName, onClose }: UIProps): React.JSX.Element => {
           >
             ← Back to Bookshelf
           </button>
-          <span
-             className={`flip-btn pointer-events-auto mt-10 mr-10 px-3 py-2 rounded-full bg-white/80 text-black font-bold border border-black cursor-pointer hover:bg-amber-100 transition-all duration-300 ${flipping ? "flipping" : ""}`}
-            style={{ position: "relative", minWidth: 120, minHeight: 48 }}
-            onClick={() => {
-              setFlipping(true);
-              setTimeout(() => setFlipping(false), 600);
-              setLanguage((l) => (l === 0 ? 1 : 0));
-              setPage(0); 
-            }}
-            >
-          <a
-            className="pointer-events-auto logo mt-10 ml-10"
-            href="https://lessons.wawasensei.dev/courses/react-three-fiber"
-          >
-            <img
-              src="book-slider/images/logo.jpg"
-              alt="Logo"
-              className="logo-container"
-              style={{
-                width: "60px",
-                height: "60px",
-                position: "fixed",
-                top: "20px",
-                left: "20px",
-                zIndex: 1000,
-                cursor: "pointer",
-                borderRadius: "50%",
-                border: "2px solid rgba(255, 255, 255, 0.1)",
-                transition: "all 0.3s ease",
-                animation: "logo-pulse 2s infinite",
-                boxShadow: "0 0 20px rgba(255, 215, 77, 0.5)",
-                transformStyle: "preserve-3d",
-              }}
-            />
-          </a>
+        </div>
 
+        {/* Logo button - fixed at top right */}
+        <a
+          className="pointer-events-auto"
+          href="https://github.com/s-bhunia"
+        >
+          <img
+            src="book-slider/images/logo.jpg"
+            alt="Logo"
+            className="logo-container"
+            style={{
+              width: "60px",
+              height: "60px",
+              position: "fixed",
+              top: "20px",
+              right: "20px",
+              zIndex: 1000,
+              cursor: "pointer",
+              borderRadius: "50%",
+              border: "2px solid rgba(255, 255, 255, 0.1)",
+              transition: "all 0.3s ease",
+              animation: "logo-pulse 2s infinite",
+              boxShadow: "0 0 20px rgba(255, 215, 77, 0.5)",
+              transformStyle: "preserve-3d",
+            }}
+          />
+        </a>
+        {/* Language change button - fixed to the left of logo */}
+        <span
+          className={`flip-btn pointer-events-auto px-3 py-2 rounded-full bg-white/80 text-black font-bold border border-black hover:bg-amber-100 transition-all duration-300 ${flipping ? "flipping" : ""}`}
+          style={{
+            position: "fixed",
+            top: "20px",
+            right: "100px",
+            minWidth: 120,
+            minHeight: 48,
+            cursor: "pointer",
+            zIndex: 999,
+          }}
+          onClick={() => {
+            setFlipping(true);
+            setTimeout(() => setFlipping(false), 600);
+            setLanguage((l) => (l === 0 ? 1 : 0));
+            setPage(0);
+          }}
+        >
           <span
-            className={`flip-btn pointer-events-auto mt-10 mr-10 px-3 py-2 rounded-full bg-white/80 text-black font-bold border border-black hover:bg-amber hover:text-orange-600 transition-all duration-300${
-              flipping ? " flipping" : ""
-            }`}
+            className="flip-inner"
             style={{
               position: "relative",
-              minWidth: 120,
-              minHeight: 48,
-              cursor: "pointer",
-            }}
-            onClick={() => {
-              setFlipping(true);
-              setTimeout(() => setFlipping(false), 600);
-              setLanguage((l) => (l === 0 ? 1 : 0));
-              setPage(0); // go back to cover when switching language
+              display: "inline-block",
+              width: "100%",
+              height: "100%",
             }}
           >
             <span
-              className="flip-inner"
-              style={{
-                position: "relative",
-                display: "inline-block",
-                width: "100%",
-                height: "100%",
-              }}
+              className="flip-front"
+              style={{ position: "absolute", width: "100%", height: "100%" }}
             >
-              <span
-                className="flip-front"
-                style={{ position: "absolute", width: "100%", height: "100%" }}
-              >
-                {language === 0 ? "ENGLISH" : "BENGALI"}
-              </span>
-              <span
-                className="flip-back"
-                style={{ position: "absolute", width: "100%", height: "100%" }}
-              >
-                {language === 0 ? "BENGALI" : "ENGLISH"}
-              </span>
+              {language === 0 ? "ENGLISH" : "BENGALI"}
+            </span>
+            <span
+              className="flip-back"
+              style={{ position: "absolute", width: "100%", height: "100%" }}
+            >
+              {language === 0 ? "BENGALI" : "ENGLISH"}
             </span>
           </span>
-          </span>
-        </div>
+        </span>
         
         <div className="w-full overflow-auto pointer-events-auto flex justify-center">
           <div className="overflow-auto flex items-center gap-4 max-w-full p-10">

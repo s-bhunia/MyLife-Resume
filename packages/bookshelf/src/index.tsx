@@ -6,7 +6,7 @@ import Book from "./Book";
 const BOOK_NAME_MAP: { [key: string]: string } = {
   "./bookshelf/book1.jpg": "Gitanjali",
   "./bookshelf/book2.jpg": "Srija_Snigdha",
-  "./bookshelf/book3.jpg": "Gitanjali",
+  "./bookshelf/book3.jpg": "food",
   "./bookshelf/book4.jpg": "Gitanjali",
   "./bookshelf/book5.jpg": "Gitanjali",
 };

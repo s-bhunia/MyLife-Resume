@@ -68,7 +68,7 @@ pageGeometry.setAttribute(
 );
 
 const whiteColor = new Color("#d4d3d3");
-const emissiveColor = new Color("rgb(12, 12, 12)");
+const emissiveColor = new Color("rgb(0, 0, 0)");
 
 const pageMaterials = [
   new MeshStandardMaterial({
@@ -113,7 +113,7 @@ const Page = ({
     `${base}images/${front}`,
     `${base}images/${back}`,
     ...(number === 1 || number === totalPages - 1
-      ? [`${base}textures/book-cover-roughness.jpg`]
+      ? [`/book-slider/images/book-cover-roughness.jpg`]
       : []),
   ]) as [Texture, Texture, Texture | undefined];
 
@@ -152,7 +152,7 @@ const Page = ({
               roughness: 0.3,
             }),
         emissive: emissiveColor,
-        emissiveIntensity: 0.9,
+        emissiveIntensity: 0.1,
       }),
       new MeshStandardMaterial({
         color: whiteColor,

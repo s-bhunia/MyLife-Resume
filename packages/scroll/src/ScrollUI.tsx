@@ -10,6 +10,13 @@ export interface ScrollUIProps {
   speed?: number;
 }
 
+// Custom link component that opens in new tab
+const CustomLink = ({ href, children }: { href?: string; children: React.ReactNode }) => (
+  <a href={href} target="_blank" rel="noopener noreferrer">
+    {children}
+  </a>
+);
+
 export const ScrollUI: React.FC<ScrollUIProps> = ({ id, onClose, speed = 80 }) => {
   const { data, loading, error } = useScrollData(id);
   const { displayedText } = useGhostWriter(data?.content, speed);
@@ -38,7 +45,9 @@ export const ScrollUI: React.FC<ScrollUIProps> = ({ id, onClose, speed = 80 }) =
             <>
               <h2 className="mylife-scroll-title">{data.title}</h2>
               <div className="mylife-scroll-content">
-                <ReactMarkdown>{displayedText}</ReactMarkdown>
+                <ReactMarkdown components={{ a: CustomLink }}>
+                  {displayedText}
+                </ReactMarkdown>
               </div>
             </>
           )}

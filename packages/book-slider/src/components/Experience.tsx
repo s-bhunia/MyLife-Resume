@@ -7,7 +7,7 @@ import { useEffect } from "react";
 export const Experience = ({ bookName }: { bookName: string }): React.JSX.Element => {  useEffect(() => {
     const canvas = document.querySelector("canvas");
     if (!canvas) return;
-    canvas.style.cursor = 'url("book-slider/images/feather1.png") 16 16, auto';
+    canvas.style.cursor = 'url("/book-slider/images/feather1.png") 16 16, auto';
     return () => {
       if (canvas) canvas.style.cursor = "";
     };
@@ -20,7 +20,7 @@ export const Experience = ({ bookName }: { bookName: string }): React.JSX.Elemen
       <Environment preset="sunset" />
      <directionalLight
         position={[1, 9, 1]}
-        intensity={0.5}
+        intensity={0.1}
         castShadow
         shadow-mapSize-width={1024} 
         shadow-mapSize-height={1024}

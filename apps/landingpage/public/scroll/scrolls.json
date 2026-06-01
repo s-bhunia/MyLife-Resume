@@ -1,10 +1,4 @@
 {
-  "supplylink": {
-    "title": "SupplyLink",
-    "content": "# H1 Heading\n\n## H2 Heading\n\n### H3 Heading\n\n#### H4 Heading\n\nThis is a paragraph with **bold text**, *italic text*, and ***bold italic***.\n\n---\n\n## Bullet List\n\n- First item\n- Second item\n  - Nested item\n  - Another nested item\n- Third item\n\n---\n\n## Numbered List\n\n1. Step one\n2. Step two\n3. Step three\n\n---\n\n## Checklist\n\n- [x] Completed task\n- [ ] Pending task\n\n---\n\n## Blockquote\n\n> This is a markdown blockquote.\n> Useful for quotes or highlighted text.\n\n---\n\n## Inline Code\n\nUse `npm install` to install packages.\n\n---\n\n## Code Block\n\n```tsx\nconst hello = () => {\n  console.log('Hello World');\n};\n```\n\n---\n\n## Table\n\n| Technology | Type |\n|------------|------|\n| React | Frontend |\n| Node.js | Backend |\n| MongoDB | Database |\n\n---\n\n## Links\n\n[OpenAI](https://openai.com)\n\n---\n\n## Mixed Formatting\n\nTHIS IS UPPERCASE TEXT.\n\n**IMPORTANT:** Markdown works perfectly inside JSON strings.\n\nYou can even combine:\n- **Bold**\n- *Italic*\n- `Code`\n- [Links](https://example.com)\n"
-  },
-
-
   "insurance_premium_prediction_model": {
     "title": "Insurance Premium Prediction Model",
     "content": "🔗 **[Try out](https://insurance-premium-prediction-model.vercel.app/)**\n\n### **What?**\n\nA machine learning model that predicts user's insurance premiums based on their basic details.\n\n## **Why?**\nI wanted to step my foot into the world of machine learning and data science, and this project was a great way to apply those skills in a practical way. This gives me an idea that how big is the sea.\n\n## Techs\n### **Model** - Scikit-learn | NumPy | Pandas | Python\n### **Frontend** - React | TypeScript\n### **API** - FastAPI | Pydantic\n\n## **Rating by me** : ⭐ **3.5/5**"
@@ -21,5 +15,42 @@
   "BiteLO": {
     "title": "BiteLO",
     "content": " **[Try out](https://bite-lo.vercel.app/)**\n\n### **What?**\n\nA online food ordering platform with a modern and attractive UI.\n\n## **Why?**\n Wanted to test my skills in building a full-stack application using modern technologies like React, MongoDB, node.js and wanted to dive into the web development world to gain its core idea for first time .\n\n## Techs\n### **Frontend** - React | TypeScript\n### **Backend** - Node.js | Express\n**Database** - MongoDB\n## **Rating by me** : ⭐ **4/5**"
-  }
+  }, 
+  "SupplyLink": {
+    "title": "SupplyLink",
+    "content": "🔗 **[Try out](https://supplylink.vercel.app/)**\n\n### **What?**\n\nA simple web app to manage and track supply chain operations. It fills the gap between the unregulated vendors and the premium sellers\n\n## **Why?**\n We wanted to create a solution that could help streamline supply chain management and improve visibility across the entire process.\n\n## Techs\n### **Frontend** - React | Javascript\n### **Backend** - Django | Python\n**Database** - PostgreSQL\n## **Rating by me** : ⭐ **4/5**"
+  },
+
+
+
+
+
+
+
+
+
+
+  "python": {
+    "title": "Python",
+    "content": "🔗 **Introduction**\n\nPython is my primary programming language. I use it for machine learning, automation, data analysis, backend development, and problem-solving.\n\n### **Proficiency Level**\nIntermediate\n\n### **Years of Experience**\n2+ Years\n\n### **Projects Completed**\n\n⚙️ **[Insurance Premium Prediction Model](https://github.com/s-bhunia/insurance_premium_prediction_model)**\n\n⚙️ **[AI-LinkMind](https://github.com/s-bhunia/AI-LinkMind)**\n\n⚙️ **[PGuard](https://github.com/s-bhunia/PGuard)**\n\n⚙️ **[SupplyLink](https://github.com/s-bhunia/supplylink)**\n\n### **Libraries & Concepts**\n\n- OOPS\n- Data Structures & Algorithms (DSA)\n- Pandas\n- NumPy\n- Scikit-learn\n- TensorFlow\n- FastAPI\n- Matplotlib\n- Requests\n- BeautifulSoup\n\n### **Currently Exploring**\n\n- MLOps\n- Deep Learning\n- Generative AI\n\n### **GitHub Profile**\n\n🔗 https://github.com/yourusername"
+  }, 
+"fastapi": {
+  "title": "FastAPI",
+  "content": "🔗 **Introduction**\n\nFastAPI is my preferred Python framework for building high-performance REST APIs and backend services. I use it to develop scalable web applications, integrate machine learning models, manage databases, and create modern backend systems with automatic API documentation.\n\n### **Proficiency Level**\nIntermediate\n\n### **Years of Experience**\n1+ Years\n\n### **Projects Completed**\n\n⚙️ **[AI-LinkMind](https://github.com/s-bhunia/AI-LinkMind)**\n\n- Developed backend APIs for AI-powered knowledge management and intelligent linking.\n\n⚙️ **[Insurance Premium Prediction Model](https://github.com/s-bhunia/insurance_premium_prediction_model)**\n\n- Built API endpoints for machine learning model inference and prediction services.\n\n⚙️ **[SupplyLink](https://github.com/s-bhunia/supplylink)**\n\n- Designed backend services for supply chain management and data processing.\n\n### **Concepts & Features**\n\n- REST API Development\n- Path & Query Parameters\n- Request Validation with Pydantic\n- Dependency Injection\n- Middleware\n- Authentication & Authorization\n- File Upload Handling\n- Error Handling\n- Async Programming\n- API Versioning\n- Background Tasks\n- Database Integration\n\n### **Tools & Technologies**\n\n- FastAPI\n- Pydantic\n- Uvicorn\n- SQLAlchemy\n- SQLite\n- PostgreSQL\n- JWT Authentication\n- Docker\n- Swagger UI\n- ReDoc\n\n### **What I Build With FastAPI**\n\n- Machine Learning Model APIs\n- Backend Systems\n- CRUD Applications\n- Data Processing Pipelines\n- AI-Powered Applications\n\n### **Currently Exploring**\n\n- Microservices Architecture\n- Advanced Authentication Systems\n- FastAPI with Docker & Kubernetes\n- Scalable API Deployment\n- MLOps Integration\n\n### **GitHub Profile**\n\n🔗 https://github.com/s-bhunia"
+}, 
+
+"ai_ml": {
+  "title": "AI & Machine Learning",
+  "content": "🔗 **Introduction**\n\nArtificial Intelligence and Machine Learning are among my primary areas of interest. I use machine learning techniques to analyze data, build predictive models, solve real-world problems, and create intelligent applications. My experience includes data preprocessing, model training, evaluation, and deployment.\n\n### **Proficiency Level**\nIntermediate\n\n### **Years of Experience**\n1+ Years\n\n### **Projects Completed**\n\n⚙️ **[Insurance Premium Prediction Model](https://github.com/s-bhunia/insurance_premium_prediction_model)**\n\n- Developed a machine learning model to predict insurance premiums based on user attributes.\n\n⚙️ **[AI-LinkMind](https://github.com/s-bhunia/AI-LinkMind)**\n\n- Built an AI-powered knowledge management and intelligent linking system.\n\n⚙️ **Custom Machine Learning Experiments**\n\n- Worked on data preprocessing, feature engineering, model evaluation, and predictive analytics.\n\n### **Concepts & Techniques**\n\n- Supervised Learning\n- Unsupervised Learning\n- Regression\n- Classification\n- Clustering\n- Feature Engineering\n- Data Preprocessing\n- Model Evaluation\n- Cross Validation\n- Hyperparameter Tuning\n- Neural Networks\n- Deep Learning Fundamentals\n\n### **Tools & Frameworks**\n\n- Scikit-learn\n- TensorFlow\n- Pandas\n- NumPy\n- Matplotlib\n- Jupyter Notebook\n- Google Colab\n- FastAPI\n\n### **What I Build**\n\n- Predictive Models\n- Data Analysis Solutions\n- AI-Powered Applications\n- Recommendation Systems\n- Model Deployment APIs\n- Intelligent Automation Tools\n\n### **Currently Exploring**\n\n- Deep Learning\n- Generative AI\n- Large Language Models (LLMs)\n- MLOps\n- RAG (Retrieval-Augmented Generation)\n- Agentic AI Systems\n\n### **GitHub Profile**\n\n🔗 https://github.com/s-bhunia"
+}, 
+
+"sql": {
+  "title": "SQL",
+  "content": "🔗 **Introduction**\n\nSQL (Structured Query Language) is one of my core skills for managing, querying, and analyzing relational databases. I use SQL to design database schemas, retrieve and manipulate data, optimize queries, and support backend applications with efficient data management.\n\n### **Proficiency Level**\nIntermediate\n\n### **Years of Experience**\n2+ Years\n\n### **Projects Completed**\n\n⚙️ **[SupplyLink](https://github.com/s-bhunia/supplylink)**\n\n- Designed and managed relational database structures for supply chain operations.\n\n⚙️ **[AI-LinkMind](https://github.com/s-bhunia/AI-LinkMind)**\n\n- Implemented database storage and retrieval mechanisms for managing linked knowledge data.\n\n⚙️ **[Insurance Premium Prediction Model](https://github.com/s-bhunia/insurance_premium_prediction_model)**\n\n- Managed and processed structured datasets for machine learning workflows.\n\n### **Concepts & Techniques**\n\n- Database Design\n- Relational Database Management\n- CRUD Operations\n- Joins (INNER, LEFT, RIGHT, FULL)\n- Subqueries\n- Views\n- Stored Procedures\n- Indexing\n- Aggregation Functions\n- Grouping & Filtering\n- Normalization\n- Transactions & ACID Properties\n\n### **Database Technologies**\n\n- MySQL\n- PostgreSQL\n- SQLite\n- SQLAlchemy\n\n### **What I Build With SQL**\n\n- Relational Database Systems\n- Backend Data Layers\n- Data Analytics Queries\n- Reporting Solutions\n- Data Pipelines\n- Database-Driven Applications\n\n### **Currently Exploring**\n\n- Query Optimization\n- Advanced PostgreSQL Features\n- Database Scaling Strategies\n- NoSQL Integration\n- Data Warehousing Concepts\n\n### **GitHub Profile**\n\n🔗 https://github.com/s-bhunia"
+}
+
+
+
+
+
 }
