@@ -6,6 +6,7 @@ import { Geometry, Base, Subtraction } from "@react-three/csg";
 import { Bookshelf } from "@mylife/bookshelf";
 import { TubeClock } from "@mylife/tube-clock";
 import { TravelGlobe } from "@mylife/globe";
+import { SocialWall } from './SocialMedia';
 
 // --- ARCHITECTURAL CONSTANTS ---
 const W = 10;
@@ -19,8 +20,8 @@ const PORCH_W = 3;
 const PORCH_D = 1.5;
 
 // ---------------------------------------------------------------------------
-// HEXAGON PROJECT CARDS (FIXED)
-// ---------------------------------------------------------------------------
+// HEXAGON PROJECT CARDS 
+//  ---------------------------------------------------------------------------
 const HexProjectCard = memo(({ 
   position, 
   title, 
@@ -330,15 +331,17 @@ const NamePlate = memo(({
   position,
   text,
   symbol,
-  scale = 1
+  scale = 1,
+  rotation = [0, 0, 0] as [number, number, number]
 }: {
   position: [number, number, number];
   text: string;
   symbol: string;
   scale?: number;
+  rotation?: [number, number, number];
 }) => {
   return (
-    <group position={position} scale={scale}>
+    <group position={position} scale={scale} rotation={rotation}>
       {/* Brass Backing/Border */}
       <mesh castShadow receiveShadow position={[0, 0, -0.02]}>
         <boxGeometry args={[1.8, 0.6, 0.02]} />
@@ -695,6 +698,12 @@ export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { ent
         </Plane>
         <NamePlate position={[-2.5, 2.5, -3.85]} text="PROJECTS" symbol="💻" scale={0.7} />
         <NamePlate position={[2.5, 2.5, -3.85]} text="SKILLS" symbol="⚡" scale={0.7} />
+        <NamePlate position={[-W/2 +0.14  , 2.5, 0]} text="CONNECT" symbol="🌐" scale={0.7}rotation={[0, Math.PI / 2, 0]} />
+        <SocialWall 
+          position={[-W / 2 + 0.14, 1.5, 0]} 
+          rotation={[0, Math.PI/2 , 0]} 
+          scale={0.5 }
+        />    
 
        {/* --- PROJECT CARDS --- */}
         {/* Top Hexagon */}
@@ -795,10 +804,10 @@ export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { ent
           scale={0.4}
           onClick={() => onOpenScroll?.('sql')}
         />
-        <group position={[4.6, 2, -3.7]} scale={0.06}>
+        <group position={[4, 1.7, -3.8]} scale={0.08}>
           <TubeClock />
         </group>
-        <group position={[3.9, 1.25, 0]} scale={0.19}>
+        <group position={[4.2, 1.79, 0]} scale={0.33}>
           <TravelGlobe
             origin={{ lat: 34.0522, lon: -118.2437, label: "Los Angeles" }}
             destinations={[
@@ -806,6 +815,7 @@ export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { ent
               { lat: 51.5074, lon: -0.1278, label: "London" },
             ]}
           />
+          
         </group>
 
         {/* Side walls with window cutouts */}
