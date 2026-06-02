@@ -4,11 +4,12 @@ import Book from "./Book";
 
 // Book name mapping - maps cover URLs to book names
 const BOOK_NAME_MAP: { [key: string]: string } = {
-  "./bookshelf/book1.jpg": "Gitanjali",
-  "./bookshelf/book2.jpg": "Srija_Snigdha",
-  "./bookshelf/book3.jpg": "food",
-  "./bookshelf/book4.jpg": "Gitanjali",
-  "./bookshelf/book5.jpg": "Gitanjali",
+  "./bookshelf/book1.webp": "Gitanjali",
+  "./bookshelf/book2.webp": "Srija_Snigdha",
+  "./bookshelf/book3.webp": "food",
+  "./bookshelf/book4.webp": "Gitanjali",
+  "./bookshelf/book5.webp": "Gitanjali",
+  "./bookshelf/book6.webp": "Gitanjali",
 };
 
 interface BookshelfProps {
@@ -22,34 +23,34 @@ export function Bookshelf({ onBookClick, ...props }: BookshelfProps) {
     {
       id: 1,
       position: [-1, 2.42, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book1.jpg",
+      coverUrl: "./bookshelf/book1.webp",
     },
     {
       id: 2,
       position: [1, 2.42, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book2.jpg",
+      coverUrl: "./bookshelf/book2.webp",
     },
     // Row 2
     {
       id: 3,
       position: [0, 1.2, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book3.jpg",
+      coverUrl: "./bookshelf/book3.webp",
     },
     // Row 3
     {
       id: 4,
       position: [1, -0.03, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book4.jpg",
+      coverUrl: "./bookshelf/book4.webp",
     },
     {
       id: 5,
       position: [-1, -0.03, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book4.jpg",
+      coverUrl: "./bookshelf/book5.webp",
     },
     {
       id: 6,
       position: [0, -1.23, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book5.jpg",
+      coverUrl: "./bookshelf/book5.webp",
     },
   ]);
 

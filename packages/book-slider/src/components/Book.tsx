@@ -113,7 +113,7 @@ const Page = ({
     `${base}images/${front}`,
     `${base}images/${back}`,
     ...(number === 1 || number === totalPages - 1
-      ? [`/book-slider/images/book-cover-roughness.jpg`]
+      ? [`/book-slider/images/book-cover-roughness.webp`]
       : []),
   ]) as [Texture, Texture, Texture | undefined];
 

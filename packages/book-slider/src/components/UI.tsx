@@ -13,11 +13,11 @@ export const languageAtom = atom(0);
 
 const buildPages = (pictures: string[]): PageData[] => {
   if (!pictures || pictures.length === 0) return [];
-  const pages: PageData[] = [{ front: "cover1.jpg", back: pictures[0] }];
+  const pages: PageData[] = [{ front: "cover.webp", back: pictures[0] }];
   for (let i = 1; i < pictures.length - 1; i += 2) {
     pages.push({ front: pictures[i % pictures.length], back: pictures[(i + 1) % pictures.length] });
   }
-  pages.push({ front: pictures[pictures.length - 1], back: "book-back.jpg" });
+  pages.push({ front: pictures[pictures.length - 1], back: "book-back.webp" });
   return pages;
 };
 
