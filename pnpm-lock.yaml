@@ -23,6 +23,9 @@ importers:
       '@mylife/bookshelf':
         specifier: workspace:*
         version: link:../../packages/bookshelf
+      '@mylife/chatbot':
+        specifier: workspace:*
+        version: link:../../packages/chatbot
       '@mylife/globe':
         specifier: workspace:*
         version: link:../../packages/globe
@@ -193,6 +196,49 @@ importers:
       three:
         specifier: ^0.183.1
         version: 0.183.2
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.12.0
+      '@types/react':
+        specifier: ^19.2.7
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      '@types/three':
+        specifier: ^0.163.0
+        version: 0.163.0
+      typescript:
+        specifier: ^5.4.2
+        version: 5.9.3
+
+  packages/chatbot:
+    dependencies:
+      '@react-three/drei':
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.183.2))(@types/react@19.2.14)(@types/three@0.163.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.183.2)
+      '@react-three/fiber':
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.183.2)
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.1
+      react:
+        specifier: ^19.2.0
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.4(react@19.2.4)
+      tailwind-merge:
+        specifier: ^2.4.0
+        version: 2.6.1
+      three:
+        specifier: ^0.183.1
+        version: 0.183.2
+      zustand:
+        specifier: ^4.5.5
+        version: 4.5.7(@types/react@19.2.14)(react@19.2.4)
     devDependencies:
       '@types/node':
         specifier: ^24.10.1
@@ -1816,6 +1862,9 @@ packages:
     resolution: {integrity: sha512-aqldKgX9aZqpoDp3e8/BZ8Dm7x1pJl+qI3ZKxDN0i/IQTWUwBx/ManmlVJ3wowqbno6c2bmiIfs+Um6LbsjJyQ==}
     peerDependencies:
       react: '>=17.0'
+
+  tailwind-merge@2.6.1:
+    resolution: {integrity: sha512-Oo6tHdpZsGpkKG88HJ8RR1rg/RdnEkQEfMoEk2x1XRI3F1AxeU+ijRXpiVUF4UbLfcxxRGw6TbUINKYdWVsQTQ==}
 
   tailwind-merge@3.5.0:
     resolution: {integrity: sha512-I8K9wewnVDkL1NTGoqWmVEIlUcB9gFriAEkXkfCjX5ib8ezGxtR3xD7iZIxrfArjEsH7F1CHD4RFUtxefdqV/A==}
@@ -3645,6 +3694,8 @@ snapshots:
   suspend-react@0.1.3(react@19.2.4):
     dependencies:
       react: 19.2.4
+
+  tailwind-merge@2.6.1: {}
 
   tailwind-merge@3.5.0: {}
 
