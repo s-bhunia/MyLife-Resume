@@ -35,6 +35,7 @@
     { "path": "../../packages/globe" },
     { "path": "../../packages/book-slider" },
     { "path": "../../packages/scroll" },
-    { "path": "../../packages/chatbot" }
+    { "path": "../../packages/chatbot" },
+    { "path": "../../packages/core-engine" }
   ]
 }

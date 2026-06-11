@@ -1,4 +1,4 @@
-import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import { useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Suspense, useCallback, useEffect, useState, useRef } from "react";
 import gsap from "gsap";
@@ -9,18 +9,19 @@ import Loader from "@mylife/loader";
 import { ScrollUI } from "@mylife/scroll";
 import { BookViewer } from "@mylife/book-slider";
 import { AssistantWidget, useWidgetStore } from "@mylife/chatbot";
-
-// --- NEW: Camera Navigation Targets ---
+import { GlobalCanvas } from "@mylife/core-engine";
+import { useAtomValue } from "jotai";
+import { isMobileAtom } from "@mylife/core-engine";
 const CAMERA_TARGETS: Record<
   string,
   { position: THREE.Vector3; lookAt: THREE.Vector3 }
 > = {
   NAVIGATE_PROJECTS: {
-    position: new THREE.Vector3(-4, 1.8, -2), // Example: Adjust to your actual project room coords
+    position: new THREE.Vector3(-4, 1.8, -2),
     lookAt: new THREE.Vector3(-4, 1.5, -4),
   },
   NAVIGATE_SKILLS: {
-    position: new THREE.Vector3(4, 1.8, -2), // Example: Adjust to your actual skills wall coords
+    position: new THREE.Vector3(4, 1.8, -2),
     lookAt: new THREE.Vector3(4, 1.5, -4),
   },
   NAVIGATE_HOME: {
@@ -82,7 +83,6 @@ const CameraDirector = ({
   return null;
 };
 
-// --- NEW: Smart Camera Controller for Chatbot Navigation ---
 const SmartCameraController = ({
   controlsRef,
 }: {
@@ -94,22 +94,18 @@ const SmartCameraController = ({
     if (targetAction && targetAction.startsWith("NAVIGATE_")) {
       const targetConfig = CAMERA_TARGETS[targetAction];
       if (targetConfig) {
-        // 1. Smoothly move the camera
         state.camera.position.lerp(targetConfig.position, 0.03);
 
-        // 2. Smoothly rotate the OrbitControls target
         if (controlsRef.current) {
           controlsRef.current.target.lerp(targetConfig.lookAt, 0.03);
           controlsRef.current.update();
         }
 
-        // 3. THE FIX: Check how close we are to the destination
         const distPos = state.camera.position.distanceTo(targetConfig.position);
         const distLook = controlsRef.current
           ? controlsRef.current.target.distanceTo(targetConfig.lookAt)
           : 0;
 
-        // 4. If we are very close, release the lock!
         if (distPos < 0.1 && distLook < 0.1) {
           useWidgetStore.getState().setTargetAction(null);
         }
@@ -149,7 +145,6 @@ export default function App() {
   const [activeBook, setActiveBook] = useState<string | null>(null);
   const [bookOpacity, setBookOpacity] = useState(false);
 
-  // --- NEW: Ref for OrbitControls to pass to the Smart Controller ---
   const controlsRef = useRef<any>(null);
 
   useEffect(() => {
@@ -216,20 +211,16 @@ export default function App() {
     setTimeout(() => setActiveBook(null), 500);
   }, []);
 
-  // --- NEW: Chatbot 2D UI Subscription ---
   useEffect(() => {
     const unsubscribe = useWidgetStore.subscribe((state) => {
       const action = state.targetAction;
       if (!action) return;
 
-      // Map Assistant intents to your existing UI handlers
       if (action === "OPEN_RESUME") {
-        setActiveScrollId("resume"); // Replace with your actual resume ID
+        setActiveScrollId("resume");
       } else if (action === "OPEN_SKILLS_BOOK") {
-        handleBookOpen("skills"); // Example of triggering your book viewer
+        handleBookOpen("skills");
       }
-
-      // Note: NAVIGATE_ commands are ignored here, as they are handled by the SmartCameraController in the Canvas
     });
     return unsubscribe;
   }, [handleBookOpen]);
@@ -269,7 +260,6 @@ export default function App() {
         <Loader onEnter={handleEnter} isSceneReady={sceneReady} />
       )}
 
-      {/* --- NEW: The Assistant Widget overlays everything (except books) --- */}
       {hasEntered && introFinished && <AssistantWidget />}
 
       <div
@@ -285,7 +275,7 @@ export default function App() {
         }}
       >
         {canvasReady && (
-          <Canvas
+          <GlobalCanvas
             shadows
             frameloop={!sceneReady || activeBook ? "demand" : "always"}
           >
@@ -302,7 +292,7 @@ export default function App() {
                 />
               )}
 
-              {cameraReady && <PerspectiveCamera makeDefault fov={55} />}
+              {cameraReady && <PerspectiveCamera makeDefault />}
 
               {sceneReady && hasEntered && !introFinished && (
                 <CameraDirector
@@ -313,7 +303,6 @@ export default function App() {
 
               {sceneReady && hasEntered && introFinished && (
                 <>
-                  {/* The new smart controller listening to the chatbot */}
                   <SmartCameraController controlsRef={controlsRef} />
 
                   <OrbitControls
@@ -328,7 +317,6 @@ export default function App() {
                       MIDDLE: THREE.MOUSE.DOLLY,
                       RIGHT: THREE.MOUSE.PAN,
                     }}
-                    // THE FIX: Immediately cancel programmatic movement if the user grabs the camera
                     onStart={() => {
                       if (useWidgetStore.getState().targetAction) {
                         useWidgetStore.getState().setTargetAction(null);
@@ -338,7 +326,7 @@ export default function App() {
                 </>
               )}
             </Suspense>
-          </Canvas>
+          </GlobalCanvas>
         )}
       </div>
 

@@ -11,6 +11,7 @@
     "@mylife/book-slider": "workspace:*",
     "@mylife/scroll": "workspace:*", 
     "@mylife/chatbot": "workspace:*",
+    "@mylife/core-engine": "workspace:*",
 
 
     "@react-three/csg": "^4.0.0",
@@ -30,7 +31,8 @@
     "three": "^0.183.1",
     "three-stdlib": "^2.36.1",
     "tone": "^15.1.22",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "jotai": "^2.0.0"
   },
   "scripts": {
     "dev": "vite",

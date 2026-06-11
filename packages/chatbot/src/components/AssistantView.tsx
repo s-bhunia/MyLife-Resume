@@ -1,15 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useWidgetStore } from '../store/useWidgetStore';
+import React, { useState, useRef, useEffect } from "react";
+import { useWidgetStore } from "../store/useWidgetStore";
+import { ChatbotAPI } from "../lib/api";
 
-type Log = { sender: 'user' | 'system'; text: string };
+type Log = { sender: "user" | "system"; text: string };
 
 export default function AssistantView() {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [logs, setLogs] = useState<Log[]>([
-    { sender: 'system', text: 'System Online. Where would you like to go?' }
+    { sender: "system", text: "System Online. Where would you like to go?" },
   ]);
-  
+
   const setTargetAction = useWidgetStore((state) => state.setTargetAction);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -25,43 +26,82 @@ export default function AssistantView() {
     if (!input.trim()) return;
 
     const userText = input;
-    setInput('');
-    setLogs(prev => [...prev, { sender: 'user', text: userText }]);
+    setInput("");
+    setLogs((prev) => [...prev, { sender: "user", text: userText }]);
     setIsProcessing(true);
 
     // MOCK PIPELINE
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    try {
+      const response = await ChatbotAPI.getIntent(userText);
+      // 2. Expecting FastAPI to return: { action: "NAVIGATE_PROJECTS", reply: "Flying to projects..." }
+      const { action, reply } = response;
+      if (action && action !== "UNKNOWN") {
+        setTargetAction(action);
+      }
+
+      setLogs((prev) => [...prev, { sender: "system", text: reply }]);
+    } catch (error) {
+      console.error("API Error:", error);
+      setLogs((prev) => [
+        ...prev,
+        {
+          sender: "system",
+          text: "Connection error. The navigation system is offline.",
+        },
+      ]);
+    } finally {
+      setIsProcessing(false);
+    }
 
     const lowerInput = userText.toLowerCase();
-    let action = 'UNKNOWN';
-    let reply = "I didn't quite catch that. Try 'projects' or 'resume'.";
+    let action = "UNKNOWN";
+    let reply =
+      "You can Try 'projects', 'skills', 'social', 'time', 'globe', 'bookshelf', or 'resume' to visit different sections.";
 
-    if (lowerInput.includes('resume') || lowerInput.includes('cv')) {
-      action = 'OPEN_RESUME';
+    if (lowerInput.includes("resume") || lowerInput.includes("cv")) {
+      action = "OPEN_RESUME";
       reply = "Opening the resume for you.";
-    } else if (lowerInput.includes('project')) {
-      action = 'NAVIGATE_PROJECTS';
+    } else if (lowerInput.includes("project")) {
+      action = "NAVIGATE_PROJECTS";
       reply = "Flying to the projects room.";
-    } else if (lowerInput.includes('skill')) {
-      action = 'NAVIGATE_SKILLS';
+    } else if (lowerInput.includes("skill")) {
+      action = "NAVIGATE_SKILLS";
       reply = "Heading to the skills section.";
+    } else if (lowerInput.includes("social") || lowerInput.includes("media")) {
+      action = "NAVIGATE_SOCIAL";
+      reply = "Taking you to social media.";
+    } else if (lowerInput.includes("time") || lowerInput.includes("clock")) {
+      action = "NAVIGATE_TIME";
+      reply = "Flying to the tube clock.";
+    } else if (lowerInput.includes("globe") || lowerInput.includes("travel")) {
+      action = "NAVIGATE_GLOBE";
+      reply = "Navigating to the globe.";
+    } else if (lowerInput.includes("book") || lowerInput.includes("shelf")) {
+      action = "NAVIGATE_BOOKSHELF";
+      reply = "Heading to the bookshelf.";
     }
 
-    if (action !== 'UNKNOWN') {
+    if (action !== "UNKNOWN") {
       setTargetAction(action);
     }
-    
-    setLogs(prev => [...prev, { sender: 'system', text: reply }]);
+
+    setLogs((prev) => [...prev, { sender: "system", text: reply }]);
     setIsProcessing(false);
   };
 
   return (
     <div className="flex flex-col h-full">
       {/* Scrollable Chat Log */}
-      <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar" ref={scrollRef}>
+      <div
+        className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar"
+        ref={scrollRef}
+      >
         {logs.map((log, i) => (
-          <div key={i} className={`flex ${log.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-            {log.sender === 'system' ? (
+          <div
+            key={i}
+            className={`flex ${log.sender === "user" ? "justify-end" : "justify-start"}`}
+          >
+            {log.sender === "system" ? (
               <div className="flex items-end gap-2 max-w-[85%]">
                 {/* Blue Circle Shape for Chatbot */}
                 <div className="w-8 h-8 rounded-full bg-blue-500 shadow-md flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">
@@ -80,13 +120,15 @@ export default function AssistantView() {
             )}
           </div>
         ))}
-        
+
         {/* Processing Indicator Slot */}
         {isProcessing && (
           <div className="flex items-center gap-2 mt-4">
-             <div className="w-8 h-8 rounded-full bg-blue-500 flex-shrink-0" />
-             {/* You can drop your ping pong dot loader component right here */}
-             <div className="text-xs text-gray-500 font-medium">Processing...</div>
+            <div className="w-8 h-8 rounded-full bg-blue-500 flex-shrink-0" />
+            {/* You can drop your ping pong dot loader component right here */}
+            <div className="text-xs text-gray-500 font-medium">
+              Processing...
+            </div>
           </div>
         )}
       </div>

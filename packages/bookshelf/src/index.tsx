@@ -4,7 +4,7 @@ import Book from "./Book";
 
 // Book name mapping - maps cover URLs to book names
 const BOOK_NAME_MAP: { [key: string]: string } = {
-  "./bookshelf/book1.webp": "Gitanjali",
+  "./bookshelf/book1.webp": "nature",
   "./bookshelf/book2.webp": "Srija_Snigdha",
   "./bookshelf/book3.webp": "food",
   "./bookshelf/book4.webp": "Gitanjali",

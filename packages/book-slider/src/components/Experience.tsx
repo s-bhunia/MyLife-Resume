@@ -4,7 +4,12 @@ import { Environment, OrbitControls } from "@react-three/drei";
 import { Book } from "./Book";
 import { useEffect } from "react";
 
-export const Experience = ({ bookName }: { bookName: string }): React.JSX.Element => {  useEffect(() => {
+export const Experience = ({
+  bookName,
+}: {
+  bookName: string;
+}): React.JSX.Element => {
+  useEffect(() => {
     const canvas = document.querySelector("canvas");
     if (!canvas) return;
     canvas.style.cursor = 'url("/book-slider/images/feather1.png") 16 16, auto';
@@ -12,17 +17,17 @@ export const Experience = ({ bookName }: { bookName: string }): React.JSX.Elemen
       if (canvas) canvas.style.cursor = "";
     };
   }, []);
-  
+
   return (
     <>
-    <Book bookName={bookName} />
+      <Book bookName={bookName} />
       <OrbitControls />
       <Environment preset="sunset" />
-     <directionalLight
+      <directionalLight
         position={[1, 9, 1]}
-        intensity={0.1}
+        intensity={1}
         castShadow
-        shadow-mapSize-width={1024} 
+        shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
         shadow-bias={-0.0001}
       />

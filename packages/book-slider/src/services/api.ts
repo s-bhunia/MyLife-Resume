@@ -11,7 +11,7 @@ interface BookData {
 
 export type PicturesByLanguageMap = Record<number, string[]>;
 
-export const fetchBookData = async (bookName: string): Promise<PicturesByLanguageMap> => {
+export const fetchBookData = async (bookName: string): Promise<BookData> => {
   // FUTURE API CALL:
   // const url = `https://api.yourdomain.com/books/${bookName}/pages`;
   
@@ -26,14 +26,9 @@ export const fetchBookData = async (bookName: string): Promise<PicturesByLanguag
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data: BookData = await response.json();
-    
-    const picturesByLangMap: PicturesByLanguageMap = {};
-    data.languages.forEach((lang) => {
-      picturesByLangMap[lang.id] = lang.pictures;
-    });
-    return picturesByLangMap;
+    return data;
   } catch (error) {
     console.error(`Failed to load data for book: ${bookName}`, error);
-    return {};
+    return { languages: [] };
   }
 };

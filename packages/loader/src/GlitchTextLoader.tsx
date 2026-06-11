@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from "react";
+import { useAtomValue } from "jotai";
+import { isMobileAtom } from "@mylife/core-engine";
 
 export interface GlitchGreetingProps {
-  wordSpeedMs?: number;    
-  pauseDurationMs?: number; 
-  textSize?: string;       
+  wordSpeedMs?: number;
+  pauseDurationMs?: number;
+  textSize?: string;
 }
 
 export const GlitchGreeting: React.FC<GlitchGreetingProps> = ({
-  wordSpeedMs = 250, 
-  pauseDurationMs = 3000, 
-  textSize = "1.2rem",
+  wordSpeedMs = 250,
+  pauseDurationMs = 3000,
+  textSize = "2.2rem",
 }) => {
+  const isMobile = useAtomValue(isMobileAtom);
   const [messages, setMessages] = useState<string[]>(["SYSTEM READY..."]);
   const [messageIndex, setMessageIndex] = useState(0);
-  
+
   const [displayedText, setDisplayedText] = useState("");
   const [wordIndex, setWordIndex] = useState(0);
 
@@ -34,8 +37,10 @@ export const GlitchGreeting: React.FC<GlitchGreetingProps> = ({
 
     if (wordIndex < wordsArray.length) {
       const typingTimer = setTimeout(() => {
-        setDisplayedText((prev) => 
-          prev === "" ? wordsArray[wordIndex] : prev + " " + wordsArray[wordIndex]
+        setDisplayedText((prev) =>
+          prev === ""
+            ? wordsArray[wordIndex]
+            : prev + " " + wordsArray[wordIndex],
         );
         setWordIndex((prev) => prev + 1);
       }, wordSpeedMs);
@@ -43,9 +48,9 @@ export const GlitchGreeting: React.FC<GlitchGreetingProps> = ({
       return () => clearTimeout(typingTimer);
     } else {
       const pauseTimer = setTimeout(() => {
-        setDisplayedText(""); 
-        setWordIndex(0);      
-        setMessageIndex((prev) => (prev + 1) % messages.length); 
+        setDisplayedText("");
+        setWordIndex(0);
+        setMessageIndex((prev) => (prev + 1) % messages.length);
       }, pauseDurationMs);
 
       return () => clearTimeout(pauseTimer);
@@ -53,18 +58,26 @@ export const GlitchGreeting: React.FC<GlitchGreetingProps> = ({
   }, [wordIndex, messageIndex, messages, wordSpeedMs, pauseDurationMs]);
 
   return (
-    <div className="greeting-container">
-      {/* The terminal-box keeps the center of gravity stable. 
+    <div
+      className="glitch-container"
+      style={{
+        // Let the engine dictate the scale directly
+        transform: `scale(${isMobile ? 0.6 : 1})`,
+        transformOrigin: "center center",
+      }}
+    >
+      <div className="greeting-container">
+        {/* The terminal-box keeps the center of gravity stable. 
         It prevents the text from shifting left as new words are typed.
       */}
-      <div className="terminal-box">
-        <span className="glitch-text" data-text={displayedText}>
-          {displayedText}
-        </span>
-        <span className="cursor">_</span>
-      </div>
+        <div className="terminal-box">
+          <span className="glitch-text" data-text={displayedText}>
+            {displayedText}
+          </span>
+          <span className="cursor">_</span>
+        </div>
 
-      <style>{`
+        <style>{`
         .greeting-container {
           position: absolute;
           top: 50%;
@@ -152,6 +165,7 @@ export const GlitchGreeting: React.FC<GlitchGreetingProps> = ({
           100% { clip: rect(88px, 9999px, 66px, 0); }
         }
       `}</style>
+      </div>
     </div>
   );
 };
