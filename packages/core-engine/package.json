@@ -15,8 +15,12 @@
 
   "dependencies": {
     "@react-three/fiber": "^8.0.0",
-    "@react-three/drei": "^9.0.0",
-    "three": "^0.150.0",
+    "@react-three/drei": "^9.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "three": "^0.160.0",
     "jotai": "^2.0.0"
   },
   
