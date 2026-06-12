@@ -66,7 +66,7 @@ pageGeometry.setAttribute(
 );
 
 // Kept the pure white fix to prevent dull images
-const whiteColor = new Color("#ffffff");
+const whiteColor = new Color("#e6e3e3");
 const emissiveColor = new Color("rgb(0, 0, 0)");
 
 const pageMaterials = [
@@ -105,7 +105,7 @@ const Page = ({
   const [picture, picture2, pictureRoughness] = useTexture([
     `${base}images/${front}`,
     `${base}images/${back}`,
-    ...(number === 0 || number === totalPages - 1
+    ...(number === totalPages - 1
       ? [`/book-slider/images/book-cover-roughness.webp`]
       : []),
   ]) as [Texture, Texture, Texture | undefined];

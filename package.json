@@ -2,6 +2,11 @@
   "name": "mylife-monorepo",
   "version": "1.0.0",
   "private": true,
+  "pnpm": {
+    "overrides": {
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0"
+    }},
   "scripts": {
     "dev": "pnpm --filter landingpage dev",
     "build": "pnpm --filter landingpage build",

@@ -1,4 +1,6 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
+import { useAtomValue } from "jotai";
+import { isMobileAtom } from "@mylife/core-engine";
 import { useWidgetStore } from "../store/useWidgetStore";
 import { useClickOutside } from "../hooks/useClickOutside";
 import WidgetButton from "./WidgetButton";
@@ -8,11 +10,30 @@ import FeedbackView from "./FeedbackView";
 export const AssistantWidget: React.FC = () => {
   const { isOpen, viewMode, closeWidget, setViewMode } = useWidgetStore();
   const widgetRef = useRef<HTMLDivElement>(null);
+  const isMobile = useAtomValue(isMobileAtom);
+
+  useEffect(() => {
+    const unsubscribe = useWidgetStore.subscribe((state) => {
+      if (state.targetAction === "OPEN_RESUME") {
+        window.open("/loader/resume.pdf", "_blank");
+        useWidgetStore.getState().setTargetAction(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useClickOutside(widgetRef, closeWidget);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50" ref={widgetRef}>
+    <div
+      className="fixed bottom-6 right-6 z-50 glitch-container"
+      ref={widgetRef}
+      style={{
+        transform: `scale(${isMobile ? 1 : 1})`,
+        transformOrigin: "center center",
+      }}
+    >
       {isOpen && (
         <div className="mb-4 w-96 h-[32rem] rounded-3xl bg-white/30 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] overflow-hidden flex flex-col transition-all duration-300">
           {/* Glass Header & Toggle */}

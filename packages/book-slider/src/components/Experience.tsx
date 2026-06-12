@@ -25,7 +25,7 @@ export const Experience = ({
       <Environment preset="sunset" />
       <directionalLight
         position={[1, 9, 1]}
-        intensity={1}
+        intensity={2}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}

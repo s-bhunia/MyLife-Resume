@@ -16,15 +16,12 @@ export default function Loader({
   const [isMounted, setIsMounted] = useState(false);
   const [showLoaderAfterDelay, setShowLoaderAfterDelay] = useState(false);
 
-  // Track both width and height for precise boundary calculations
   const [windowDimensions, setWindowDimensions] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 1200,
     height: typeof window !== "undefined" ? window.innerHeight : 800,
   });
 
   useEffect(() => {
-    // This resize listener is perfectly safe for performance because
-    // the Loader component is destroyed entirely once you enter the house.
     const handleResize = () =>
       setWindowDimensions({
         width: window.innerWidth,
@@ -47,30 +44,14 @@ export default function Loader({
     return () => clearTimeout(delayTimer);
   }, []);
 
-  useEffect(() => {
-    if (isSceneReady && showLoaderAfterDelay) {
-      // Loader will be hidden by parent component
-    }
-  }, [isSceneReady, showLoaderAfterDelay]);
-
   const { width } = windowDimensions;
   const isMobile = width < 768;
 
-  // --- 1. BOUNDARY MATH: Ensure icons NEVER bleed off screen ---
-  // A 60px icon needs 30px to clear its own center, plus a 15px safe padding margin = 45px.
+  // --- DESKTOP BOUNDARY MATH ---
   const maxSafeX = width / 2 - 45;
-
-  // --- 2. DYNAMIC ELLIPSE GENERATION ---
   const scaleWidth = Math.max(0.3, Math.min(width / 1400, 1));
-
-  // Calculate the ideal X offset, but strictly clamp it so it never exceeds maxSafeX
   const outerX = Math.min(680 * scaleWidth, maxSafeX);
-
-  // The Top and Bottom icons sit slightly inward (88%) to create a beautiful oval/circle
   const innerX = outerX * 0.88;
-
-  // On tall, narrow mobile screens, we give them a larger vertical spread
-  // so they form a clean circle instead of overlapping in the middle.
   const scaleHeight = isMobile ? 0.95 : Math.max(0.6, scaleWidth);
   const spreadY = 150 * scaleHeight;
 
@@ -161,7 +142,6 @@ export default function Loader({
             transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, box-shadow 0.35s ease, filter 0.35s ease;
           }
 
-          /* Force shrink the physical icon size slightly on very small phones */
           @media (max-width: 480px) {
             .neon-profile-icon {
               width: 50px;
@@ -192,47 +172,67 @@ export default function Loader({
           }
         `}</style>
 
-      <div style={{ position: "relative" }} aria-hidden="true">
+      {/* Shift the central loaders and icons UP on mobile 
+        to balance the layout and make room for the stacked buttons.
+      */}
+      <div
+        style={{
+          position: "relative",
+          transform: isMobile ? "translateY(-10vh)" : "none",
+          transition: "transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        }}
+        aria-hidden="true"
+      >
         {!isSceneReady || !showLoaderAfterDelay ? (
           <PingPongDotLoader dotSize={12} />
         ) : (
           <GlitchGreeting />
         )}
-        {socialData.map((icon, idx) => (
-          <ProfileIcon
-            key={idx}
-            name={icon.name}
-            url={icon.url}
-            pngSrc={icon.pngSrc}
-            xOffset={icon.x}
-            yOffset={icon.y}
-            delay={icon.delay}
-            isMounted={isMounted}
-          />
-        ))}
+
+        {socialData.map((icon, idx) => {
+          // --- MOBILE SPATIAL ARC MATH ---
+          // Rather than a circle, we calculate a sleek parabolic curve below the text
+          const offset = idx - 2.5; // Centers the 6 items (-2.5 to 2.5)
+          const mobileX = offset * 55; // Spread them horizontally
+          const mobileY = 130 + Math.pow(offset, 2) * 12; // Bend them downward into a "smile"
+
+          const finalX = isMobile ? mobileX : icon.x;
+          const finalY = isMobile ? mobileY : icon.y;
+
+          return (
+            <ProfileIcon
+              key={idx}
+              name={icon.name}
+              url={icon.url}
+              pngSrc={icon.pngSrc}
+              xOffset={finalX}
+              yOffset={finalY}
+              delay={icon.delay}
+              isMounted={isMounted}
+            />
+          );
+        })}
       </div>
 
       <div
         style={{
           position: "absolute",
-          bottom: isMobile ? "8%" : "12%",
+          bottom: isMobile ? "6%" : "12%",
           display: "flex",
-          // Shrink the gap on mobile so the buttons don't bump into the screen edges
-          gap: isMobile ? "15px" : "40px",
-          alignItems: "flex-end",
+          // Change to vertical stack on mobile for better ergonomics
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? "20px" : "40px",
+          alignItems: "center",
           justifyContent: "center",
           opacity: isMounted ? 1 : 0,
-
-          // 3. FORCE RESPONSIVE BUTTONS: We use a CSS scale transform here.
-          // This forces both buttons to shrink by 25% on mobile, regardless of their internal CSS.
           transform: isMounted
-            ? `translateY(0) scale(${isMobile ? 0.75 : 1})`
-            : `translateY(20px) scale(${isMobile ? 0.75 : 1})`,
-
-          transition: "all 0.8s ease 0.6s",
-          transformOrigin: "bottom center", // Ensures they scale down toward the bottom of the screen
+            ? `translateY(0) scale(${isMobile ? 0.9 : 1})`
+            : `translateY(20px) scale(${isMobile ? 0.9 : 1})`,
+          transition: "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s",
+          transformOrigin: "bottom center",
         }}
       >
+        {/* Placed ExploreHouse on top so the hover/tap house-popup expands upward cleanly */}
         <ExploreHouseButton onClick={onEnter} />
         <ResumeButton
           onClick={() => window.open("/loader/resume.pdf", "_blank")}

@@ -3,6 +3,7 @@ import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Suspense, useCallback, useEffect, useState, useRef } from "react";
 import gsap from "gsap";
 import * as THREE from "three";
+
 import { Environment } from "./components/Environment";
 import { House } from "./components/House";
 import Loader from "@mylife/loader";
@@ -10,23 +11,38 @@ import { ScrollUI } from "@mylife/scroll";
 import { BookViewer } from "@mylife/book-slider";
 import { AssistantWidget, useWidgetStore } from "@mylife/chatbot";
 import { GlobalCanvas } from "@mylife/core-engine";
-import { useAtomValue } from "jotai";
-import { isMobileAtom } from "@mylife/core-engine";
+
 const CAMERA_TARGETS: Record<
   string,
   { position: THREE.Vector3; lookAt: THREE.Vector3 }
 > = {
+  NAVIGATE_HOME: {
+    position: new THREE.Vector3(0, 1.6, 2.5),
+    lookAt: new THREE.Vector3(0, 1.5, -2),
+  },
   NAVIGATE_PROJECTS: {
-    position: new THREE.Vector3(-4, 1.8, -2),
-    lookAt: new THREE.Vector3(-4, 1.5, -4),
+    position: new THREE.Vector3(-2.5, 1.6, -1.5),
+    lookAt: new THREE.Vector3(-2.5, 1.6, -3.85),
   },
   NAVIGATE_SKILLS: {
-    position: new THREE.Vector3(4, 1.8, -2),
-    lookAt: new THREE.Vector3(4, 1.5, -4),
+    position: new THREE.Vector3(2.5, 1.6, -1.5),
+    lookAt: new THREE.Vector3(2.5, 1.6, -3.85),
   },
-  NAVIGATE_HOME: {
-    position: new THREE.Vector3(0, 1.6, 0),
-    lookAt: new THREE.Vector3(0, 1.5, -4),
+  NAVIGATE_SOCIAL: {
+    position: new THREE.Vector3(-2.5, 1.5, 0),
+    lookAt: new THREE.Vector3(-4.86, 1.5, 0),
+  },
+  NAVIGATE_TIME: {
+    position: new THREE.Vector3(4, 1.7, -2.5),
+    lookAt: new THREE.Vector3(4, 1.7, -3.8),
+  },
+  NAVIGATE_GLOBE: {
+    position: new THREE.Vector3(2.5, 1.79, 0),
+    lookAt: new THREE.Vector3(4.2, 1.79, 0),
+  },
+  NAVIGATE_BOOKSHELF: {
+    position: new THREE.Vector3(0, 1.4, -1.5),
+    lookAt: new THREE.Vector3(0, 1.35, -3.5),
   },
 };
 
@@ -217,7 +233,8 @@ export default function App() {
       if (!action) return;
 
       if (action === "OPEN_RESUME") {
-        setActiveScrollId("resume");
+        window.open("/loader/Resume_S_Bhunia.pdf", "_blank");
+        useWidgetStore.getState().setTargetAction(null);
       } else if (action === "OPEN_SKILLS_BOOK") {
         handleBookOpen("skills");
       }
