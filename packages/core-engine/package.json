@@ -14,13 +14,13 @@
   },
 
   "dependencies": {
-    "@react-three/fiber": "^8.0.0",
-    "@react-three/drei": "^9.0.0"
+    "@react-three/fiber": "^9.5.0",
+    "@react-three/drei": "^10.7.7"
   },
   "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "three": "^0.160.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "three": "^0.183.1",
     "jotai": "^2.0.0"
   },
   

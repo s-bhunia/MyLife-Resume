@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChatbotAPI } from "../lib/api";
 
 type SentItem = {
@@ -189,9 +189,7 @@ export default function FeedbackView() {
         )}
 
         {/* Input Area */}
-        <div
-          className={`relative flex flex-col transition-all duration-300 ${sentHistory.length > 0 ? "h-24" : "h-full"}`}
-        >
+        <div className="relative flex flex-col flex-none min-h-[4rem] transition-all duration-300">
           <textarea
             placeholder="Leave a text message..."
             value={feedback}

@@ -5,7 +5,11 @@ export const useGhostWriter = (text: string = "", wordSpeedMs: number = 100) => 
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    if (!text) return;
+    if (!text) {
+      setDisplayedText("");
+      setIsTyping(false);
+      return;
+    }
     
     setIsTyping(true);
     const words = text.split(' ');

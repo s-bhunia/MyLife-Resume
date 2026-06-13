@@ -11,13 +11,20 @@ export const useScrollData = (id: string | null) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setData(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+    const controller = new AbortController();
     
     setLoading(true);
     setError(null);
 
     // Swap this path for your API endpoint in the future
-    fetch('/scroll/scrolls.json')
+    setData(null);
+    fetch('/scroll/scrolls.json', { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch scroll data");
         return res.json();
@@ -29,8 +36,15 @@ export const useScrollData = (id: string | null) => {
           setError("Scroll content not found.");
         }
       })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      .catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        setError(err instanceof Error ? err.message : 'Failed to fetch scroll data');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, [id]);
 
   return { data, loading, error };

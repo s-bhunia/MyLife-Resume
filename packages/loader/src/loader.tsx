@@ -114,8 +114,8 @@ export default function Loader({
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: 100vw;
-            height: 100vh;
+            width: 100dvw;
+            height: 100dvh;
             background-color: #0d0d14;
             overflow: hidden;
             position: absolute; 
@@ -217,7 +217,7 @@ export default function Loader({
       <div
         style={{
           position: "absolute",
-          bottom: isMobile ? "6%" : "12%",
+          bottom: isMobile ? "12%" : "12%",
           display: "flex",
           // Change to vertical stack on mobile for better ergonomics
           flexDirection: isMobile ? "column" : "row",
@@ -234,9 +234,7 @@ export default function Loader({
       >
         {/* Placed ExploreHouse on top so the hover/tap house-popup expands upward cleanly */}
         <ExploreHouseButton onClick={onEnter} />
-        <ResumeButton
-          onClick={() => window.open("/loader/resume.pdf", "_blank")}
-        />
+        <ResumeButton />
       </div>
     </div>
   );

@@ -3,20 +3,21 @@ import React from "react";
 import { Environment, OrbitControls } from "@react-three/drei";
 import { Book } from "./Book";
 import { useEffect } from "react";
+import { useThree } from "@react-three/fiber";
 
 export const Experience = ({
   bookName,
 }: {
   bookName: string;
 }): React.JSX.Element => {
+  const canvas = useThree((state) => state.gl.domElement);
+
   useEffect(() => {
-    const canvas = document.querySelector("canvas");
-    if (!canvas) return;
     canvas.style.cursor = 'url("/book-slider/images/feather1.png") 16 16, auto';
     return () => {
       if (canvas) canvas.style.cursor = "";
     };
-  }, []);
+  }, [canvas]);
 
   return (
     <>

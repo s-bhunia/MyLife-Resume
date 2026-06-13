@@ -4,14 +4,14 @@
   "private": true,
   "pnpm": {
     "overrides": {
-      "react": "^19.0.0",
-      "react-dom": "^19.0.0"
+      "react": "^19.2.0",
+      "react-dom": "^19.2.0"
     }},
   "scripts": {
     "dev": "pnpm --filter landingpage dev",
     "build": "pnpm --filter landingpage build",
-    "lint": "pnpm --filter \"./packages/**\" lint",
-    "typecheck": "pnpm --filter \"./packages/**\" typecheck"
+    "typecheck": "pnpm --filter landingpage typecheck",
+    "check": "pnpm typecheck && pnpm build"
   },
   "devDependencies": {
     "typescript": "^5.4.2"

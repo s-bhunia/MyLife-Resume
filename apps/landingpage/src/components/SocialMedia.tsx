@@ -30,7 +30,7 @@ const SocialIcon = memo(({ position, url, children }: any) => {
       position={position}
       onClick={(e) => {
         e.stopPropagation();
-        window.open(url, "_blank");
+        window.open(url, "_blank", "noopener,noreferrer");
       }}
       onPointerOver={(e) => {
         e.stopPropagation();

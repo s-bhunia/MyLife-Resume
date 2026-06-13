@@ -114,15 +114,29 @@ export const UI = ({ bookName, onClose }: UIProps): React.JSX.Element => {
           transform: scale(1.1) rotate(8deg);
           box-shadow: 0 0 40px rgba(255, 215, 77, 0.8);
         }
-        /* Custom Range Slider Styling */
+        
+        /* Custom Range Slider Styling (Responsive to Viewport Height) */
         input[type=range]::-webkit-slider-thumb {
           appearance: none;
-          width: 20px;
-          height: 20px;
+          width: clamp(16px, 3vh, 32px);
+          height: clamp(16px, 3vh, 32px);
           border-radius: 50%;
           background: #ffd74d;
           cursor: pointer;
           box-shadow: 0 0 10px rgba(255, 215, 77, 0.8);
+          transition: width 0.2s, height 0.2s;
+        }
+
+        input[type=range]::-moz-range-thumb {
+          appearance: none;
+          width: clamp(16px, 3vh, 32px);
+          height: clamp(16px, 3vh, 32px);
+          border-radius: 50%;
+          background: #ffd74d;
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 0 10px rgba(255, 215, 77, 0.8);
+          transition: width 0.2s, height 0.2s;
         }
       `}</style>
 
@@ -191,20 +205,21 @@ export const UI = ({ bookName, onClose }: UIProps): React.JSX.Element => {
             </span>
           </button>
         )}
-
         {/* New Pagination Slider System */}
-        <div className="w-full pointer-events-auto flex justify-center items-center pb-8 pt-12 bg-gradient-to-t from-black/80 to-transparent">
-          <div className="flex items-center gap-4 w-full max-w-2xl px-6 py-4 bg-black/40 backdrop-blur-md border border-white/20 rounded-full shadow-2xl">
+        <div className="w-full pointer-events-auto flex justify-center items-center pb-[clamp(1rem,4vh,2rem)] pt-[clamp(1.5rem,6vh,3rem)] bg-gradient-to-t from-black/80 to-transparent transition-all duration-300">
+          <div className="flex items-center gap-[clamp(0.5rem,2vh,1rem)] w-full max-w-2xl px-[clamp(1rem,3vh,1.5rem)] py-[clamp(0.5rem,2vh,1rem)] bg-black/40 backdrop-blur-md border border-white/20 rounded-full shadow-2xl transition-all duration-300">
+            {/* Previous Page Button */}
             <button
-              className="w-10 h-10 flex shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white hover:text-black transition-colors font-bold text-xl disabled:opacity-30 disabled:hover:bg-white/10 disabled:hover:text-white"
+              className="w-[clamp(2rem,6vh,3rem)] h-[clamp(2rem,6vh,3rem)] flex shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white hover:text-black transition-colors font-bold text-[clamp(1rem,3vh,1.5rem)] disabled:opacity-30 disabled:hover:bg-white/10 disabled:hover:text-white"
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
             >
               &larr;
             </button>
 
-            <div className="flex-1 flex flex-col items-center gap-1">
-              <span className="text-white/90 font-medium tracking-widest uppercase text-xs">
+            {/* Slider and Text Container */}
+            <div className="flex-1 flex flex-col items-center gap-[clamp(2px,1vh,4px)]">
+              <span className="text-white/90 font-medium tracking-widest uppercase text-[clamp(0.6rem,1.5vh,0.85rem)] transition-all duration-300">
                 {page === 0
                   ? "Front Cover"
                   : page === pages.length
@@ -217,12 +232,13 @@ export const UI = ({ bookName, onClose }: UIProps): React.JSX.Element => {
                 max={pages.length}
                 value={page}
                 onChange={(e) => setPage(parseInt(e.target.value))}
-                className="w-full h-1.5 bg-white/30 rounded-lg appearance-none cursor-pointer"
+                className="w-full h-[clamp(4px,0.8vh,8px)] bg-white/30 rounded-lg appearance-none cursor-pointer transition-all duration-300"
               />
             </div>
 
+            {/* Next Page Button */}
             <button
-              className="w-10 h-10 flex shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white hover:text-black transition-colors font-bold text-xl disabled:opacity-30 disabled:hover:bg-white/10 disabled:hover:text-white"
+              className="w-[clamp(2rem,6vh,3rem)] h-[clamp(2rem,6vh,3rem)] flex shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white hover:text-black transition-colors font-bold text-[clamp(1rem,3vh,1.5rem)] disabled:opacity-30 disabled:hover:bg-white/10 disabled:hover:text-white"
               onClick={() => setPage((p) => Math.min(pages.length, p + 1))}
               disabled={page === pages.length}
             >

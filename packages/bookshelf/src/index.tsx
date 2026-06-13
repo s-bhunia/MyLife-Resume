@@ -9,7 +9,6 @@ const BOOK_NAME_MAP: { [key: string]: string } = {
   "./bookshelf/book3.webp": "food",
   "./bookshelf/book4.webp": "Gitanjali",
   "./bookshelf/book5.webp": "Gitanjali",
-  "./bookshelf/book6.webp": "Gitanjali",
 };
 
 interface BookshelfProps {
@@ -50,7 +49,7 @@ export function Bookshelf({ onBookClick, ...props }: BookshelfProps) {
     {
       id: 6,
       position: [0, -1.23, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book5.webp",
+      coverUrl: "./bookshelf/book1.webp",
     },
   ]);
 

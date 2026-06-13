@@ -4,8 +4,6 @@ import * as THREE from "three";
 import { useWidgetStore } from "@mylife/chatbot";
 import { CAMERA_TARGETS } from "../config/cameraTargets";
 
-// Temporary vectors to prevent garbage collection overhead inside useFrame
-const targetPos = new THREE.Vector3();
 const targetLook = new THREE.Vector3();
 
 export function CameraController() {

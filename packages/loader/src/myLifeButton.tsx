@@ -33,10 +33,15 @@ export const ExploreHouseButton: React.FC<ExploreHouseButtonProps> = ({
         }
 
         .house-wrapper {
+          /* Position absolutely so it does not affect the layout of sibling buttons */
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
           overflow: hidden;
-          height: 0;
+          height: 85px; /* reserve space for the image */
           opacity: 0;
-          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+          transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
           display: flex;
           justify-content: center;
           align-items: flex-end;
@@ -49,9 +54,7 @@ export const ExploreHouseButton: React.FC<ExploreHouseButtonProps> = ({
         }
 
         .house-scanner-btn:hover .house-wrapper {
-          height: 85px; 
           opacity: 1;
-          margin-bottom: 12px;
         }
 
         .house-scanner-btn:hover {

@@ -7,10 +7,10 @@ interface ResumeButtonProps {
 
 export const ResumeButton: React.FC<ResumeButtonProps> = ({
   onClick,
-  resumePath = "loader/Resume_S_Bhunia.pdf",
+  resumePath = "/loader/Resume_S_Bhunia.pdf",
 }) => {
   const handleClick = () => {
-    window.open(resumePath, "_blank");
+    window.open(resumePath, "_blank", "noopener,noreferrer");
     onClick?.();
   };
 

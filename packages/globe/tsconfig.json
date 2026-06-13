@@ -11,6 +11,6 @@
     "noEmit": false,
     "emitDeclarationOnly": true
   },
-  "include": ["src/**/*.tsx", "src/**/*.ts"],
+  "include": ["src/**/*.tsx", "src/**/*.ts", "src/**/*.json"],
   "exclude": ["node_modules"]
 }

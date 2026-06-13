@@ -21,8 +21,7 @@ export default function Book({
   onClick,
 }: BookProps) {
   const coverTexture = useTexture(coverUrl);
-coverTexture.colorSpace = THREE.SRGBColorSpace;
-coverTexture.anisotropy = 16;
+  coverTexture.colorSpace = THREE.SRGBColorSpace;
 
   // 1. Create a reference to directly manipulate the mesh in the render loop
   const meshRef = useRef<THREE.Mesh>(null);

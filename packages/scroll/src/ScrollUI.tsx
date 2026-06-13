@@ -11,8 +11,12 @@ export interface ScrollUIProps {
 }
 
 // Custom link component that opens in new tab
-const CustomLink = ({ href, children }: { href?: string; children: React.ReactNode }) => (
-  <a href={href} target="_blank" rel="noopener noreferrer">
+const CustomLink = ({
+  href,
+  children,
+  ...props
+}: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  <a {...props} href={href} target="_blank" rel="noopener noreferrer">
     {children}
   </a>
 );

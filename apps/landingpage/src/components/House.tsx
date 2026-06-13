@@ -1,4 +1,4 @@
-import { Box, Plane, Cylinder, Sphere, useTexture, Text, RoundedBox} from "@react-three/drei";
+import { Box, Plane, Cylinder, Sphere, useTexture, Text } from "@react-three/drei";
 import { useRef, useState, useEffect, memo, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -649,6 +649,8 @@ export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { ent
     [floorTexture],
   );
 
+  useEffect(() => () => matFloor.dispose(), [matFloor]);
+
   return (
     <group>
       {/* 1. PLATFORM & SURROUNDINGS */}
@@ -713,7 +715,7 @@ export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { ent
           subtitle="Full-Stack Web" 
           symbol="🔗" 
           scale={0.3}
-          onClick={() => onOpenScroll?.('supplylink')}
+          onClick={() => onOpenScroll?.('SupplyLink')}
         />
         
         {/* Bottom Left Hexagon */}
@@ -763,7 +765,7 @@ export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { ent
           subtitle="Full-Stack Web" 
           symbol="🔗" 
           scale={0.3}
-          onClick={() => onOpenScroll?.('supplylink_extra3')}
+          onClick={() => onOpenScroll?.('SupplyLink')}
         />
         <Bookshelf position={[0, 1.35, -3.5]} scale={0.3} onBookClick={onBookClick} />
         {/* --- Skill CARDS --- */}

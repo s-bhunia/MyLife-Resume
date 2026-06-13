@@ -1,4 +1,3 @@
-import React from 'react';
 import { useWidgetStore } from '../store/useWidgetStore';
 import { cn } from '../lib/utils';
 

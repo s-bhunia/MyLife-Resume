@@ -27,7 +27,7 @@ export const AssistantWidget: React.FC = () => {
 
   return (
     <div
-      className="fixed bottom-6 right-6 z-50 glitch-container"
+      className="fixed bottom-0 right-6 z-50 glitch-container w-auto max-w-[90vw] p-2"
       ref={widgetRef}
       style={{
         transform: `scale(${isMobile ? 1 : 1})`,
@@ -35,9 +35,9 @@ export const AssistantWidget: React.FC = () => {
       }}
     >
       {isOpen && (
-        <div className="mb-4 w-96 h-[32rem] rounded-3xl bg-white/30 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] overflow-hidden flex flex-col transition-all duration-300">
+        <div className="mb-4 w-96 max-w-full sm:w-96 max-h-[calc(100vh-6rem)] rounded-3xl bg-white/30 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] overflow-y-auto flex flex-col transition-all duration-300">
           {/* Glass Header & Toggle */}
-          <div className="flex p-2 gap-2 bg-white/20 border-b border-white/30">
+          <div className="flex flex-col sm:flex-row p-2 gap-2 bg-white/20 border-b border-white/30">
             <button
               onClick={() => setViewMode("assistant")}
               className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${viewMode === "assistant" ? "bg-[#ffe4c4] text-gray-800 shadow-sm" : "text-gray-600 hover:bg-white/30"}`}
@@ -53,7 +53,7 @@ export const AssistantWidget: React.FC = () => {
           </div>
 
           {/* Dynamic Content Body */}
-          <div className="p-4 flex-1 overflow-hidden">
+          <div className="p-4 flex-1 overflow-auto">
             {viewMode === "assistant" ? <AssistantView /> : <FeedbackView />}
           </div>
         </div>

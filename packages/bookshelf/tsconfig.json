@@ -2,7 +2,6 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "ignoreDeprecations": "6.0",
     "outDir": "./dist",
     "declaration": true,
     "declarationMap": true,

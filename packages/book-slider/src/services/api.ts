@@ -2,6 +2,7 @@
 
 interface Language {
   id: number;
+  name: string;
   pictures: string[];
 }
 
@@ -11,7 +12,10 @@ interface BookData {
 
 export type PicturesByLanguageMap = Record<number, string[]>;
 
-export const fetchBookData = async (bookName: string): Promise<BookData> => {
+export const fetchBookData = async (
+  bookName: string,
+  signal?: AbortSignal,
+): Promise<BookData> => {
   // FUTURE API CALL:
   // const url = `https://api.yourdomain.com/books/${bookName}/pages`;
   
@@ -20,7 +24,7 @@ export const fetchBookData = async (bookName: string): Promise<BookData> => {
   const url = `/book-slider/books/${bookName}/${bookName}.json`; 
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { signal });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -28,6 +32,7 @@ export const fetchBookData = async (bookName: string): Promise<BookData> => {
     const data: BookData = await response.json();
     return data;
   } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
     console.error(`Failed to load data for book: ${bookName}`, error);
     return { languages: [] };
   }

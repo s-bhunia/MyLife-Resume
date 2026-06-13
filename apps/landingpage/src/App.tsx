@@ -1,6 +1,13 @@
 import { useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { Suspense, useCallback, useEffect, useState, useRef } from "react";
+import {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 import gsap from "gsap";
 import * as THREE from "three";
 
@@ -58,6 +65,7 @@ const CameraDirector = ({
   useEffect(() => {
     camera.position.set(20, 15, 30);
     const lookTarget = new THREE.Vector3(0, 1.5, 2.5);
+    const finalLookTarget = new THREE.Vector3(0, 1.5, -4);
     camera.lookAt(lookTarget);
 
     const tl = gsap.timeline({
@@ -86,7 +94,7 @@ const CameraDirector = ({
       duration: 3,
       ease: "power2.inOut",
       onUpdate: () => {
-        lookTarget.lerp(new THREE.Vector3(0, 1.5, -4), 0.05);
+        lookTarget.lerp(finalLookTarget, 0.05);
         camera.lookAt(lookTarget);
       },
     });
@@ -136,11 +144,17 @@ const ScenePreloader = ({ onSceneReady }: { onSceneReady: () => void }) => {
 
   useEffect(() => {
     gl.compile(scene, camera);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
+    let secondFrame: number | undefined;
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
         onSceneReady();
       });
     });
+
+    return () => {
+      cancelAnimationFrame(firstFrame);
+      if (secondFrame !== undefined) cancelAnimationFrame(secondFrame);
+    };
   }, [gl, scene, camera, onSceneReady]);
 
   return null;
@@ -151,40 +165,12 @@ export default function App() {
   const [introFinished, setIntroFinished] = useState(false);
   const [doorOpen, setDoorOpen] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
-  const [canvasReady, setCanvasReady] = useState(false);
-
-  const [envReady, setEnvReady] = useState(false);
-  const [houseReady, setHouseReady] = useState(false);
-  const [cameraReady, setCameraReady] = useState(false);
-
   const [activeScrollId, setActiveScrollId] = useState<string | null>(null);
   const [activeBook, setActiveBook] = useState<string | null>(null);
   const [bookOpacity, setBookOpacity] = useState(false);
 
   const controlsRef = useRef<any>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setCanvasReady(true), 1);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (!canvasReady) return;
-    const timer1 = setTimeout(() => setEnvReady(true), 20);
-    return () => clearTimeout(timer1);
-  }, [canvasReady]);
-
-  useEffect(() => {
-    if (!envReady) return;
-    const timer2 = setTimeout(() => setHouseReady(true), 40);
-    return () => clearTimeout(timer2);
-  }, [envReady]);
-
-  useEffect(() => {
-    if (!houseReady) return;
-    const timer3 = setTimeout(() => setCameraReady(true), 60);
-    return () => clearTimeout(timer3);
-  }, [houseReady]);
+  const bookTransitionTimer = useRef<number | null>(null);
 
   const handleSceneReady = useCallback(() => setSceneReady(true), []);
   const handleOpenDoor = useCallback(() => setDoorOpen(true), []);
@@ -197,7 +183,9 @@ export default function App() {
     if (elem.requestFullscreen) {
       elem
         .requestFullscreen()
-        .catch((err: any) => console.log("FS Error:", err));
+        .catch((err: unknown) =>
+          console.warn("Fullscreen request failed:", err),
+        );
     } else if (elem.webkitRequestFullscreen) {
       elem.webkitRequestFullscreen();
     } else if (elem.msRequestFullscreen) {
@@ -218,14 +206,35 @@ export default function App() {
   };
 
   const handleBookOpen = useCallback((bookName: string) => {
+    if (bookTransitionTimer.current !== null) {
+      window.clearTimeout(bookTransitionTimer.current);
+    }
     setActiveBook(bookName);
-    setTimeout(() => setBookOpacity(true), 10);
+    bookTransitionTimer.current = window.setTimeout(
+      () => setBookOpacity(true),
+      10,
+    );
   }, []);
 
   const handleBookClose = useCallback(() => {
     setBookOpacity(false);
-    setTimeout(() => setActiveBook(null), 500);
+    if (bookTransitionTimer.current !== null) {
+      window.clearTimeout(bookTransitionTimer.current);
+    }
+    bookTransitionTimer.current = window.setTimeout(
+      () => setActiveBook(null),
+      500,
+    );
   }, []);
+
+  useEffect(
+    () => () => {
+      if (bookTransitionTimer.current !== null) {
+        window.clearTimeout(bookTransitionTimer.current);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     const unsubscribe = useWidgetStore.subscribe((state) => {
@@ -233,10 +242,14 @@ export default function App() {
       if (!action) return;
 
       if (action === "OPEN_RESUME") {
-        window.open("/loader/Resume_S_Bhunia.pdf", "_blank");
+        window.open(
+          "/loader/Resume_S_Bhunia.pdf",
+          "_blank",
+          "noopener,noreferrer",
+        );
         useWidgetStore.getState().setTargetAction(null);
       } else if (action === "OPEN_SKILLS_BOOK") {
-        handleBookOpen("skills");
+        useWidgetStore.getState().setTargetAction("NAVIGATE_SKILLS");
       }
     });
     return unsubscribe;
@@ -277,7 +290,11 @@ export default function App() {
         <Loader onEnter={handleEnter} isSceneReady={sceneReady} />
       )}
 
-      {hasEntered && introFinished && <AssistantWidget />}
+      {hasEntered && introFinished && (
+        <Suspense fallback={null}>
+          <AssistantWidget />
+        </Suspense>
+      )}
 
       <div
         style={{
@@ -291,68 +308,60 @@ export default function App() {
           pointerEvents: bookOpacity ? "none" : "auto",
         }}
       >
-        {canvasReady && (
-          <GlobalCanvas
-            shadows
-            frameloop={!sceneReady || activeBook ? "demand" : "always"}
-          >
-            <Suspense fallback={null}>
-              <ScenePreloader onSceneReady={handleSceneReady} />
+        <GlobalCanvas shadows frameloop={activeBook ? "demand" : "always"}>
+          <Suspense fallback={null}>
+            <Environment />
+            <House
+              entranceOpen={doorOpen}
+              onOpenScroll={setActiveScrollId}
+              onBookClick={handleBookOpen}
+            />
+            <PerspectiveCamera makeDefault />
+            <ScenePreloader onSceneReady={handleSceneReady} />
 
-              {envReady && <Environment />}
+            {sceneReady && hasEntered && !introFinished && (
+              <CameraDirector
+                onOpenDoor={handleOpenDoor}
+                onIntroFinish={handleIntroFinish}
+              />
+            )}
 
-              {houseReady && (
-                <House
-                  entranceOpen={doorOpen}
-                  onOpenScroll={setActiveScrollId}
-                  onBookClick={handleBookOpen}
+            {sceneReady && hasEntered && introFinished && (
+              <>
+                <SmartCameraController controlsRef={controlsRef} />
+
+                <OrbitControls
+                  ref={controlsRef}
+                  target={[0, 1.5, -2]}
+                  enablePan={true}
+                  maxPolarAngle={Math.PI / 2 - 0.05}
+                  minDistance={1}
+                  maxDistance={15}
+                  mouseButtons={{
+                    LEFT: THREE.MOUSE.ROTATE,
+                    MIDDLE: THREE.MOUSE.DOLLY,
+                    RIGHT: THREE.MOUSE.PAN,
+                  }}
+                  onStart={() => {
+                    if (useWidgetStore.getState().targetAction) {
+                      useWidgetStore.getState().setTargetAction(null);
+                    }
+                  }}
                 />
-              )}
-
-              {cameraReady && <PerspectiveCamera makeDefault />}
-
-              {sceneReady && hasEntered && !introFinished && (
-                <CameraDirector
-                  onOpenDoor={handleOpenDoor}
-                  onIntroFinish={handleIntroFinish}
-                />
-              )}
-
-              {sceneReady && hasEntered && introFinished && (
-                <>
-                  <SmartCameraController controlsRef={controlsRef} />
-
-                  <OrbitControls
-                    ref={controlsRef}
-                    target={[0, 1.5, -2]}
-                    enablePan={true}
-                    maxPolarAngle={Math.PI / 2 - 0.05}
-                    minDistance={1}
-                    maxDistance={15}
-                    mouseButtons={{
-                      LEFT: THREE.MOUSE.ROTATE,
-                      MIDDLE: THREE.MOUSE.DOLLY,
-                      RIGHT: THREE.MOUSE.PAN,
-                    }}
-                    onStart={() => {
-                      if (useWidgetStore.getState().targetAction) {
-                        useWidgetStore.getState().setTargetAction(null);
-                      }
-                    }}
-                  />
-                </>
-              )}
-            </Suspense>
-          </GlobalCanvas>
-        )}
+              </>
+            )}
+          </Suspense>
+        </GlobalCanvas>
       </div>
 
       {activeScrollId && (
-        <ScrollUI
-          id={activeScrollId}
-          onClose={() => setActiveScrollId(null)}
-          speed={60}
-        />
+        <Suspense fallback={null}>
+          <ScrollUI
+            id={activeScrollId}
+            onClose={() => setActiveScrollId(null)}
+            speed={60}
+          />
+        </Suspense>
       )}
 
       <div
@@ -371,7 +380,9 @@ export default function App() {
         }}
       >
         {activeBook && (
-          <BookViewer bookName={activeBook} onClose={handleBookClose} />
+          <Suspense fallback={null}>
+            <BookViewer bookName={activeBook} onClose={handleBookClose} />
+          </Suspense>
         )}
       </div>
     </div>

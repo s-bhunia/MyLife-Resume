@@ -105,7 +105,7 @@ const AnimatedArc: React.FC<AnimatedArcProps> = ({
     // Logic: Scale = Distance / 15.
     // Zoom In (Dist 5) -> Scale 0.33
     // Zoom Out (Dist 30) -> Scale 2.0
-    const zoomFactor = dist / 15; 
+    const zoomFactor = THREE.MathUtils.clamp(dist / 15, 0.5, 2);
 
     // --- 2. UPDATE PIN SIZE ---
     // Calculate animation visibility
@@ -125,9 +125,10 @@ const AnimatedArc: React.FC<AnimatedArcProps> = ({
     // --- 3. UPDATE TUBE THICKNESS (Geometry Regeneration) ---
     const targetRadius = tubeRadius * zoomFactor;
     
-    // Optimization: Only rebuild geometry if the radius changed by > 5%
-    // This prevents rebuilding every single frame which causes lag
-    if (Math.abs(lastRadiusRef.current - targetRadius) > 0.001) {
+    const radiusChange =
+      Math.abs(lastRadiusRef.current - targetRadius) / lastRadiusRef.current;
+    // Rebuild only after a meaningful zoom change, rather than on tiny camera moves.
+    if (radiusChange > 0.2) {
       lastRadiusRef.current = targetRadius;
       
       // Dispose old geometry to free memory
