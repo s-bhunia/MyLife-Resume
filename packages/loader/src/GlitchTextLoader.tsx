@@ -20,7 +20,13 @@ export const GlitchGreeting: React.FC<GlitchGreetingProps> = ({
   const [displayedText, setDisplayedText] = useState("");
   const [wordIndex, setWordIndex] = useState(0);
 
+  // Guard against React StrictMode double‑invoke of effects in development.
+  // The ref persists across the double render and ensures the JSON is fetched only once.
+  const hasFetchedRef = React.useRef(false);
+
   useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
     fetch("/loader/loader_text.json")
       .then((res) => res.json())
       .then((data) => {

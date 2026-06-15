@@ -1,4 +1,11 @@
-import { Box, Plane, Cylinder, Sphere, useTexture, Text } from "@react-three/drei";
+import {
+  Box,
+  Plane,
+  Cylinder,
+  Sphere,
+  useTexture,
+  Text,
+} from "@react-three/drei";
 import { useRef, useState, useEffect, memo, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -6,7 +13,7 @@ import { Geometry, Base, Subtraction } from "@react-three/csg";
 import { Bookshelf } from "@mylife/bookshelf";
 import { TubeClock } from "@mylife/tube-clock";
 import { TravelGlobe } from "@mylife/globe";
-import { SocialWall } from './SocialMedia';
+import { SocialWall } from "./SocialMedia";
 
 // --- ARCHITECTURAL CONSTANTS ---
 const W = 10;
@@ -20,111 +27,146 @@ const PORCH_W = 3;
 const PORCH_D = 1.5;
 
 // ---------------------------------------------------------------------------
-// HEXAGON PROJECT CARDS 
+// HEXAGON PROJECT CARDS
 //  ---------------------------------------------------------------------------
-const HexProjectCard = memo(({ 
-  position, 
-  title, 
-  subtitle,
-  symbol,
-  scale = 1,
-  onClick,
-}: { 
-  position: [number, number, number]; 
-  title: string; 
-  subtitle: string;
-  symbol: string;
-  scale?: number;
-  onClick?: () => void;
-}) => {
-  const [hovered, setHovered] = useState(false);
-  const groupRef = useRef<THREE.Group>(null);
-  const glowRef = useRef<THREE.Mesh>(null);
+const HexProjectCard = memo(
+  ({
+    position,
+    title,
+    subtitle,
+    symbol,
+    scale = 1,
+    onClick,
+  }: {
+    position: [number, number, number];
+    title: string;
+    subtitle: string;
+    symbol: string;
+    scale?: number;
+    onClick?: () => void;
+  }) => {
+    const [hovered, setHovered] = useState(false);
+    const groupRef = useRef<THREE.Group>(null);
+    const glowRef = useRef<THREE.Mesh>(null);
 
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      // Pop out on the Z axis when hovered
-      const targetZ = hovered ? position[2] + 0.15 : position[2];
-      groupRef.current.position.z = THREE.MathUtils.damp(groupRef.current.position.z, targetZ, 6, delta);
-    }
-    
-    if (glowRef.current) {
-      // Fade the glow in and out
-      const material = glowRef.current.material as THREE.MeshBasicMaterial;
-      const targetOpacity = hovered ? 0.6 : 0.0;
-      material.opacity = THREE.MathUtils.damp(material.opacity, targetOpacity, 6, delta);
-    }
-  });
+    useFrame((_, delta) => {
+      if (groupRef.current) {
+        // Pop out on the Z axis when hovered
+        const targetZ = hovered ? position[2] + 0.15 : position[2];
+        groupRef.current.position.z = THREE.MathUtils.damp(
+          groupRef.current.position.z,
+          targetZ,
+          6,
+          delta,
+        );
+      }
 
-  // The rotation [Math.PI / 2, 0, Math.PI / 2] creates a perfect "Pointy-Top" hexagon.
-  // If you prefer a "Flat-Top" hexagon, change the last value to 0: [Math.PI / 2, 0, 0]
-  const hexRotation: [number, number, number] = [Math.PI / 2, 0, Math.PI / 1];
+      if (glowRef.current) {
+        // Fade the glow in and out
+        const material = glowRef.current.material as THREE.MeshBasicMaterial;
+        const targetOpacity = hovered ? 0.6 : 0.0;
+        material.opacity = THREE.MathUtils.damp(
+          material.opacity,
+          targetOpacity,
+          6,
+          delta,
+        );
+      }
+    });
 
-  // Pushed text and accents further out to Z = 0.06 to prevent clipping (Z-fighting)
-  const contentZ = 0.06; 
+    // The rotation [Math.PI / 2, 0, Math.PI / 2] creates a perfect "Pointy-Top" hexagon.
+    // If you prefer a "Flat-Top" hexagon, change the last value to 0: [Math.PI / 2, 0, 0]
+    const hexRotation: [number, number, number] = [Math.PI / 2, 0, Math.PI / 1];
 
-  return (
-    <group 
-      ref={groupRef}
-      position={position} 
-      scale={scale}
-      onClick={(e) => { e.stopPropagation(); onClick?.(); }}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        setHovered(true);
-        document.body.style.cursor = "pointer";
-      }}
-      onPointerOut={(e) => {
-        e.stopPropagation();
-        setHovered(false);
-        document.body.style.cursor = "auto";
-      }}
-    >
-      {/* 1. Backside Glow Effect */}
-      <mesh ref={glowRef} position={[0, 0, -0.02]} rotation={hexRotation}>
-        <cylinderGeometry args={[0.78, 0.78, 0.02, 6]} />
-        <meshBasicMaterial 
-          color="#d4af37" 
-          transparent 
-          opacity={0} 
-          depthWrite={false} 
-          blending={THREE.AdditiveBlending} 
-        />
-      </mesh>
+    // Pushed text and accents further out to Z = 0.06 to prevent clipping (Z-fighting)
+    const contentZ = 0.06;
 
-      {/* 2. Soft Drop Shadow Fake */}
-      <mesh position={[0.02, -0.02, -0.03]} rotation={hexRotation}>
-        <cylinderGeometry args={[0.7, 0.7, 0.04, 6]} />
-        <meshBasicMaterial color="#000000" transparent opacity={0.15} />
-      </mesh>
+    return (
+      <group
+        ref={groupRef}
+        position={position}
+        scale={scale}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation();
+          setHovered(false);
+          document.body.style.cursor = "auto";
+        }}
+      >
+        {/* 1. Backside Glow Effect */}
+        <mesh ref={glowRef} position={[0, 0, -0.02]} rotation={hexRotation}>
+          <cylinderGeometry args={[0.78, 0.78, 0.02, 6]} />
+          <meshBasicMaterial
+            color="#d4af37"
+            transparent
+            opacity={0}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
 
-      {/* 3. Main Creamy Hexagon Body */}
-      <mesh rotation={hexRotation} castShadow receiveShadow>
-        <cylinderGeometry args={[0.7, 0.7, 0.06, 6]} />
-        <meshStandardMaterial color="#ddd0b5" roughness={0.6} />
-      </mesh>
-      
-      {/* 4. Gold Accent Line */}
-      <mesh position={[0, -0.4, contentZ]}>
-         <boxGeometry args={[0.4, 0.03, 0.02]} />
-         <meshStandardMaterial color="#d48337" />
-      </mesh>
+        {/* 2. Soft Drop Shadow Fake */}
+        <mesh position={[0.02, -0.02, -0.03]} rotation={hexRotation}>
+          <cylinderGeometry args={[0.7, 0.7, 0.04, 6]} />
+          <meshBasicMaterial color="#000000" transparent opacity={0.15} />
+        </mesh>
 
-      {/* 5. Project Content (Z-axis pushed out to prevent hiding) */}
-      <Text position={[0, 0.25, contentZ]} fontSize={0.28} color="#2d2d2d" anchorX="center" anchorY="middle">
-        {symbol}
-      </Text>
+        {/* 3. Main Creamy Hexagon Body */}
+        <mesh rotation={hexRotation} castShadow receiveShadow>
+          <cylinderGeometry args={[0.7, 0.7, 0.06, 6]} />
+          <meshStandardMaterial color="#ddd0b5" roughness={0.6} />
+        </mesh>
 
-      <Text position={[0, 0, contentZ]} fontSize={0.16} color="#242323" anchorX="center" anchorY="middle" outlineWidth={0.001} outlineColor="#d75959">
-        {title}
-      </Text>
+        {/* 4. Gold Accent Line */}
+        <mesh position={[0, -0.4, contentZ]}>
+          <boxGeometry args={[0.4, 0.03, 0.02]} />
+          <meshStandardMaterial color="#d48337" />
+        </mesh>
 
-      <Text position={[0, -0.2, contentZ]} fontSize={0.1} color="#7a0c0c" anchorX="center" anchorY="middle">
-        {subtitle}
-      </Text>
-    </group>
-  );
-});
+        {/* 5. Project Content (Z-axis pushed out to prevent hiding) */}
+        <Text
+          position={[0, 0.25, contentZ]}
+          fontSize={0.28}
+          color="#2d2d2d"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {symbol}
+        </Text>
+
+        <Text
+          position={[0, 0, contentZ]}
+          fontSize={0.16}
+          color="#242323"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.001}
+          outlineColor="#d75959"
+        >
+          {title}
+        </Text>
+
+        <Text
+          position={[0, -0.2, contentZ]}
+          fontSize={0.1}
+          color="#7a0c0c"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {subtitle}
+        </Text>
+      </group>
+    );
+  },
+);
 
 const MAT_PLASTER = new THREE.MeshStandardMaterial({
   color: "#ffffff",
@@ -327,68 +369,70 @@ const MAT_PLATE_BORDER = new THREE.MeshStandardMaterial({
   roughness: 0.2,
 });
 
-const NamePlate = memo(({
-  position,
-  text,
-  symbol,
-  scale = 1,
-  rotation = [0, 0, 0] as [number, number, number]
-}: {
-  position: [number, number, number];
-  text: string;
-  symbol: string;
-  scale?: number;
-  rotation?: [number, number, number];
-}) => {
-  return (
-    <group position={position} scale={scale} rotation={rotation}>
-      {/* Brass Backing/Border */}
-      <mesh castShadow receiveShadow position={[0, 0, -0.02]}>
-        <boxGeometry args={[1.8, 0.6, 0.02]} />
-        <primitive object={MAT_PLATE_BORDER} attach="material" />
-      </mesh>
+const NamePlate = memo(
+  ({
+    position,
+    text,
+    symbol,
+    scale = 1,
+    rotation = [0, 0, 0] as [number, number, number],
+  }: {
+    position: [number, number, number];
+    text: string;
+    symbol: string;
+    scale?: number;
+    rotation?: [number, number, number];
+  }) => {
+    return (
+      <group position={position} scale={scale} rotation={rotation}>
+        {/* Brass Backing/Border */}
+        <mesh castShadow receiveShadow position={[0, 0, -0.02]}>
+          <boxGeometry args={[1.8, 0.6, 0.02]} />
+          <primitive object={MAT_PLATE_BORDER} attach="material" />
+        </mesh>
 
-      {/* Wooden Plate */}
-      <mesh castShadow receiveShadow>
-        <boxGeometry args={[1.7, 0.5, 0.04]} />
-        <primitive object={MAT_WOOD_PLATE} attach="material" />
-      </mesh>
+        {/* Wooden Plate */}
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[1.7, 0.5, 0.04]} />
+          <primitive object={MAT_WOOD_PLATE} attach="material" />
+        </mesh>
 
-      {/* Stylized Wood Grain Textures (Geometric) */}
-      <mesh position={[0, 0.1, 0.02]}>
-        <boxGeometry args={[1.7, 0.02, 0.01]} />
-        <primitive object={MAT_WOOD_GRAIN} attach="material" />
-      </mesh>
-      <mesh position={[0, -0.15, 0.02]}>
-        <boxGeometry args={[1.7, 0.02, 0.01]} />
-        <primitive object={MAT_WOOD_GRAIN} attach="material" />
-      </mesh>
+        {/* Stylized Wood Grain Textures (Geometric) */}
+        <mesh position={[0, 0.1, 0.02]}>
+          <boxGeometry args={[1.7, 0.02, 0.01]} />
+          <primitive object={MAT_WOOD_GRAIN} attach="material" />
+        </mesh>
+        <mesh position={[0, -0.15, 0.02]}>
+          <boxGeometry args={[1.7, 0.02, 0.01]} />
+          <primitive object={MAT_WOOD_GRAIN} attach="material" />
+        </mesh>
 
-      {/* Symbol */}
-      <Text
-        position={[-0.6, 0, 0.03]}
-        fontSize={0.25}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {symbol}
-      </Text>
+        {/* Symbol */}
+        <Text
+          position={[-0.6, 0, 0.03]}
+          fontSize={0.25}
+          color="#ffffff"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {symbol}
+        </Text>
 
-      {/* Text */}
-      <Text
-        position={[0.1, 0, 0.03]}
-        fontSize={0.2}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-        letterSpacing={0.1}
-      >
-        {text}
-      </Text>
-    </group>
-  );
-});
+        {/* Text */}
+        <Text
+          position={[0.1, 0, 0.03]}
+          fontSize={0.2}
+          color="#ffffff"
+          anchorX="center"
+          anchorY="middle"
+          letterSpacing={0.1}
+        >
+          {text}
+        </Text>
+      </group>
+    );
+  },
+);
 // ---------------------------------------------------------------------------
 // TALL WINDOW
 // ---------------------------------------------------------------------------
@@ -634,7 +678,15 @@ const OrnamentalShrub = memo(
 // ---------------------------------------------------------------------------
 // MAIN HOUSE COMPONENT
 // ---------------------------------------------------------------------------
-export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { entranceOpen?: boolean; onOpenScroll?: (id: string) => void; onBookClick?: (bookName: string) => void }) => {
+export const House = ({
+  entranceOpen = false,
+  onOpenScroll,
+  onBookClick,
+}: {
+  entranceOpen?: boolean;
+  onOpenScroll?: (id: string) => void;
+  onBookClick?: (bookName: string) => void;
+}) => {
   const floorTexture = useTexture("/textures/floor.jpg");
 
   // Memoize texture setup so it only runs once
@@ -698,126 +750,165 @@ export const House = ({ entranceOpen = false, onOpenScroll, onBookClick }: { ent
         >
           <primitive object={matFloor} attach="material" />
         </Plane>
-        <NamePlate position={[-2.5, 2.5, -3.85]} text="PROJECTS" symbol="💻" scale={0.7} />
-        <NamePlate position={[2.5, 2.5, -3.85]} text="SKILLS" symbol="⚡" scale={0.7} />
-        <NamePlate position={[-W/2 +0.14  , 2.5, 0]} text="CONNECT" symbol="🌐" scale={0.7}rotation={[0, Math.PI / 2, 0]} />
-        <SocialWall 
-          position={[-W / 2 + 0.14, 1.5, 0]} 
-          rotation={[0, Math.PI/2 , 0]} 
-          scale={0.5 }
-        />    
+        <NamePlate
+          position={[-2.5, 2.5, -3.85]}
+          text="PROJECTS"
+          symbol="💻"
+          scale={0.7}
+        />
+        <NamePlate
+          position={[2.5, 2.5, -3.85]}
+          text="SKILLS"
+          symbol="⚡"
+          scale={0.7}
+        />
+        <NamePlate
+          position={[-W / 2 + 0.14, 2.5, 0]}
+          text="CONNECT"
+          symbol="🌐"
+          scale={0.7}
+          rotation={[0, Math.PI / 2, 0]}
+        />
+        <SocialWall
+          position={[-W / 2 + 0.14, 1.5, 0]}
+          rotation={[0, Math.PI / 2, 0]}
+          scale={0.5}
+        />
 
-       {/* --- PROJECT CARDS --- */}
+        {/* --- PROJECT CARDS --- */}
         {/* Top Hexagon */}
-        <HexProjectCard 
-          position={[-2.5, 1.9, -3.85]} 
-          title="SupplyLink" 
-          subtitle="Full-Stack Web" 
-          symbol="🔗" 
+        <HexProjectCard
+          position={[-2.3, 1.55, -3.85]}
+          title="SupplyLink"
+          subtitle="Full-Stack Web"
+          symbol="🔗"
           scale={0.3}
-          onClick={() => onOpenScroll?.('SupplyLink')}
+          onClick={() => onOpenScroll?.("SupplyLink")}
         />
-        
+
         {/* Bottom Left Hexagon */}
-        <HexProjectCard 
-          position={[-2.7, 1.55, -3.85]} 
-          title="Link Saver" 
-          subtitle="Android App" 
-          symbol="💾" 
+        <HexProjectCard
+          position={[-2.7, 1.55, -3.85]}
+          title="Link Saver"
+          subtitle="Android App"
+          symbol="💾"
           scale={0.3}
-          onClick={() => onOpenScroll?.('Link Saver')}
+          onClick={() => onOpenScroll?.("Link Saver")}
         />
-        
+
         {/* Bottom Right Hexagon */}
-        <HexProjectCard 
-          position={[-2.3, 1.55, -3.85]} 
+        <HexProjectCard
+          position={[-2.5, 1.9, -3.85]}
           title="
 
     Insurance
     Premium 
-    " 
+    "
           subtitle="
           
-    ML Model" 
-          symbol="🤖" 
+    ML Model"
+          symbol="🤖"
           scale={0.3}
-          onClick={() => onOpenScroll?.('insurance_premium_prediction_model')}
+          onClick={() => onOpenScroll?.("insurance_premium_prediction_model")}
         />
-        <HexProjectCard 
-          position={[-2.5, 1.2, -3.85]} 
+        <HexProjectCard
+          position={[-2.5, 1.2, -3.85]}
           title="MQCMaker"
-          subtitle="Quiz Generator" 
-          symbol="🔗" 
+          subtitle="Quiz Generator"
+          symbol="🔗"
           scale={0.3}
-          onClick={() => onOpenScroll?.('MQCMaker')}
+          onClick={() => onOpenScroll?.("MQCMaker")}
         />
-        <HexProjectCard 
-          position={[-2.9, 1.2, -3.85]} 
-          title="BiteLO" 
-          subtitle="Full-Stack Web" 
-          symbol="🔗" 
+        <HexProjectCard
+          position={[-2.9, 1.2, -3.85]}
+          title="BiteLO"
+          subtitle="Full-Stack Web"
+          symbol="🔗"
           scale={0.3}
-          onClick={() => onOpenScroll?.('BiteLO')}
+          onClick={() => onOpenScroll?.("BiteLO")}
         />
-        <HexProjectCard 
-          position={[-2.1, 1.2, -3.85]} 
-          title="SupplyLink" 
-          subtitle="Full-Stack Web" 
-          symbol="🔗" 
+        <HexProjectCard
+          position={[-2.1, 1.2, -3.85]}
+          title="Converter-Hub"
+          subtitle="Full-Stack Web"
+          symbol="🔗"
           scale={0.3}
-          onClick={() => onOpenScroll?.('SupplyLink')}
+          onClick={() => onOpenScroll?.("converter-hub")}
         />
-        <Bookshelf position={[0, 1.35, -3.5]} scale={0.3} onBookClick={onBookClick} />
+        <Bookshelf
+          position={[0, 1.35, -3.5]}
+          scale={0.3}
+          onBookClick={onBookClick}
+        />
         {/* --- Skill CARDS --- */}
         {/* --- 1 skill hexagon--- */}
-        <HexProjectCard 
-          position={[2.5, 2, -3.85]} 
-          title="Python" 
-          subtitle="Programming Language" 
-          symbol="🔗" 
-          scale={0.4}
-          onClick={() => onOpenScroll?.('python')}
+        <HexProjectCard
+          position={[2.5, 2, -3.85]}
+          title="Python"
+          subtitle="Programming Language"
+          symbol="🔗"
+          scale={0.35}
+          onClick={() => onOpenScroll?.("python")}
         />
-        
+
         {/* --- 2.1 skill hexagon --- */}
-        <HexProjectCard 
-          position={[2.2, 1.5, -3.85]} 
-          title="fastAPI" 
-          subtitle="Backend Framework" 
-          symbol="🤖" 
-          scale={0.4}
-          onClick={() => onOpenScroll?.('fastapi')}
+        <HexProjectCard
+          position={[2.26, 1.59, -3.85]}
+          title="fastAPI"
+          subtitle="Backend Framework"
+          symbol="🤖"
+          scale={0.35}
+          onClick={() => onOpenScroll?.("fastapi")}
         />
-           {/* --- 2.2 skill hexagon --- */}
-        <HexProjectCard 
-          position={[2.8, 1.5, -3.85]} 
-          title="AI/ML" 
-          subtitle="LLMOps & Models" 
-          symbol="💾" 
-          scale={0.4}
-          onClick={() => onOpenScroll?.('ai_ml')}
-        /> 
-    {/* --- 3 skill hexagon --- */}
-        <HexProjectCard 
-          position={[2.5, 1, -3.85]} 
-          title="SQL" 
-          subtitle="Database Management" 
-          symbol="🔗" 
-          scale={0.4}
-          onClick={() => onOpenScroll?.('sql')}
+        {/* --- 2.2 skill hexagon --- */}
+        <HexProjectCard
+          position={[2.74, 1.59, -3.85]}
+          title="AI/ML"
+          subtitle="LLMOps & Models"
+          symbol="💾"
+          scale={0.35}
+          onClick={() => onOpenScroll?.("ai_ml")}
+        />
+        {/* --- 3.2 skill hexagon --- */}
+        <HexProjectCard
+          position={[2.5, 1.18, -3.85]}
+          title="SQL"
+          subtitle="Database Management"
+          symbol="🔗"
+          scale={0.35}
+          onClick={() => onOpenScroll?.("sql")}
+        />
+        {/* --- 3.1 skill hexagon --- */}
+        <HexProjectCard
+          position={[2.03, 1.18, -3.85]}
+          title="Docker"
+          subtitle="Containerization"
+          symbol="🔗"
+          scale={0.35}
+          onClick={() => onOpenScroll?.("docker")}
+        />
+        {/* --- 3.3 skill hexagon --- */}
+        <HexProjectCard
+          position={[2.96, 1.18, -3.85]}
+          title="Google Cloud 
+    Platform
+    "
+          subtitle="cloud Services"
+          symbol=""
+          scale={0.35}
+          onClick={() => onOpenScroll?.("google-cloud-platform")}
         />
         <group position={[4, 1.7, -3.8]} scale={0.08}>
           <TubeClock />
         </group>
-        <group position={[4.2, 1.79, 0]} scale={0.33}>
+        <group position={[4.2, 1.67, 0]} scale={0.3}>
           <TravelGlobe
             origin={{ lat: 34.0522, lon: -118.2437, label: "Los Angeles" }}
             destinations={[
-              { lat: 40.7128, lon: -74.0060, label: "New York" },
+              { lat: 40.7128, lon: -74.006, label: "New York" },
               { lat: 51.5074, lon: -0.1278, label: "London" },
             ]}
           />
-          
         </group>
 
         {/* Side walls with window cutouts */}

@@ -1,13 +1,6 @@
 import { useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import {
-  Suspense,
-  lazy,
-  useCallback,
-  useEffect,
-  useState,
-  useRef,
-} from "react";
+import { Suspense, useCallback, useEffect, useState, useRef } from "react";
 import gsap from "gsap";
 import * as THREE from "three";
 
@@ -17,7 +10,10 @@ import Loader from "@mylife/loader";
 import { ScrollUI } from "@mylife/scroll";
 import { BookViewer } from "@mylife/book-slider";
 import { AssistantWidget, useWidgetStore } from "@mylife/chatbot";
+
+import { useAtomValue } from "jotai";
 import { GlobalCanvas } from "@mylife/core-engine";
+import { isMobileAtom } from "@mylife/core-engine";
 
 const CAMERA_TARGETS: Record<
   string,
@@ -62,6 +58,9 @@ const CameraDirector = ({
 }) => {
   const { camera } = useThree();
 
+  // 1. Hook into your engine's device state
+  const isMobile = useAtomValue(isMobileAtom);
+
   useEffect(() => {
     camera.position.set(20, 15, 30);
     const lookTarget = new THREE.Vector3(0, 1.5, 2.5);
@@ -87,10 +86,14 @@ const CameraDirector = ({
     tl.call(() => onOpenDoor());
     tl.to({}, { duration: 1.5 });
 
+    // 2. Determine the final stopping point based on device
+    // Desktop stops at 0. Mobile stops closer at -2.5 (adjust this number if needed)
+    const finalCameraZ = isMobile ? -2 : 0;
+
     tl.to(camera.position, {
       x: 0,
       y: 1.6,
-      z: 0,
+      z: finalCameraZ, // 3. Use the responsive value here
       duration: 3,
       ease: "power2.inOut",
       onUpdate: () => {
@@ -102,7 +105,7 @@ const CameraDirector = ({
     return () => {
       tl.kill();
     };
-  }, [camera, onIntroFinish, onOpenDoor]);
+  }, [camera, onIntroFinish, onOpenDoor, isMobile]);
 
   return null;
 };
@@ -168,6 +171,7 @@ export default function App() {
   const [activeScrollId, setActiveScrollId] = useState<string | null>(null);
   const [activeBook, setActiveBook] = useState<string | null>(null);
   const [bookOpacity, setBookOpacity] = useState(false);
+  const isMobile = useAtomValue(isMobileAtom);
 
   const controlsRef = useRef<any>(null);
   const bookTransitionTimer = useRef<number | null>(null);
@@ -332,11 +336,11 @@ export default function App() {
 
                 <OrbitControls
                   ref={controlsRef}
-                  target={[0, 1.5, -2]}
+                  target={[0, 1.5, isMobile ? -4.5 : -2]}
                   enablePan={true}
                   maxPolarAngle={Math.PI / 2 - 0.05}
-                  minDistance={1}
-                  maxDistance={15}
+                  minDistance={0.01}
+                  maxDistance={40}
                   mouseButtons={{
                     LEFT: THREE.MOUSE.ROTATE,
                     MIDDLE: THREE.MOUSE.DOLLY,

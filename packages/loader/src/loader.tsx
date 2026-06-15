@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-
+import { useState, useEffect, useRef } from "react";
+import "./loader.css";
+import { ChatbotAPI } from "@mylife/chatbot";
 import { PingPongDotLoader } from "./PingPongLoader";
 import { GlitchGreeting } from "./GlitchTextLoader";
 import { ProfileIcon } from "./ProfileIcon";
@@ -35,6 +36,21 @@ export default function Loader({
       clearTimeout(mountTimer);
       window.removeEventListener("resize", handleResize);
     };
+  }, []);
+
+  // Guard against double invocation in React StrictMode (dev only)
+  const healthCheckRanRef = useRef(false);
+  useEffect(() => {
+    if (healthCheckRanRef.current) return;
+    healthCheckRanRef.current = true;
+    (async () => {
+      try {
+        const ok = await ChatbotAPI.healthCheck();
+        console.log("Health check result:", ok);
+      } catch (e) {
+        console.error("Health check failed", e);
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -82,7 +98,7 @@ export default function Loader({
     },
     {
       name: "YouTube",
-      url: "#",
+      url: "https://www.youtube.com/@InitToInfinity",
       pngSrc: "/loader/youtube.svg",
       x: innerX,
       y: -spreadY,
@@ -108,69 +124,7 @@ export default function Loader({
 
   return (
     <div className="loader-screen">
-      <style>{`
-          .loader-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 100dvw;
-            height: 100dvh;
-            background-color: #0d0d14;
-            overflow: hidden;
-            position: absolute; 
-            top: 0;
-            left: 0;
-            z-index: 999; 
-          }
-
-          .neon-profile-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            z-index: 1; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 60px;
-            height: 60px;
-            background: #12121c;
-            border-radius: 50%;
-            box-shadow: 0 0 15px 4px rgba(255, 255, 255, 0.5);
-            z-index: 20;
-            cursor: pointer;
-            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, box-shadow 0.35s ease, filter 0.35s ease;
-          }
-
-          @media (max-width: 480px) {
-            .neon-profile-icon {
-              width: 50px;
-              height: 50px;
-            }
-          }
-
-          .neon-profile-icon:focus-visible {
-            outline: 2px solid rgba(0, 255, 255, 0.8);
-            outline-offset: 2px;
-          }
-
-          .neon-profile-icon.icon-hovered {
-            background: #1a1a24;
-            box-shadow: 0 0 25px 12px rgba(0, 255, 255, 0.7), 0 0 50px 25px rgba(0, 255, 255, 0.3);
-            filter: brightness(1.15);
-          }
-
-          .neon-profile-icon.icon-pressed {
-            box-shadow: 0 0 35px 20px rgba(0, 255, 255, 0.9), 0 0 70px 35px rgba(0, 255, 255, 0.4);
-            filter: brightness(1.35);
-          }
-
-          @media (prefers-reduced-motion: reduce) {
-            .neon-profile-icon {
-              transition: none;
-            }
-          }
-        `}</style>
+      {/* Styles moved to loader.css */}
 
       {/* Shift the central loaders and icons UP on mobile 
         to balance the layout and make room for the stacked buttons.

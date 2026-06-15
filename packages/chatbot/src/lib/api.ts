@@ -15,16 +15,14 @@ const request = async <T>(url: string, init: RequestInit): Promise<T> => {
       
       try {
         const errorBody = await response.json();
-        // Parse FastAPI validation errors
         if (errorBody.detail) {
           if (Array.isArray(errorBody.detail)) {
-            errorMessage = errorBody.detail[0].msg; // Extracts: "value is not a valid email address..."
+            errorMessage = errorBody.detail[0].msg; 
           } else if (typeof errorBody.detail === "string") {
             errorMessage = errorBody.detail;
           }
         }
       } catch (e) {
-        // Fallback to default error if response isn't JSON
       }
       
       throw new Error(errorMessage);
@@ -51,6 +49,26 @@ export const ChatbotAPI = {
     }
     return response;
   },
+
+async healthCheck(): Promise<boolean> {
+  const controller = new AbortController();
+  // Set a 5-second timeout to abort the request
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const response = await fetch(API_BASE_URL, { 
+      method: 'GET', 
+      signal: controller.signal 
+    });
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    // Always clear timeouts to prevent memory leaks
+    clearTimeout(timeoutId);
+  }
+},
+
 
  async sendTextFeedback(payload: { name?: string; email?: string; message: string }) {
     return request(`${API_BASE_URL}/api/feedback/text`, {
