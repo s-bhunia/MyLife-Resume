@@ -341,10 +341,12 @@ export default function App() {
                   maxPolarAngle={Math.PI / 2 - 0.05}
                   minDistance={0.01}
                   maxDistance={40}
+                  rotateSpeed={0.5}
+                  // enableDamping={false}
                   mouseButtons={{
-                    LEFT: THREE.MOUSE.ROTATE,
+                    LEFT: THREE.MOUSE.PAN,
                     MIDDLE: THREE.MOUSE.DOLLY,
-                    RIGHT: THREE.MOUSE.PAN,
+                    RIGHT: THREE.MOUSE.ROTATE,
                   }}
                   onStart={() => {
                     if (useWidgetStore.getState().targetAction) {

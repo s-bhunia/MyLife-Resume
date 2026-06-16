@@ -9,7 +9,6 @@ import locationData from "./locations.json";
 
 function App() {
   return (
-    // Disable default context menu on the container to allow Right-Click Drag
     <div
       style={{ width: "100vw", height: "100vh", background: "#1a1a1a" }}
       onContextMenu={(e) => e.preventDefault()}
@@ -49,5 +48,5 @@ function App() {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
 );

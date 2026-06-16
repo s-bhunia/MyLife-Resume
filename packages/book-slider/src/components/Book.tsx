@@ -16,6 +16,7 @@ import {
   Vector3,
   Texture,
   Group,
+  SRGBColorSpace,
 } from "three";
 import { pageAtom, pagesAtom } from "./UI";
 
@@ -65,8 +66,7 @@ pageGeometry.setAttribute(
   new Float32BufferAttribute(skinWeights, 4),
 );
 
-// Kept the pure white fix to prevent dull images
-const whiteColor = new Color("#e6e3e3");
+const whiteColor = new Color("#ffffff");
 const emissiveColor = new Color("rgb(0, 0, 0)");
 
 const pageMaterials = [
@@ -101,7 +101,6 @@ const Page = ({
 }: PageProps): React.JSX.Element => {
   const base = `/book-slider/books/${bookName}/`;
 
-  // RESTORED: useTexture to load everything at once via Suspense
   const [picture, picture2, pictureRoughness] = useTexture([
     `${base}images/${front}`,
     `${base}images/${back}`,
@@ -109,7 +108,16 @@ const Page = ({
       ? [`/book-slider/images/book-cover-roughness.webp`]
       : []),
   ]) as [Texture, Texture, Texture | undefined];
-
+  useMemo(() => {
+    if (picture) {
+      picture.colorSpace = SRGBColorSpace;
+      picture.needsUpdate = true;
+    }
+    if (picture2) {
+      picture2.colorSpace = SRGBColorSpace;
+      picture2.needsUpdate = true;
+    }
+  }, [picture, picture2]);
   const group = useRef<Group>(null);
   const turnedAt = useRef(0);
   const lastOpened = useRef(opened);
