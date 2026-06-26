@@ -12,22 +12,29 @@ export const useGhostWriter = (text: string = "", wordSpeedMs: number = 100) => 
     }
     
     setIsTyping(true);
-    const words = text.split(' ');
-    let currentWordIndex = 0;
-    
     setDisplayedText(""); // Reset on new text
 
-    const interval = setInterval(() => {
-      // Re-join the array up to the current word
-      const currentString = words.slice(0, currentWordIndex + 1).join(' ');
-      setDisplayedText(currentString);
-      
-      currentWordIndex++;
+    // THE FIX: Matches Links | Bold | Headings | List Items | Whole Words | Stray Spaces
+    const tokenRegex = /(\[.*?\]\(.*?\))|(\*\*.*?\*\*)|(#{1,6}\s)|(-\s)|(\S+\s*)|(\s+)/g;
+    
+    // Convert the text into an array of words and markdown blocks
+    const tokensArray = Array.from(text.matchAll(tokenRegex)).map(m => m[0]);
 
-      if (currentWordIndex >= words.length) {
+    let currentTokenIndex = 0;
+    let currentString = '';
+
+    const interval = setInterval(() => {
+      if (currentTokenIndex >= tokensArray.length) {
         clearInterval(interval);
         setIsTyping(false);
+        return;
       }
+      
+      // Append the next token (a full word or a full markdown block)
+      currentString += tokensArray[currentTokenIndex];
+      setDisplayedText(currentString);
+      
+      currentTokenIndex++;
     }, wordSpeedMs);
 
     return () => clearInterval(interval);

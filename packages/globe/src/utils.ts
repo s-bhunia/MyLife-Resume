@@ -3,11 +3,6 @@ import * as THREE from 'three';
 /**
  * Converts latitude and longitude coordinates to a 3D vector (x, y, z)
  * on the surface of a sphere.
- *
- * @param lat - Latitude (in degrees)
- * @param lon - Longitude (in degrees)
- * @param radius - The radius of the sphere
- * @returns A THREE.Vector3 representing the position on the sphere's surface.
  */
 export function latLonToVector3(
   lat: number,
@@ -16,12 +11,15 @@ export function latLonToVector3(
 ): THREE.Vector3 {
   // Convert degrees to radians
   const phi = (90 - lat) * (Math.PI / 180);
-  const theta = (lon + 180) * (Math.PI / 180);
+  
+  // The offset aligns the math with the Three.js texture wrapping.
+  // Standard equirectangular maps usually require a +90 or -90 degree offset.
+ const theta = (lon-180) * (Math.PI / 180);
 
-  // Calculate coordinates
+  // Calculate Cartesian coordinates
   const x = -(radius * Math.sin(phi) * Math.cos(theta));
-  const z = radius * Math.sin(phi) * Math.sin(theta);
   const y = radius * Math.cos(phi);
+  const z = radius * Math.sin(phi) * Math.sin(theta);
 
   return new THREE.Vector3(x, y, z);
 }

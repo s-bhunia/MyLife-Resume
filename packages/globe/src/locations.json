@@ -1,13 +1,13 @@
 {
-    "origin": {
-      "lat": 1,
-      "lon": 1,
-      "label": "Barrackpore"
-    },
-    "destinations": [
-      { "lat": 3.723917, "lon": 7.093829, "label": "Paris" },
-      { "lat": 26.829546 , "lon": 80.891515, "label": "Tokyo" },
-      { "lat": 19.869403, "lon": 85.928733, "label": "Sydney" },
-      { "lat": 51.5074, "lon": -0.1278, "label": "London" }
-    ]
-  }
+  "origin": {
+    "lat": 22.7656,
+    "lon": 88.3773,
+    "label": "Barrackpore"
+  },
+  "destinations": [
+    { "lat": 30.7351, "lon":  79.0669, "label": "Kadernath" },
+    { "lat": 27.0863, "lon": 88.6615, "label": "Lava" },
+    { "lat": 19.8177, "lon": 85.8286, "label": "Puri" },
+    { "lat": 23.3443, "lon": 85.8286, "label": "Jharkhand" }
+  ]
+}

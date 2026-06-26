@@ -1,7 +1,7 @@
 // globe/src/TravelGlobe.tsx
 import React, { useMemo, useEffect, useRef } from "react";
 import * as THREE from "three";
-import { useFrame, ThreeEvent } from "@react-three/fiber";
+import { useFrame, ThreeEvent, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import { latLonToVector3 } from "./utils";
 import AnimatedArc from "./AnimatedArc";
@@ -26,6 +26,7 @@ interface TravelGlobeProps {
   globeScale?: [number, number, number] | number;
   earthTiltDeg?: number;
   autoRotateSpeed?: number;
+  onClick?: () => void;
 }
 
 const TravelGlobe: React.FC<TravelGlobeProps> = ({
@@ -37,6 +38,7 @@ const TravelGlobe: React.FC<TravelGlobeProps> = ({
   globeScale = 1,
   earthTiltDeg = 23.5,
   autoRotateSpeed = 0.08,
+  onClick,
 }) => {
   const globeGroupRef = useRef<THREE.Group>(null);
   const isDragging = useRef(false);
@@ -77,10 +79,15 @@ const TravelGlobe: React.FC<TravelGlobeProps> = ({
     }
   });
 
+  const { controls } = useThree();
+
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
     if (e.nativeEvent.button === 2) {
       e.stopPropagation();
       isDragging.current = true;
+      (e.target as Element).setPointerCapture(e.pointerId);
+
+      if (controls) (controls as any).enabled = false;
       previousMouseX.current = e.clientX;
       document.body.style.cursor = "grabbing";
     }
@@ -88,6 +95,7 @@ const TravelGlobe: React.FC<TravelGlobeProps> = ({
 
   const handlePointerUp = () => {
     isDragging.current = false;
+    if (controls) (controls as any).enabled = true;
     document.body.style.cursor = "auto";
   };
 
@@ -104,11 +112,12 @@ const TravelGlobe: React.FC<TravelGlobeProps> = ({
   useEffect(() => {
     const handleGlobalUp = () => {
       isDragging.current = false;
+      if (controls) (controls as any).enabled = true;
       document.body.style.cursor = "auto";
     };
     window.addEventListener("pointerup", handleGlobalUp);
     return () => window.removeEventListener("pointerup", handleGlobalUp);
-  }, []);
+  }, [controls]);
 
   const getScale = (
     scale?: [number, number, number] | number,
@@ -135,6 +144,11 @@ const TravelGlobe: React.FC<TravelGlobeProps> = ({
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
+            onContextMenu={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onClick) onClick();
+            }}
           >
             <sphereGeometry args={[globeRadius, 64, 64]} />
             <meshStandardMaterial

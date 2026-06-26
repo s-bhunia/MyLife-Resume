@@ -135,3 +135,36 @@
   color: #bf943f;
   border-bottom: 1px solid #bf953f;
 }
+/* --- Markdown Elements Styling --- */
+
+.mylife-scroll-content h2 {
+  color: #5c1a06; /* Royal reddish-brown */
+  font-size: 1.5rem;
+  border-bottom: 1px solid #c8a97e;
+  padding-bottom: 5px;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
+
+.mylife-scroll-content h3 {
+  color: #8a6519; /* Dull gold */
+  font-size: 1.2rem;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
+
+.mylife-scroll-content ul {
+  padding-left: 20px;
+  margin-bottom: 1em;
+  list-style-type: square;
+}
+
+.mylife-scroll-content li {
+  margin-bottom: 0.5em;
+}
+
+.mylife-scroll-content p {
+  margin-bottom: 1em;
+}

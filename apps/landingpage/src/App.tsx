@@ -396,6 +396,7 @@ export default function App() {
                 <SmartCameraController controlsRef={controlsRef} />
 
                 <OrbitControls
+                  makeDefault
                   ref={controlsRef}
                   target={[0, 1.5, isMobile ? -4.5 : -2]}
                   enablePan={true}

@@ -14,6 +14,7 @@ import { Bookshelf } from "@mylife/bookshelf";
 import { TubeClock } from "@mylife/tube-clock";
 import { TravelGlobe } from "@mylife/globe";
 import { SocialWall } from "./SocialMedia";
+import locationData from "../../../../packages/globe/src/locations.json";
 
 // --- ARCHITECTURAL CONSTANTS ---
 const W = 10;
@@ -903,11 +904,9 @@ export const House = ({
         </group>
         <group position={[4.2, 1.67, 0]} scale={0.3}>
           <TravelGlobe
-            origin={{ lat: 34.0522, lon: -118.2437, label: "Los Angeles" }}
-            destinations={[
-              { lat: 40.7128, lon: -74.006, label: "New York" },
-              { lat: 51.5074, lon: -0.1278, label: "London" },
-            ]}
+            origin={locationData.origin}
+            destinations={locationData.destinations}
+            onClick={() => onOpenScroll?.("globe_travel_history")}
           />
         </group>
 
