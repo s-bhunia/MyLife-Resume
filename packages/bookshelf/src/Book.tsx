@@ -9,8 +9,10 @@ interface BookProps {
   width?: number;
   height?: number;
   depth?: number;
-  onClick?: () => void; // <-- Add this for your future routing
+  onClick?: () => void;
 }
+
+const EPS = 0.001; // Epsilon threshold for early return
 
 export default function Book({
   position,
@@ -23,28 +25,28 @@ export default function Book({
   const coverTexture = useTexture(coverUrl);
   coverTexture.colorSpace = THREE.SRGBColorSpace;
 
-  // 1. Create a reference to directly manipulate the mesh in the render loop
   const meshRef = useRef<THREE.Mesh>(null);
-
-  // 2. Track whether the mouse is over this specific book
   const [hovered, setHovered] = useState(false);
 
   const tiltAngle: [number, number, number] = [-0.15, 0, 0];
-
-  // 3. Define the target Z position.
-  // If hovered, we pull the book forward by 0.2 units. Otherwise, it stays at its original position.
   const targetZ = hovered ? position[2] + 0.9 : position[2];
 
-  // 4. useFrame runs on every single frame (like 60fps)
-  useFrame(() => {
-    if (meshRef.current) {
-      // Smoothly animate the current Z position towards the targetZ
-      meshRef.current.position.z = THREE.MathUtils.lerp(
-        meshRef.current.position.z,
-        targetZ,
-        0.1, // This number controls the speed of the animation. Lower is slower.
-      );
-    }
+  useFrame((_, delta) => {
+    if (!meshRef.current) return;
+
+    const currentZ = meshRef.current.position.z;
+    const zDiff = Math.abs(currentZ - targetZ);
+
+    // Stop calculating if the book has reached its destination
+    if (zDiff < EPS) return;
+
+    // Use damp instead of lerp for framerate-independent smoothing
+    meshRef.current.position.z = THREE.MathUtils.damp(
+      currentZ,
+      targetZ,
+      6,
+      delta,
+    );
   });
 
   return (
@@ -52,18 +54,17 @@ export default function Book({
       ref={meshRef}
       position={position}
       rotation={tiltAngle}
-      // --- Interaction Events ---
-      onPointerOver={(_e) => {
-        _e.stopPropagation(); // Prevents triggering hover on objects behind the book
+      onPointerOver={(e) => {
+        e.stopPropagation();
         setHovered(true);
-        document.body.style.cursor = "pointer"; // Change to hand cursor
+        document.body.style.cursor = "pointer";
       }}
-      onPointerOut={(_e) => {
+      onPointerOut={() => {
         setHovered(false);
-        document.body.style.cursor = "auto"; // Revert cursor
+        document.body.style.cursor = "auto";
       }}
-      onClick={(_e) => {
-        _e.stopPropagation();
+      onClick={(e) => {
+        e.stopPropagation();
         if (onClick) {
           onClick();
         } else {
@@ -74,7 +75,6 @@ export default function Book({
       }}
     >
       <boxGeometry args={[width, height, depth]} />
-
       <meshStandardMaterial
         attach="material-0"
         color="#f5f5dc"
@@ -100,7 +100,6 @@ export default function Book({
         map={coverTexture}
         toneMapped={false}
         color="#ffffff"
-       
       />
       <meshStandardMaterial
         attach="material-5"

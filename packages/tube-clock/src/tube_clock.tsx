@@ -1,7 +1,4 @@
-import { useState, useRef, memo } from "react";
-import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
-
+import { useState, memo } from "react";
 import { LampBody } from "./LampBody";
 import { NeonClock } from "./NeonClock";
 import { KnobControl } from "./KnobControl";
@@ -28,8 +25,8 @@ const TubeClockContent = memo(
   },
 );
 
-// Animated wrapper - handles rotation without causing content re-renders
-const TubeClockAnimated = memo(
+// Animated wrapper replaced with a static group to save GPU
+const TubeClockStatic = memo(
   ({
     brightness,
     setBrightness,
@@ -37,18 +34,8 @@ const TubeClockAnimated = memo(
     brightness: number;
     setBrightness: (val: number) => void;
   }) => {
-    const groupRef = useRef<THREE.Group>(null);
-
-    useFrame((state) => {
-      if (groupRef.current) {
-        const t = state.clock.getElapsedTime();
-        groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.05;
-        groupRef.current.rotation.x = Math.cos(t * 0.6) * 0.02;
-      }
-    });
-
     return (
-      <group  position={[0, 2, 0]}>
+      <group position={[0, 2, 0]}>
         <TubeClockContent
           brightness={brightness}
           setBrightness={setBrightness}
@@ -63,6 +50,6 @@ export default function TubeClock() {
   const [brightness, setBrightness] = useState(2.0);
 
   return (
-    <TubeClockAnimated brightness={brightness} setBrightness={setBrightness} />
+    <TubeClockStatic brightness={brightness} setBrightness={setBrightness} />
   );
 }

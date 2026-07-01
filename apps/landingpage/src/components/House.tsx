@@ -50,29 +50,34 @@ const HexProjectCard = memo(
     const groupRef = useRef<THREE.Group>(null);
     const glowRef = useRef<THREE.Mesh>(null);
 
-    useFrame((_, delta) => {
-      if (groupRef.current) {
-        // Pop out on the Z axis when hovered
-        const targetZ = hovered ? position[2] + 0.15 : position[2];
-        groupRef.current.position.z = THREE.MathUtils.damp(
-          groupRef.current.position.z,
-          targetZ,
-          6,
-          delta,
-        );
-      }
+    const EPS = 0.001;
 
-      if (glowRef.current) {
-        // Fade the glow in and out
-        const material = glowRef.current.material as THREE.MeshBasicMaterial;
-        const targetOpacity = hovered ? 0.6 : 0.0;
-        material.opacity = THREE.MathUtils.damp(
-          material.opacity,
-          targetOpacity,
-          6,
-          delta,
-        );
-      }
+    useFrame((_, delta) => {
+      if (!groupRef.current || !glowRef.current) return;
+
+      const targetZ = hovered ? position[2] + 0.15 : position[2];
+      const material = glowRef.current.material as THREE.MeshBasicMaterial;
+      const targetOpacity = hovered ? 0.6 : 0.0;
+
+      const zDiff = Math.abs(groupRef.current.position.z - targetZ);
+      const opDiff = Math.abs(material.opacity - targetOpacity);
+
+      // If both animations are within 0.001 of their target, stop calculating
+      if (zDiff < EPS && opDiff < EPS) return;
+
+      groupRef.current.position.z = THREE.MathUtils.damp(
+        groupRef.current.position.z,
+        targetZ,
+        6,
+        delta,
+      );
+
+      material.opacity = THREE.MathUtils.damp(
+        material.opacity,
+        targetOpacity,
+        6,
+        delta,
+      );
     });
 
     // The rotation [Math.PI / 2, 0, Math.PI / 2] creates a perfect "Pointy-Top" hexagon.
@@ -94,11 +99,11 @@ const HexProjectCard = memo(
         onPointerOver={(e) => {
           e.stopPropagation();
           setHovered(true);
-          document.body.style.cursor = "pointer";
         }}
         onPointerOut={(e) => {
           e.stopPropagation();
           setHovered(false);
+          // Revert to default cursor
           document.body.style.cursor = "auto";
         }}
       >

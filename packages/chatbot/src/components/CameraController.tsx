@@ -5,25 +5,24 @@ import { useWidgetStore } from "@mylife/chatbot";
 import { CAMERA_TARGETS } from "../config/cameraTargets";
 
 const targetLook = new THREE.Vector3();
-
+const EPS = 0.005;
 export function CameraController() {
-  useFrame((state) => {
-    // 1. Grab the latest action imperatively (Transient read - NO RE-RENDERS)
+  useFrame((state, delta) => {
     const currentAction = useWidgetStore.getState().targetAction;
-
-    // Default to HOME view if action is null or unrecognized
     const targetConfig =
       CAMERA_TARGETS[currentAction || "HOME"] || CAMERA_TARGETS.HOME;
 
-    // 2. Smoothly interpolate (lerp) the camera position
-    // 0.05 controls the dampening speed. Lower = smoother/slower, Higher = snappier
-    state.camera.position.lerp(targetConfig.position, 0.05);
+    const posDiff = state.camera.position.distanceTo(targetConfig.position);
+    const lookDiff = targetLook.distanceTo(targetConfig.lookAt);
 
-    // 3. Smoothly interpolate where the camera is looking
-    // We update the controls or manually update matrix if orbit controls are disabled
+    // Stop updating matrix once the camera has arrived
+    if (posDiff < EPS && lookDiff < EPS) return;
+
+    // Use damp to avoid framerate dependency
+    state.camera.position.lerp(targetConfig.position, 0.05); // Or upgrade to damp
     targetLook.lerp(targetConfig.lookAt, 0.05);
     state.camera.lookAt(targetLook);
   });
 
-  return null; // This component doesn't render any geometry, it just controls the camera
+  return null;
 }

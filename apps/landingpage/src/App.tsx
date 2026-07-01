@@ -15,6 +15,7 @@ import { useAtomValue } from "jotai";
 import { GlobalCanvas } from "@mylife/core-engine";
 import { isMobileAtom } from "@mylife/core-engine";
 
+// --- CAMERA TARGETS ---
 const CAMERA_TARGETS: Record<
   string,
   { position: THREE.Vector3; lookAt: THREE.Vector3 }
@@ -49,6 +50,7 @@ const CAMERA_TARGETS: Record<
   },
 };
 
+// --- COMPONENTS ---
 const CameraDirector = ({
   onIntroFinish,
   onOpenDoor,
@@ -57,8 +59,6 @@ const CameraDirector = ({
   onOpenDoor: () => void;
 }) => {
   const { camera } = useThree();
-
-  // 1. Hook into your engine's device state
   const isMobile = useAtomValue(isMobileAtom);
 
   useEffect(() => {
@@ -86,14 +86,12 @@ const CameraDirector = ({
     tl.call(() => onOpenDoor());
     tl.to({}, { duration: 1.5 });
 
-    // 2. Determine the final stopping point based on device
-    // Desktop stops at 0. Mobile stops closer at -2.5 (adjust this number if needed)
     const finalCameraZ = isMobile ? -2 : 0;
 
     tl.to(camera.position, {
       x: 0,
       y: 1.6,
-      z: finalCameraZ, // 3. Use the responsive value here
+      z: finalCameraZ,
       duration: 3,
       ease: "power2.inOut",
       onUpdate: () => {
@@ -118,58 +116,62 @@ const SmartCameraController = ({
   useFrame((state) => {
     const targetAction = useWidgetStore.getState().targetAction;
 
-    if (targetAction && targetAction.startsWith("NAVIGATE_")) {
-      const targetConfig = CAMERA_TARGETS[targetAction];
-      if (targetConfig) {
-        state.camera.position.lerp(targetConfig.position, 0.03);
+    if (!targetAction || !targetAction.startsWith("NAVIGATE_")) {
+      if (controlsRef.current) {
+        const padding = 0.6;
+        const minX = -5 + padding,
+          maxX = 5 - padding;
+        const minZ = -4 + padding,
+          maxZ = 4 - padding;
+        const minY = 0.5,
+          maxY = 2.8;
 
+        state.camera.position.x = THREE.MathUtils.clamp(
+          state.camera.position.x,
+          minX,
+          maxX,
+        );
+        state.camera.position.y = THREE.MathUtils.clamp(
+          state.camera.position.y,
+          minY,
+          maxY,
+        );
+        state.camera.position.z = THREE.MathUtils.clamp(
+          state.camera.position.z,
+          minZ,
+          maxZ,
+        );
+
+        const target = controlsRef.current.target;
+        target.x = THREE.MathUtils.clamp(target.x, minX, maxX);
+        target.y = THREE.MathUtils.clamp(target.y, minY, maxY);
+        target.z = THREE.MathUtils.clamp(target.z, minZ, maxZ);
+      }
+      return;
+    }
+
+    const targetConfig = CAMERA_TARGETS[targetAction];
+    if (targetConfig) {
+      state.camera.position.lerp(targetConfig.position, 0.03);
+
+      if (controlsRef.current) {
+        controlsRef.current.target.lerp(targetConfig.lookAt, 0.03);
+        controlsRef.current.update();
+      }
+
+      const distPos = state.camera.position.distanceTo(targetConfig.position);
+      const distLook = controlsRef.current
+        ? controlsRef.current.target.distanceTo(targetConfig.lookAt)
+        : 0;
+
+      if (distPos < 0.1 && distLook < 0.1) {
+        state.camera.position.copy(targetConfig.position);
         if (controlsRef.current) {
-          controlsRef.current.target.lerp(targetConfig.lookAt, 0.03);
+          controlsRef.current.target.copy(targetConfig.lookAt);
           controlsRef.current.update();
         }
-
-        const distPos = state.camera.position.distanceTo(targetConfig.position);
-        const distLook = controlsRef.current
-          ? controlsRef.current.target.distanceTo(targetConfig.lookAt)
-          : 0;
-
-        if (distPos < 0.1 && distLook < 0.1) {
-          useWidgetStore.getState().setTargetAction(null);
-        }
+        useWidgetStore.getState().setTargetAction(null);
       }
-    } else if (controlsRef.current) {
-      // --- INVISIBLE WALLS FOR FREE ROAMING ---
-      // House dimensions based on House.tsx: W = 10, D = 8, H_TOTAL = ~3
-      const padding = 0.6; // Keeps the camera slightly away from the exact physical wall
-      const minX = -5 + padding;
-      const maxX = 5 - padding;
-      const minZ = -4 + padding;
-      const maxZ = 4 - padding;
-      const minY = 0.5; // Prevent clipping into the floor
-      const maxY = 2.8; // Prevent clipping through the ceiling
-
-      // 1. Clamp the camera position
-      state.camera.position.x = THREE.MathUtils.clamp(
-        state.camera.position.x,
-        minX,
-        maxX,
-      );
-      state.camera.position.y = THREE.MathUtils.clamp(
-        state.camera.position.y,
-        minY,
-        maxY,
-      );
-      state.camera.position.z = THREE.MathUtils.clamp(
-        state.camera.position.z,
-        minZ,
-        maxZ,
-      );
-
-      // 2. Clamp the OrbitControls panning target
-      const target = controlsRef.current.target;
-      target.x = THREE.MathUtils.clamp(target.x, minX, maxX);
-      target.y = THREE.MathUtils.clamp(target.y, minY, maxY);
-      target.z = THREE.MathUtils.clamp(target.z, minZ, maxZ);
     }
   });
   return null;
@@ -196,6 +198,7 @@ const ScenePreloader = ({ onSceneReady }: { onSceneReady: () => void }) => {
   return null;
 };
 
+// --- MAIN APP ---
 export default function App() {
   const [sceneReady, setSceneReady] = useState(false);
   const [introFinished, setIntroFinished] = useState(false);
@@ -204,20 +207,21 @@ export default function App() {
   const [activeScrollId, setActiveScrollId] = useState<string | null>(null);
   const [activeBook, setActiveBook] = useState<string | null>(null);
   const [bookOpacity, setBookOpacity] = useState(false);
+
   const isMobile = useAtomValue(isMobileAtom);
   const [showMobileControls, setShowMobileControls] = useState(false);
 
-  // Add a ref to lock the popup so it only ever fires once
+  const controlsRef = useRef<any>(null);
   const hasShownControlsRef = useRef(false);
+  const bookTransitionTimer = useRef<number | null>(null);
 
-  // --- UPDATE THIS USEEFFECT ---
+  const handleSceneReady = useCallback(() => setSceneReady(true), []);
+  const handleOpenDoor = useCallback(() => setDoorOpen(true), []);
+  const handleIntroFinish = useCallback(() => setIntroFinished(true), []);
+
   useEffect(() => {
-    // 1. Check if the device actually has a touch screen
-    // (This stops desktop users from triggering it by resizing their window or hitting F11)
     const isTouchDevice =
       "ontouchstart" in window || navigator.maxTouchPoints > 0;
-
-    // 2. Only show if it's a mobile/touch device, intro finished, and it hasn't been shown yet
     if (
       isMobile &&
       isTouchDevice &&
@@ -226,16 +230,9 @@ export default function App() {
       !hasShownControlsRef.current
     ) {
       setShowMobileControls(true);
-      hasShownControlsRef.current = true; // Lock it permanently for this session
+      hasShownControlsRef.current = true;
     }
   }, [isMobile, hasEntered, introFinished]);
-
-  const controlsRef = useRef<any>(null);
-  const bookTransitionTimer = useRef<number | null>(null);
-
-  const handleSceneReady = useCallback(() => setSceneReady(true), []);
-  const handleOpenDoor = useCallback(() => setDoorOpen(true), []);
-  const handleIntroFinish = useCallback(() => setIntroFinished(true), []);
 
   const handleEnter = async () => {
     setHasEntered(true);
@@ -337,12 +334,13 @@ export default function App() {
           .rotate-icon { font-size: 3rem; margin-bottom: 20px; animation: spin 2s infinite ease-in-out; }
           @keyframes spin { 0% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } 100% { transform: rotate(-90deg); } }
         }
-          @keyframes hintSlideUp {
+        @keyframes hintSlideUp {
           from { opacity: 0; transform: translate(-50%, 24px); }
           to { opacity: 1; transform: translate(-50%, 0); }
         }
       `}</style>
 
+      {/* --- UI OVERLAYS --- */}
       {hasEntered && (
         <div className="portrait-overlay">
           <div className="rotate-icon">📱</div>
@@ -361,6 +359,17 @@ export default function App() {
         </Suspense>
       )}
 
+      {activeScrollId && (
+        <Suspense fallback={null}>
+          <ScrollUI
+            id={activeScrollId}
+            onClose={() => setActiveScrollId(null)}
+            speed={60}
+          />
+        </Suspense>
+      )}
+
+      {/* --- SCENE 1: THE HOUSE (Restored to original structure) --- */}
       <div
         style={{
           position: "absolute",
@@ -371,6 +380,7 @@ export default function App() {
           transitionDuration: "0.5s",
           transitionTimingFunction: "ease",
           pointerEvents: bookOpacity ? "none" : "auto",
+          cursor: "url('/home-icon.png'), auto",
         }}
       >
         <GlobalCanvas shadows frameloop={activeBook ? "demand" : "always"}>
@@ -394,15 +404,14 @@ export default function App() {
             {sceneReady && hasEntered && introFinished && (
               <>
                 <SmartCameraController controlsRef={controlsRef} />
-
                 <OrbitControls
                   makeDefault
                   ref={controlsRef}
                   target={[0, 1.5, isMobile ? -4.5 : -2]}
                   enablePan={true}
                   maxPolarAngle={Math.PI / 2 - 0.05}
-                  minDistance={0.5} // Prevents the camera from clipping entirely into project cards/books
-                  maxDistance={8} // Restricts huge zoom-outs (was 40)
+                  minDistance={0.5}
+                  maxDistance={8}
                   rotateSpeed={0.5}
                   mouseButtons={{
                     LEFT: THREE.MOUSE.PAN,
@@ -421,16 +430,7 @@ export default function App() {
         </GlobalCanvas>
       </div>
 
-      {activeScrollId && (
-        <Suspense fallback={null}>
-          <ScrollUI
-            id={activeScrollId}
-            onClose={() => setActiveScrollId(null)}
-            speed={60}
-          />
-        </Suspense>
-      )}
-
+      {/* --- SCENE 2: THE BOOK VIEWER (Restored) --- */}
       <div
         style={{
           position: "absolute",
@@ -451,6 +451,7 @@ export default function App() {
             <BookViewer bookName={activeBook} onClose={handleBookClose} />
           </Suspense>
         )}
+
         {showMobileControls && (
           <div
             style={{
@@ -509,7 +510,6 @@ export default function App() {
                 ✕
               </button>
             </div>
-
             <div
               style={{ display: "flex", flexDirection: "column", gap: "10px" }}
             >
@@ -521,7 +521,6 @@ export default function App() {
                   <strong>1-Finger Drag:</strong> Look around
                 </span>
               </div>
-
               <div
                 style={{ display: "flex", alignItems: "center", gap: "12px" }}
               >
@@ -530,7 +529,6 @@ export default function App() {
                   <strong>2-Finger Drag:</strong> Move position
                 </span>
               </div>
-
               <div
                 style={{ display: "flex", alignItems: "center", gap: "12px" }}
               >
@@ -540,7 +538,6 @@ export default function App() {
                 </span>
               </div>
             </div>
-
             <button
               onClick={() => setShowMobileControls(false)}
               style={{
@@ -549,7 +546,7 @@ export default function App() {
                 padding: "10px",
                 borderRadius: "8px",
                 border: "none",
-                backgroundColor: "#e6bb11", // Matches your NamePlate gold accent
+                backgroundColor: "#e6bb11",
                 color: "#111",
                 fontWeight: 700,
                 fontSize: "0.9rem",
@@ -561,109 +558,6 @@ export default function App() {
           </div>
         )}
       </div>
-      {showMobileControls && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "28px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "calc(100vw - 48px)",
-            maxWidth: "320px",
-            backgroundColor: "rgba(13, 13, 20, 0.85)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
-            borderRadius: "16px",
-            padding: "18px 20px",
-            color: "#ffffff",
-            zIndex: 99999,
-            display: "flex",
-            flexDirection: "column",
-            gap: "14px",
-            boxShadow: "0 12px 40px rgba(0, 0, 0, 0.45)",
-            animation:
-              "hintSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-            fontFamily: "system-ui, -apple-system, sans-serif",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "0.8rem",
-                fontWeight: 700,
-                letterSpacing: "0.06em",
-                color: "#87CEEB",
-                textTransform: "uppercase",
-              }}
-            >
-              How to Navigate
-            </span>
-            <button
-              onClick={() => setShowMobileControls(false)}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "#999",
-                fontSize: "1.1rem",
-                padding: "4px",
-                cursor: "pointer",
-              }}
-            >
-              ✕
-            </button>
-          </div>
-
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <span style={{ fontSize: "1.35rem" }}>👆</span>
-              <span style={{ fontSize: "0.9rem", lineHeight: "1.2" }}>
-                <strong>1-Finger Drag:</strong> Look around
-              </span>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <span style={{ fontSize: "1.35rem" }}>✌️</span>
-              <span style={{ fontSize: "0.9rem", lineHeight: "1.2" }}>
-                <strong>2-Finger Drag:</strong> Move position
-              </span>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <span style={{ fontSize: "1.35rem" }}>🤏</span>
-              <span style={{ fontSize: "0.9rem", lineHeight: "1.2" }}>
-                <strong>Pinch:</strong> Zoom in & out
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setShowMobileControls(false)}
-            style={{
-              marginTop: "4px",
-              width: "100%",
-              padding: "10px",
-              borderRadius: "8px",
-              border: "none",
-              backgroundColor: "#e6bb11", // Matches your NamePlate gold accent
-              color: "#111",
-              fontWeight: 700,
-              fontSize: "0.9rem",
-              cursor: "pointer",
-            }}
-          >
-            Got it
-          </button>
-        </div>
-      )}
     </div>
   );
 }

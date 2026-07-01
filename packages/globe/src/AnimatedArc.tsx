@@ -1,7 +1,7 @@
 // globe/src/components/AnimatedArc.tsx
 import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 
 interface AnimatedArcProps {
   startVec: THREE.Vector3;
@@ -64,20 +64,22 @@ const AnimatedArc: React.FC<AnimatedArcProps> = ({
   globeRadius,
   color = "#FFD700",
   arcAltitude = 2,
-  tubeRadius = 0.03, // Base thickness
-  pinScale = 1.5, // Base pin size
+  tubeRadius = 0.03,
+  pinScale = 1.5,
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const pinGroupRef = useRef<THREE.Group>(null);
 
-  // Keep track of the last radius to avoid rebuilding geometry unnecessarily
   const lastRadiusRef = useRef(tubeRadius);
+  const lastDistRef = useRef(-1); // Cache camera distance
+  const zoomFactorRef = useRef(0.1); // Cache zoom factor
 
   const ANIMATION_SPEED = 400;
   const TUB_SEGMENTS = 48;
   const RADIAL_SEGMENTS = 8;
+  const DIST_THRESHOLD = 0.5;
+  const { invalidate } = useThree();
 
-  // 1. Calculate Curve
   const curve = useMemo(() => {
     const midPoint = new THREE.Vector3()
       .addVectors(startVec, endVec)
@@ -91,31 +93,48 @@ const AnimatedArc: React.FC<AnimatedArcProps> = ({
     return new THREE.QuadraticBezierCurve3(startVec, midPointLifted, endVec);
   }, [startVec, endVec, globeRadius, arcAltitude]);
 
-  // Calculate the center point of the arc for distance checking
   const curveCenter = useMemo(() => curve.getPointAt(0.5), [curve]);
 
   useFrame((state, delta) => {
     if (!meshRef.current || !pinGroupRef.current) return;
 
-    // --- 1. ZOOM / DISTANCE LOGIC ---
-    const camera = state.camera;
-    // Distance from camera to the center of this specific arc
-    const dist = camera.position.distanceTo(curveCenter);
+    // --- 1. ZOOM / DISTANCE LOGIC (Cached) ---
+    const dist = state.camera.position.distanceTo(curveCenter);
 
-    // SCALE FACTOR:
-    // Slightly widened the max clamp so it can scale just a bit more naturally
-    const zoomFactor = THREE.MathUtils.clamp(dist / 15, 0.1, 0.5);
+    // Only update zoom factor if the camera moved significantly
+    if (Math.abs(dist - lastDistRef.current) > DIST_THRESHOLD) {
+      lastDistRef.current = dist;
+      zoomFactorRef.current = THREE.MathUtils.clamp(dist / 15, 0.1, 0.5);
+
+      const targetRadius = tubeRadius * zoomFactorRef.current;
+      const radiusChange =
+        Math.abs(lastRadiusRef.current - targetRadius) / lastRadiusRef.current;
+
+      // Rebuild geometry only after a meaningful zoom change
+      if (radiusChange > 0.2) {
+        lastRadiusRef.current = targetRadius;
+        meshRef.current.geometry.dispose();
+        meshRef.current.geometry = new THREE.TubeGeometry(
+          curve,
+          TUB_SEGMENTS,
+          targetRadius,
+          RADIAL_SEGMENTS,
+          false,
+        );
+      }
+    }
+
+    const zoomFactor = zoomFactorRef.current;
+    const currentRadius = lastRadiusRef.current;
 
     // --- 2. UPDATE PIN SIZE ---
     const geo = meshRef.current.geometry;
     const totalCount = geo.index ? geo.index.count : 0;
     let currentCount = meshRef.current.userData.drawCount || 0;
 
-    // Apply Scale to Pin
     const isVisible = currentCount > 0 && currentCount < totalCount;
     const targetPinScale = isVisible ? pinScale * zoomFactor : 0;
 
-    // Smooth lerp for pin
     const smoothScale = THREE.MathUtils.lerp(
       pinGroupRef.current.scale.x,
       targetPinScale,
@@ -123,61 +142,36 @@ const AnimatedArc: React.FC<AnimatedArcProps> = ({
     );
     pinGroupRef.current.scale.setScalar(smoothScale);
 
-    // --- 3. UPDATE TUBE THICKNESS (Geometry Regeneration) ---
-    const targetRadius = tubeRadius * zoomFactor;
-
-    const radiusChange =
-      Math.abs(lastRadiusRef.current - targetRadius) / lastRadiusRef.current;
-
-    // Rebuild only after a meaningful zoom change
-    if (radiusChange > 0.2) {
-      lastRadiusRef.current = targetRadius;
-      meshRef.current.geometry.dispose();
-      meshRef.current.geometry = new THREE.TubeGeometry(
-        curve,
-        TUB_SEGMENTS,
-        targetRadius,
-        RADIAL_SEGMENTS,
-        false,
-      );
-    }
-
-    // --- 4. ANIMATE LINE DRAWING ---
-    const activeGeo = meshRef.current.geometry;
-    const activeTotalCount = activeGeo.index ? activeGeo.index.count : 0;
-
+    // --- 3. ANIMATE LINE DRAWING ---
     currentCount += ANIMATION_SPEED * delta;
-    if (currentCount > activeTotalCount + 1500) currentCount = 0;
+    if (currentCount > totalCount + 1500) currentCount = 0;
 
     meshRef.current.userData.drawCount = currentCount;
-    const drawRangeCount = Math.min(currentCount, activeTotalCount);
-    activeGeo.setDrawRange(0, drawRangeCount);
+    const drawRangeCount = Math.min(currentCount, totalCount);
+    geo.setDrawRange(0, drawRangeCount);
 
-    // --- 5. PIN POSITION & ROTATION ---
-    const t =
-      activeTotalCount > 0 ? Math.min(1, currentCount / activeTotalCount) : 0;
+    // --- 4. PIN POSITION & ROTATION ---
+    const t = totalCount > 0 ? Math.min(1, currentCount / totalCount) : 0;
     const baseCurvePoint = curve.getPointAt(t);
 
-    // Dynamically push the pin slightly outward so it rests ON the tube, not inside it
-    const hoverOffset = targetRadius * 1.5;
+    const hoverOffset = currentRadius * 1.5;
     const outwardNormal = baseCurvePoint.clone().normalize();
     const finalPosition = baseCurvePoint
       .clone()
       .add(outwardNormal.multiplyScalar(hoverOffset));
 
-    // Update Position
     pinGroupRef.current.position.copy(finalPosition);
 
-    // Update Rotation (Local Matrix)
     const localCenter = new THREE.Vector3(0, 0, 0);
     const tangent = curve.getTangentAt(t).normalize();
     const rotationMatrix = new THREE.Matrix4();
 
     rotationMatrix.lookAt(finalPosition, localCenter, tangent);
     pinGroupRef.current.quaternion.setFromRotationMatrix(rotationMatrix);
-
-    // Flip exactly 180 degrees (Math.PI) to point outward.
     pinGroupRef.current.rotateX(Math.PI / 4);
+    if (dist < 10) {
+      invalidate();
+    }
   });
 
   return (
