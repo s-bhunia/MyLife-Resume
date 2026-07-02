@@ -12,8 +12,6 @@ interface BookProps {
   onClick?: () => void;
 }
 
-const EPS = 0.001; // Epsilon threshold for early return
-
 export default function Book({
   position,
   coverUrl,
@@ -31,22 +29,14 @@ export default function Book({
   const tiltAngle: [number, number, number] = [-0.15, 0, 0];
   const targetZ = hovered ? position[2] + 0.9 : position[2];
 
-  useFrame((_, delta) => {
-    if (!meshRef.current) return;
-
-    const currentZ = meshRef.current.position.z;
-    const zDiff = Math.abs(currentZ - targetZ);
-
-    // Stop calculating if the book has reached its destination
-    if (zDiff < EPS) return;
-
-    // Use damp instead of lerp for framerate-independent smoothing
-    meshRef.current.position.z = THREE.MathUtils.damp(
-      currentZ,
-      targetZ,
-      6,
-      delta,
-    );
+  useFrame(() => {
+    if (meshRef.current) {
+      meshRef.current.position.z = THREE.MathUtils.lerp(
+        meshRef.current.position.z,
+        targetZ,
+        0.1,
+      );
+    }
   });
 
   return (
@@ -59,9 +49,10 @@ export default function Book({
         setHovered(true);
         document.body.style.cursor = "pointer";
       }}
-      onPointerOut={() => {
+      onPointerOut={(e) => {
         setHovered(false);
-        document.body.style.cursor = "auto";
+        // CRITICAL: Empty string returns control to the House Div's custom default cursor
+        document.body.style.cursor = "";
       }}
       onClick={(e) => {
         e.stopPropagation();

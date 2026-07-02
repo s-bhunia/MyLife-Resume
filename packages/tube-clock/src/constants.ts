@@ -7,8 +7,8 @@ export const COLORS = {
   darkMetal: "#1a1a1a",  // Aged iron for the cage
   glass: "#d2cdcd",
   fuel: "#0044ff",       // Deep Blue Dyed Kerosene (UPDATED)
-  neonOff: "#2a1a1a",    
-  neonOn: "#ff4400",     
+  neonOff: "#614c4c17",    
+  neonOn: "#211c1a",     
 };
 
 // Profile for the Upper Glass Chimney

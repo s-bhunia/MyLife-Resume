@@ -116,62 +116,57 @@ const SmartCameraController = ({
   useFrame((state) => {
     const targetAction = useWidgetStore.getState().targetAction;
 
-    if (!targetAction || !targetAction.startsWith("NAVIGATE_")) {
-      if (controlsRef.current) {
-        const padding = 0.6;
-        const minX = -5 + padding,
-          maxX = 5 - padding;
-        const minZ = -4 + padding,
-          maxZ = 4 - padding;
-        const minY = 0.5,
-          maxY = 2.8;
+    if (targetAction && targetAction.startsWith("NAVIGATE_")) {
+      const targetConfig = CAMERA_TARGETS[targetAction];
+      if (targetConfig) {
+        state.camera.position.lerp(targetConfig.position, 0.03);
 
-        state.camera.position.x = THREE.MathUtils.clamp(
-          state.camera.position.x,
-          minX,
-          maxX,
-        );
-        state.camera.position.y = THREE.MathUtils.clamp(
-          state.camera.position.y,
-          minY,
-          maxY,
-        );
-        state.camera.position.z = THREE.MathUtils.clamp(
-          state.camera.position.z,
-          minZ,
-          maxZ,
-        );
-
-        const target = controlsRef.current.target;
-        target.x = THREE.MathUtils.clamp(target.x, minX, maxX);
-        target.y = THREE.MathUtils.clamp(target.y, minY, maxY);
-        target.z = THREE.MathUtils.clamp(target.z, minZ, maxZ);
-      }
-      return;
-    }
-
-    const targetConfig = CAMERA_TARGETS[targetAction];
-    if (targetConfig) {
-      state.camera.position.lerp(targetConfig.position, 0.03);
-
-      if (controlsRef.current) {
-        controlsRef.current.target.lerp(targetConfig.lookAt, 0.03);
-        controlsRef.current.update();
-      }
-
-      const distPos = state.camera.position.distanceTo(targetConfig.position);
-      const distLook = controlsRef.current
-        ? controlsRef.current.target.distanceTo(targetConfig.lookAt)
-        : 0;
-
-      if (distPos < 0.1 && distLook < 0.1) {
-        state.camera.position.copy(targetConfig.position);
         if (controlsRef.current) {
-          controlsRef.current.target.copy(targetConfig.lookAt);
+          controlsRef.current.target.lerp(targetConfig.lookAt, 0.03);
           controlsRef.current.update();
         }
-        useWidgetStore.getState().setTargetAction(null);
+
+        const distPos = state.camera.position.distanceTo(targetConfig.position);
+        const distLook = controlsRef.current
+          ? controlsRef.current.target.distanceTo(targetConfig.lookAt)
+          : 0;
+
+        if (distPos < 0.1 && distLook < 0.1) {
+          useWidgetStore.getState().setTargetAction(null);
+        }
       }
+    } else if (controlsRef.current) {
+      // --- INVISIBLE WALLS FOR FREE ROAMING ---
+      // House dimensions based on House.tsx: W = 10, D = 8, H_TOTAL = ~3
+      const padding = 0.6; // Keeps the camera slightly away from the exact physical wall
+      const minX = -5 + padding;
+      const maxX = 5 - padding;
+      const minZ = -4 + padding;
+      const maxZ = 4 - padding;
+      const minY = 0.5; // Prevent clipping into the floor
+      const maxY = 2.8; // Prevent clipping through the ceiling
+
+      // 1. Clamp the camera position
+      state.camera.position.x = THREE.MathUtils.clamp(
+        state.camera.position.x,
+        minX,
+        maxX,
+      );
+      state.camera.position.y = THREE.MathUtils.clamp(
+        state.camera.position.y,
+        minY,
+        maxY,
+      );
+      state.camera.position.z = THREE.MathUtils.clamp(
+        state.camera.position.z,
+        minZ,
+        maxZ,
+      );
+
+      const target = controlsRef.current.target;
+      target.x = THREE.MathUtils.clamp(target.x, minX, maxX);
+      target.y = THREE.MathUtils.clamp(target.y, minY, maxY);
+      target.z = THREE.MathUtils.clamp(target.z, minZ, maxZ);
     }
   });
   return null;

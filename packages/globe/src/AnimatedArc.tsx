@@ -1,7 +1,7 @@
 // globe/src/components/AnimatedArc.tsx
 import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 
 interface AnimatedArcProps {
   startVec: THREE.Vector3;
@@ -69,16 +69,11 @@ const AnimatedArc: React.FC<AnimatedArcProps> = ({
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const pinGroupRef = useRef<THREE.Group>(null);
-
   const lastRadiusRef = useRef(tubeRadius);
-  const lastDistRef = useRef(-1); // Cache camera distance
-  const zoomFactorRef = useRef(0.1); // Cache zoom factor
 
   const ANIMATION_SPEED = 400;
   const TUB_SEGMENTS = 48;
   const RADIAL_SEGMENTS = 8;
-  const DIST_THRESHOLD = 0.5;
-  const { invalidate } = useThree();
 
   const curve = useMemo(() => {
     const midPoint = new THREE.Vector3()
@@ -98,36 +93,10 @@ const AnimatedArc: React.FC<AnimatedArcProps> = ({
   useFrame((state, delta) => {
     if (!meshRef.current || !pinGroupRef.current) return;
 
-    // --- 1. ZOOM / DISTANCE LOGIC (Cached) ---
-    const dist = state.camera.position.distanceTo(curveCenter);
+    const camera = state.camera;
+    const dist = camera.position.distanceTo(curveCenter);
+    const zoomFactor = THREE.MathUtils.clamp(dist / 15, 0.1, 0.5);
 
-    // Only update zoom factor if the camera moved significantly
-    if (Math.abs(dist - lastDistRef.current) > DIST_THRESHOLD) {
-      lastDistRef.current = dist;
-      zoomFactorRef.current = THREE.MathUtils.clamp(dist / 15, 0.1, 0.5);
-
-      const targetRadius = tubeRadius * zoomFactorRef.current;
-      const radiusChange =
-        Math.abs(lastRadiusRef.current - targetRadius) / lastRadiusRef.current;
-
-      // Rebuild geometry only after a meaningful zoom change
-      if (radiusChange > 0.2) {
-        lastRadiusRef.current = targetRadius;
-        meshRef.current.geometry.dispose();
-        meshRef.current.geometry = new THREE.TubeGeometry(
-          curve,
-          TUB_SEGMENTS,
-          targetRadius,
-          RADIAL_SEGMENTS,
-          false,
-        );
-      }
-    }
-
-    const zoomFactor = zoomFactorRef.current;
-    const currentRadius = lastRadiusRef.current;
-
-    // --- 2. UPDATE PIN SIZE ---
     const geo = meshRef.current.geometry;
     const totalCount = geo.index ? geo.index.count : 0;
     let currentCount = meshRef.current.userData.drawCount || 0;
@@ -142,19 +111,37 @@ const AnimatedArc: React.FC<AnimatedArcProps> = ({
     );
     pinGroupRef.current.scale.setScalar(smoothScale);
 
-    // --- 3. ANIMATE LINE DRAWING ---
+    const targetRadius = tubeRadius * zoomFactor;
+    const radiusChange =
+      Math.abs(lastRadiusRef.current - targetRadius) / lastRadiusRef.current;
+
+    if (radiusChange > 0.2) {
+      lastRadiusRef.current = targetRadius;
+      meshRef.current.geometry.dispose();
+      meshRef.current.geometry = new THREE.TubeGeometry(
+        curve,
+        TUB_SEGMENTS,
+        targetRadius,
+        RADIAL_SEGMENTS,
+        false,
+      );
+    }
+
+    const activeGeo = meshRef.current.geometry;
+    const activeTotalCount = activeGeo.index ? activeGeo.index.count : 0;
+
     currentCount += ANIMATION_SPEED * delta;
-    if (currentCount > totalCount + 1500) currentCount = 0;
+    if (currentCount > activeTotalCount + 1500) currentCount = 0;
 
     meshRef.current.userData.drawCount = currentCount;
-    const drawRangeCount = Math.min(currentCount, totalCount);
-    geo.setDrawRange(0, drawRangeCount);
+    const drawRangeCount = Math.min(currentCount, activeTotalCount);
+    activeGeo.setDrawRange(0, drawRangeCount);
 
-    // --- 4. PIN POSITION & ROTATION ---
-    const t = totalCount > 0 ? Math.min(1, currentCount / totalCount) : 0;
+    const t =
+      activeTotalCount > 0 ? Math.min(1, currentCount / activeTotalCount) : 0;
     const baseCurvePoint = curve.getPointAt(t);
 
-    const hoverOffset = currentRadius * 1.5;
+    const hoverOffset = targetRadius * 1.5;
     const outwardNormal = baseCurvePoint.clone().normalize();
     const finalPosition = baseCurvePoint
       .clone()
@@ -169,9 +156,6 @@ const AnimatedArc: React.FC<AnimatedArcProps> = ({
     rotationMatrix.lookAt(finalPosition, localCenter, tangent);
     pinGroupRef.current.quaternion.setFromRotationMatrix(rotationMatrix);
     pinGroupRef.current.rotateX(Math.PI / 4);
-    if (dist < 10) {
-      invalidate();
-    }
   });
 
   return (
@@ -189,7 +173,6 @@ const AnimatedArc: React.FC<AnimatedArcProps> = ({
           opacity={0.8}
         />
       </mesh>
-
       <group ref={pinGroupRef}>
         <MapPin color="#FF4500" />
       </group>

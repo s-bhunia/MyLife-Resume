@@ -45,37 +45,32 @@ export const LampBody = memo(() => {
 
   return (
     <group>
-   {/* 1. GLASS CHIMNEY - CLEAR FRONT, FROSTED BACK */}
+      {/* 1. GLASS CHIMNEY - CLEAR FRONT, FROSTED BACK */}
       <group position={[0, 0.5, 0]} rotation={[0, -Math.PI / 2, 0]}>
-        
-        {/* Front Half: Clear Transparent Glass */}
+        {/* Front Half: Clear Transparent Glass (OPTIMIZED) */}
         <mesh receiveShadow castShadow>
           <latheGeometry args={[CHIMNEY_PROFILE, 16, 0, Math.PI]} />
-          <meshPhysicalMaterial
-            color={COLORS.glass}
-            transmission={0.9}
-            opacity={1}
+          <meshStandardMaterial
+            color="#ffffff"
             transparent={true}
-            roughness={0.1} // Low roughness keeps it crystal clear
-            metalness={0.1}
-            ior={1.5}
-            thickness={0.5}
+            opacity={0.15}
+            roughness={0.5} // Crystal clear
+            metalness={0.9} // High metalness catches environment reflections like glass
+            envMapIntensity={2}
             side={THREE.DoubleSide}
           />
         </mesh>
 
-        {/* Back Half: Frosted/Blurry Glass */}
+        {/* Back Half: Frosted/Blurry Glass (OPTIMIZED) */}
         <mesh receiveShadow castShadow>
           <latheGeometry args={[CHIMNEY_PROFILE, 16, Math.PI, Math.PI]} />
-          <meshPhysicalMaterial
-            color={COLORS.glass}
-            transmission={0.9} // Still lets light through
-            opacity={1}
+          <meshStandardMaterial
+            color="#ffffff"
             transparent={true}
-            roughness={0.9}    // High roughness creates the blur/frosted effect
-            metalness={0.1}
-            ior={1.5}
-            thickness={0.5}
+            opacity={0.7}
+            roughness={0.9} // High roughness for frosted look
+            metalness={0.7}
+            envMapIntensity={1}
             side={THREE.DoubleSide}
           />
         </mesh>
@@ -96,35 +91,31 @@ export const LampBody = memo(() => {
 
       {/* 3. FUEL TANK ASSEMBLY */}
       <group position={[0, 0, 0]}>
-        {/* Outer Glass Tank */}
+        {/* Outer Glass Tank (OPTIMIZED) */}
         <mesh position={[0, 0.1, 0]}>
           <latheGeometry args={[TANK_PROFILE, 16]} />
-          <meshPhysicalMaterial
-            color={COLORS.glass}
-            transmission={0.9}
-            opacity={1}
+          <meshStandardMaterial
+            color="#ffffff"
             transparent={true}
-            roughness={0.3}
-            metalness={0.1}
-            ior={1.5}
-            thickness={0.5}
+            opacity={0.15}
+            roughness={0.9}
+            metalness={0.9}
+            envMapIntensity={2}
             side={THREE.DoubleSide}
           />
         </mesh>
 
-        {/* Inner Fuel Liquid */}
+        {/* Inner Fuel Liquid (OPTIMIZED) */}
         <mesh position={[0, 0.1, 0]}>
           <latheGeometry args={[halfFuelProfile, 16]} />
-          <meshPhysicalMaterial
+          <meshStandardMaterial
             color={COLORS.fuel}
             emissive={COLORS.fuel}
-            emissiveIntensity={0.1}
-            transmission={0.1}
+            emissiveIntensity={0.15}
             transparent={true}
-            opacity={1}
+            opacity={0.85}
             roughness={0.3}
-            metalness={0.9}
-            ior={1.4}
+            metalness={0.6}
             side={THREE.DoubleSide}
           />
         </mesh>

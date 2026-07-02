@@ -1,4 +1,5 @@
 import React, { memo, useMemo } from "react";
+import * as THREE from "three";
 import { RoundedBox } from "@react-three/drei";
 import { COLORS } from "./constants";
 
@@ -56,26 +57,47 @@ const Digit = memo(
       <group>
         {segs.map((s, i) => {
           const isActive = isActiveMap[i];
-          const finalColor = isActive ? COLORS.neonOn : COLORS.neonOff;
-          const emissiveColor = isActive ? "#ffaa00" : "#000000";
-          const intensity = isActive ? brightness * 10 : 0;
+          const emissiveColor = isActive ? "#ffaa00" : "#ede1e1";
+          const intensity = isActive ? brightness * 8 : 0;
 
           return (
-            <RoundedBox
+            <group
               key={`segment-${value}-${i}`}
-              args={[len, thickness, thickness]}
-              radius={thickness / 2}
               position={[s[0] as number, s[1] as number, 0]}
               rotation={[0, 0, s[2] as number]}
             >
-              <meshStandardMaterial
-                color={finalColor}
-                emissive={emissiveColor}
-                emissiveIntensity={intensity}
-                roughness={0.2}
-                toneMapped={false}
-              />
-            </RoundedBox>
+              {/* 1. THE CORE TUBE (White hot in the center when active) */}
+              <RoundedBox
+                args={[len, thickness, thickness]}
+                radius={thickness / 2}
+              >
+                <meshStandardMaterial
+                  color={isActive ? "#ffffff" : COLORS.neonOff}
+                  emissive={emissiveColor}
+                  emissiveIntensity={intensity}
+                  roughness={0.2}
+                  transparent={true}
+                  opacity={isActive ? 1 : 0.05}
+                  toneMapped={false}
+                />
+              </RoundedBox>
+              {/* 2. THE NEON GLOW HALO (Only renders on active segments) */}
+              {isActive && (
+                <RoundedBox
+                  args={[len + 0.04, thickness * 2.5, thickness * 2.5]}
+                  radius={thickness}
+                >
+                  <meshBasicMaterial
+                    color="#ff5900" // The color of the glow
+                    transparent={true}
+                    opacity={0.5} // Soft transparency
+                    depthWrite={false} // Prevents clipping with the glass
+                    blending={THREE.AdditiveBlending} // This is the magic that creates the optical "glow"
+                    toneMapped={false}
+                  />
+                </RoundedBox>
+              )}
+            </group>
           );
         })}
       </group>
@@ -83,31 +105,23 @@ const Digit = memo(
   },
 );
 
-// Custom 'M' component that matches Digit geometry exactly
 const LetterM = memo(
-  ({ size = 0.5, brightness}: { size?: number; brightness: number}) => {
+  ({ size = 0.5, brightness }: { size?: number; brightness: number }) => {
     const thickness = size * 0.12;
-    const len = size * 0.85; // Match Digit length
+    const len = size * 0.85;
 
     const segs = useMemo(
       () => [
-        // 1. Left Vertical Column (Top Left & Bottom Left positions)
         [-size / 2, size / 2, Math.PI / 2],
         [-size / 2, -size / 2, Math.PI / 2],
-
-        // 2. Right Vertical Column (Top Right & Bottom Right positions)
         [size / 2, size / 2, Math.PI / 2],
         [size / 2, -size / 2, Math.PI / 2],
-
-        // 3. Center V (Diagonals)
-        // Adjusted to hang from the top corners inwards
-        [-size * 0.18, size * 0.3, -Math.PI / 6], // Left slant
-        [size * 0.18, size * 0.3, Math.PI / 6], // Right slant
+        [-size * 0.18, size * 0.3, -Math.PI / 6],
+        [size * 0.18, size * 0.3, Math.PI / 6],
       ],
       [size],
     );
 
-    // Slightly shorter length for diagonals
     const diagLen = size * 0.6;
 
     return (
@@ -117,21 +131,40 @@ const LetterM = memo(
           const currentLen = isDiagonal ? diagLen : len;
 
           return (
-            <RoundedBox
+            <group
               key={`letter-m-${i}`}
-              args={[currentLen, thickness, thickness]}
-              radius={thickness / 2}
               position={[s[0] as number, s[1] as number, 0]}
               rotation={[0, 0, s[2] as number]}
             >
-              <meshStandardMaterial
-                color={COLORS.neonOn}
-                emissive="#ffaa00"
-                emissiveIntensity={brightness * 6}
-                roughness={0.2}
-                toneMapped={false}
-              />
-            </RoundedBox>
+              {/* 1. CORE TUBE */}
+              <RoundedBox
+                args={[currentLen, thickness, thickness]}
+                radius={thickness / 2}
+              >
+                <meshStandardMaterial
+                  color="#ffffff"
+                  emissive="#ffaa00"
+                  emissiveIntensity={brightness * 6}
+                  roughness={0.2}
+                  toneMapped={false}
+                />
+              </RoundedBox>
+
+              {/* 2. NEON GLOW HALO */}
+              <RoundedBox
+                args={[currentLen + 0.04, thickness * 2.5, thickness * 2.5]}
+                radius={thickness}
+              >
+                <meshBasicMaterial
+                  color="#ff5100"
+                  transparent={true}
+                  opacity={0.15}
+                  depthWrite={false}
+                  blending={THREE.AdditiveBlending}
+                  toneMapped={false}
+                />
+              </RoundedBox>
+            </group>
           );
         })}
       </group>
@@ -143,7 +176,6 @@ export const NeonClock = memo(({ brightness }: { brightness: number }) => {
   const [time, setTime] = React.useState(new Date());
 
   React.useEffect(() => {
-    // Update every second
     const t = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -152,7 +184,6 @@ export const NeonClock = memo(({ brightness }: { brightness: number }) => {
   const m = time.getMinutes();
   const isPM = h >= 12;
 
-  // Logic: 0 becomes 12, 13 becomes 1, etc.
   const hours = (h % 12 || 12).toString().padStart(2, "0");
   const minutes = m.toString().padStart(2, "0");
 
