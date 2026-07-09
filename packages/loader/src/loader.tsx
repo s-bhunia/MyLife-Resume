@@ -114,7 +114,7 @@ export default function Loader({
     },
     {
       name: "Discord",
-      url: "#",
+      url: "https://discord.gg/CtJcquwaK7",
       pngSrc: "/loader/discord.svg",
       x: innerX,
       y: spreadY,

@@ -27,7 +27,7 @@ export function Bookshelf({ onBookClick, ...props }: BookshelfProps) {
     {
       id: 2,
       position: [1, 2.42, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book2.webp",
+      coverUrl: "./bookshelf/book1.webp",
     },
     // Row 2
     {
@@ -44,12 +44,12 @@ export function Bookshelf({ onBookClick, ...props }: BookshelfProps) {
     {
       id: 5,
       position: [-1, -0.03, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book5.webp",
+      coverUrl: "./bookshelf/book2.webp",
     },
     {
       id: 6,
       position: [0, -1.23, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book1.webp",
+      coverUrl: "./bookshelf/book2.webp",
     },
   ]);
 
