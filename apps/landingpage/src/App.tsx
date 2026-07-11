@@ -15,6 +15,8 @@ import { useAtomValue } from "jotai";
 import { GlobalCanvas } from "@mylife/core-engine";
 import { isMobileAtom } from "@mylife/core-engine";
 
+import { Analytics } from "@vercel/analytics/next";
+
 // --- CAMERA TARGETS ---
 const CAMERA_TARGETS: Record<
   string,
@@ -553,6 +555,7 @@ export default function App() {
           </div>
         )}
       </div>
+      <Analytics />
     </div>
   );
 }
