@@ -15,7 +15,7 @@ import { useAtomValue } from "jotai";
 import { GlobalCanvas } from "@mylife/core-engine";
 import { isMobileAtom } from "@mylife/core-engine";
 
-import { Analytics } from "@vercel/analytics/next";
+import { Analytics } from "@vercel/analytics/react";
 
 // --- CAMERA TARGETS ---
 const CAMERA_TARGETS: Record<
