@@ -20,7 +20,7 @@ const BookshelfModel: React.FC<BookshelfProps> = ({
 }) => {
   // 1. Load the texture.
   // R3F will automatically suspend rendering until this is downloaded.
-  const plyTexture = useTexture("./bookshelf/plywood.webp");
+  const plyTexture = useTexture("/bookshelf/plywood.webp");
 
   // 2. Configure texture wrapping so it doesn't stretch awkwardly on long panels
   plyTexture.wrapS = THREE.RepeatWrapping;

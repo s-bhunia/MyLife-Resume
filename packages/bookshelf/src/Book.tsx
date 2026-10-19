@@ -1,102 +1,60 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { useHoverable } from "@mylife/core-engine";
 
 interface BookProps {
   position: [number, number, number];
   coverUrl: string;
-  width?: number;
-  height?: number;
-  depth?: number;
-  onClick?: () => void;
+  title: string;
+  onClick: () => void;
 }
 
-export default function Book({
-  position,
-  coverUrl,
-  width = 0.6,
-  height = 0.85,
-  depth = 0.15,
-  onClick,
-}: BookProps) {
-  const coverTexture = useTexture(coverUrl);
-  coverTexture.colorSpace = THREE.SRGBColorSpace;
+const SIZE: [number, number, number] = [0.6, 0.85, 0.15];
+const PAGES = new THREE.MeshStandardMaterial({ color: "#efe7d6", roughness: 0.9 });
+const SPINE = new THREE.MeshStandardMaterial({ color: "#2b2b2b", roughness: 0.7 });
+const GEOMETRY = new THREE.BoxGeometry(...SIZE);
 
-  const meshRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = useState(false);
+export default function Book({ position, coverUrl, title, onClick }: BookProps) {
+  const cover = useTexture(coverUrl);
+  const mesh = useRef<THREE.Mesh>(null);
+  const hovered = useRef(false);
+  const hover = useHoverable(title, "Book · click to read", (value) => {
+    hovered.current = value;
+  });
 
-  const tiltAngle: [number, number, number] = [-0.15, 0, 0];
-  const targetZ = hovered ? position[2] + 0.9 : position[2];
+  useEffect(() => {
+    cover.colorSpace = THREE.SRGBColorSpace;
+    cover.anisotropy = 8;
+  }, [cover]);
 
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.position.z = THREE.MathUtils.lerp(
-        meshRef.current.position.z,
-        targetZ,
-        0.1,
-      );
-    }
+  useFrame((_, delta) => {
+    const node = mesh.current;
+    if (!node) return;
+    const target = position[2] + (hovered.current ? 0.9 : 0);
+    if (Math.abs(node.position.z - target) < 0.001) return;
+    node.position.z = THREE.MathUtils.damp(node.position.z, target, 9, delta);
   });
 
   return (
     <mesh
-      ref={meshRef}
+      ref={mesh}
+      geometry={GEOMETRY}
       position={position}
-      rotation={tiltAngle}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        setHovered(true);
-        document.body.style.cursor = "pointer";
-      }}
-      onPointerOut={(e) => {
-        setHovered(false);
-        // CRITICAL: Empty string returns control to the House Div's custom default cursor
-        document.body.style.cursor = "";
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (onClick) {
-          onClick();
-        } else {
-          console.log(
-            `Clicked book with cover: ${coverUrl}. Ready to load 3D viewer!`,
-          );
-        }
+      rotation={[-0.15, 0, 0]}
+      {...hover}
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick();
       }}
     >
-      <boxGeometry args={[width, height, depth]} />
-      <meshStandardMaterial
-        attach="material-0"
-        color="#f5f5dc"
-        roughness={0.9}
-      />
-      <meshStandardMaterial
-        attach="material-1"
-        color="#2b2b2b"
-        roughness={0.7}
-      />
-      <meshStandardMaterial
-        attach="material-2"
-        color="#f5f5dc"
-        roughness={0.9}
-      />
-      <meshStandardMaterial
-        attach="material-3"
-        color="#f5f5dc"
-        roughness={0.9}
-      />
-      <meshBasicMaterial
-        attach="material-4"
-        map={coverTexture}
-        toneMapped={false}
-        color="#ffffff"
-      />
-      <meshStandardMaterial
-        attach="material-5"
-        color="#2b2b2b"
-        roughness={0.7}
-      />
+      <primitive object={PAGES} attach="material-0" />
+      <primitive object={SPINE} attach="material-1" />
+      <primitive object={PAGES} attach="material-2" />
+      <primitive object={PAGES} attach="material-3" />
+      <meshStandardMaterial attach="material-4" map={cover} roughness={0.55} />
+      <primitive object={SPINE} attach="material-5" />
     </mesh>
   );
 }

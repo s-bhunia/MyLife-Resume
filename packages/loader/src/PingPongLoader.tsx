@@ -39,10 +39,10 @@ export const PingPongDotLoader: React.FC<PingPongDotLoaderProps> = ({
 
     canvas.style.position = "relative";
     canvas.style.zIndex = "10";
-    canvas.style.backgroundColor = "#050508";
+    canvas.style.backgroundColor = "#2a1b10";
     canvas.style.borderRadius = `${dotSize * 0.8}px`;
-    canvas.style.border = "1px solid #1f1f2e";
-    canvas.style.boxShadow = "0 10px 40px rgba(0,0,0,0.8)";
+    canvas.style.border = "1px solid #c99a4a";
+    canvas.style.boxShadow = "0 18px 40px -12px rgba(90, 50, 15, 0.55), inset 0 0 0 3px #3a2616";
 
     container.appendChild(canvas);
 
@@ -146,7 +146,7 @@ export const PingPongDotLoader: React.FC<PingPongDotLoaderProps> = ({
         ctx.shadowBlur = 0;
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
-            drawDot(c, r, "#1a1a24", 0);
+            drawDot(c, r, "#3d2a1a", 0);
           }
         }
 
@@ -155,13 +155,13 @@ export const PingPongDotLoader: React.FC<PingPongDotLoaderProps> = ({
         const glowSmall = dotSize * 0.6;
 
         for (let i = 0; i < paddleHeight; i++) {
-          drawDot(state.paddleL.x, lY + i, "#ffffff", glowSmall);
-          drawDot(state.paddleR.x, rY + i, "#ffffff", glowSmall);
+          drawDot(state.paddleL.x, lY + i, "#ffd48a", glowSmall);
+          drawDot(state.paddleR.x, rY + i, "#ffd48a", glowSmall);
         }
 
         const bX = Math.round(state.ball.x);
         const bY = Math.round(state.ball.y);
-        drawDot(bX, bY, "#ffffff", dotSize * 1.5);
+        drawDot(bX, bY, "#ff8a3d", dotSize * 1.5);
       }
 
       function loop(now) {

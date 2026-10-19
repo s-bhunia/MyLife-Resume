@@ -1,77 +1,35 @@
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
+import type { ThreeElements } from "@react-three/fiber";
 import BookshelfModel from "./Bookshelf";
 import Book from "./Book";
 
-// Book name mapping - maps cover URLs to book names
-const BOOK_NAME_MAP: { [key: string]: string } = {
-  "./bookshelf/book1.webp": "nature",
-  "./bookshelf/book2.webp": "Srija_Snigdha",
-  "./bookshelf/book3.webp": "food",
-  "./bookshelf/book4.webp": "Gitanjali",
-  "./bookshelf/book5.webp": "Gitanjali",
-};
-
-interface BookshelfProps {
-  onBookClick?: (bookName: string) => void;
-  [key: string]: any;
+interface ShelfBook {
+  id: string;
+  title: string;
+  cover: string;
+  position: [number, number, number];
 }
 
-export function Bookshelf({ onBookClick, ...props }: BookshelfProps) {
-  const [books] = useState([
-    // Row 1 (Bottom shelf)
-    {
-      id: 1,
-      position: [1, -0.03, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book1.webp",
-    },
-    {
-      id: 2,
-      position: [1, 2.42, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book1.webp",
-    },
-    // Row 2
-    {
-      id: 3,
-      position: [0, 1.2, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book3.webp",
-    },
-    // Row 3
-    {
-      id: 4,
-      position: [-1, 2.42, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book4.webp",
-    },
-    {
-      id: 5,
-      position: [-1, -0.03, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book2.webp",
-    },
-    {
-      id: 6,
-      position: [0, -1.23, -0.2] as [number, number, number],
-      coverUrl: "./bookshelf/book2.webp",
-    },
-  ]);
+const BOOKS: ShelfBook[] = [
+  { id: "nature", title: "Nature", cover: "/bookshelf/book1.webp", position: [1, -0.03, -0.2] },
+  { id: "Gitanjali", title: "Gitanjali", cover: "/bookshelf/book4.webp", position: [-1, 2.42, -0.2] },
+  { id: "food", title: "Food", cover: "/bookshelf/book3.webp", position: [0, 1.2, -0.2] },
+  { id: "Srija_Snigdha", title: "Srija Snigdha", cover: "/bookshelf/book2.webp", position: [-1, -0.03, -0.2] },
+  { id: "Gitanjali", title: "Gitanjali", cover: "/bookshelf/book5.webp", position: [1, 2.42, -0.2] },
+  { id: "Srija_Snigdha", title: "Srija Snigdha", cover: "/bookshelf/book2.webp", position: [0, -1.23, -0.2] },
+];
 
+type BookshelfProps = ThreeElements["group"] & {
+  onBookClick: (bookName: string) => void;
+};
+
+export function Bookshelf({ onBookClick, ...props }: BookshelfProps) {
   return (
     <group {...props}>
-      {/* Suspense waits for both the plywood and book textures to load */}
       <Suspense fallback={null}>
         <BookshelfModel rows={5} width={4.5} height={6.5} />
-
-        {/* Map through the state to render the books */}
-        {books.map((book) => (
-          <Book
-            key={book.id}
-            position={book.position}
-            coverUrl={book.coverUrl}
-            onClick={() => {
-              const bookName = BOOK_NAME_MAP[book.coverUrl] || book.coverUrl;
-              if (onBookClick) {
-                onBookClick(bookName);
-              }
-            }}
-          />
+        {BOOKS.map((book, i) => (
+          <Book key={`${book.id}-${i}`} position={book.position} coverUrl={book.cover} title={book.title} onClick={() => onBookClick(book.id)} />
         ))}
       </Suspense>
     </group>

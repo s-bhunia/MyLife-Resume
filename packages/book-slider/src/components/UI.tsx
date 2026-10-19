@@ -144,15 +144,15 @@ export const UI = ({ bookName, onClose }: UIProps): React.JSX.Element => {
         <div className="flex justify-between items-center w-full">
           <button
             onClick={onClose}
-            className="pointer-events-auto mt-10 ml-10 px-4 py-2 bg-red-500 text-white rounded-full font-bold hover:bg-red-600 transition-colors shadow-lg"
+            className="pointer-events-auto mt-6 ml-6 rounded-xl border border-white/15 bg-[#0b0e14]/70 px-4 py-2.5 text-sm font-medium text-slate-100 backdrop-blur-xl transition-colors hover:border-cyan-300/50"
           >
-            ← Back to Bookshelf
+            ← Back to the library
           </button>
         </div>
 
         <a className="pointer-events-auto" href="https://github.com/s-bhunia">
           <img
-            src="book-slider/images/logo.jpg"
+            src="/book-slider/images/logo.webp"
             alt="Logo"
             className="logo-container"
             style={{

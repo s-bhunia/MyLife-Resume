@@ -1,0 +1,13 @@
+export const W = 10;
+export const D = 8;
+export const H_BASE = 0.8;
+export const H_UPPER = 2.05;
+export const H_BAND = 0.15;
+export const H_TOTAL = H_BASE + H_UPPER + H_BAND;
+export const THICKNESS = 0.2;
+export const PORCH_W = 3;
+export const PORCH_D = 1.5;
+export const FLOOR_Y = 0.41;
+export const BACK_WALL_Z = -D / 2 + THICKNESS / 2 + 0.05;
+export const LEFT_WALL_X = -W / 2 + THICKNESS / 2 + 0.04;
+export const RIGHT_WALL_X = W / 2 - THICKNESS / 2 - 0.04;

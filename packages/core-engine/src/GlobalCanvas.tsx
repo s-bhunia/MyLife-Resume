@@ -1,23 +1,52 @@
-// packages/core-engine/src/GlobalCanvas.tsx
-import React, { useEffect } from "react";
-import { Canvas, CanvasProps } from "@react-three/fiber";
+import { useEffect, useState } from "react";
+import { Canvas, events as pointerEvents, type CanvasProps, type EventManager } from "@react-three/fiber";
 import { ResponsiveCamera } from "./ResponsiveCamera";
 import { initDeviceManager } from "./DeviceManager";
 
-export const GlobalCanvas: React.FC<CanvasProps> = ({ children, ...props }) => {
+const MAX_DPR = 2;
+const currentDpr = () => Math.min(window.devicePixelRatio || 1, MAX_DPR);
+
+function useDevicePixelRatio() {
+  const [dpr, setDpr] = useState(currentDpr);
   useEffect(() => {
-    const cleanup = initDeviceManager();
-    return cleanup;
+    let query = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    const update = () => {
+      setDpr(currentDpr());
+      query.removeEventListener("change", update);
+      query = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+      query.addEventListener("change", update);
+    };
+    query.addEventListener("change", update);
+    window.addEventListener("resize", update);
+    update();
+    return () => {
+      query.removeEventListener("change", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
+  return dpr;
+}
+
+export function clientPointerEvents(store: Parameters<typeof pointerEvents>[0]): EventManager<HTMLElement> {
+  return {
+    ...pointerEvents(store),
+    compute(event, state) {
+      const { left, top, width, height } = state.size;
+      state.pointer.set(((event.clientX - left) / width) * 2 - 1, -((event.clientY - top) / height) * 2 + 1);
+      state.raycaster.setFromCamera(state.pointer, state.camera);
+    },
+  };
+}
+
+export function GlobalCanvas({ children, ...props }: CanvasProps) {
+  const dpr = useDevicePixelRatio();
+
+  useEffect(() => initDeviceManager(), []);
 
   return (
-    <Canvas
-      {...props}
-      // CRITICAL: Cap pixel ratio at 1.5 to prevent mobile GPU melting
-      dpr={[1, 1.5]}
-    >
+    <Canvas dpr={dpr} events={clientPointerEvents} {...props}>
       <ResponsiveCamera />
       {children}
     </Canvas>
   );
-};
+}
