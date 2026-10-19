@@ -1,31 +1,23 @@
 {
   "name": "@mylife/loader",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "./src/loader.tsx",
   "exports": {
     ".": "./src/loader.tsx"
   },
   "scripts": {
-    "build": "tsc",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.5.0",
+    "@mylife/profile": "workspace:*",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "three": "^0.183.1",
-    "jotai": "^2.0.0",
-    "@mylife/core-engine": "workspace:*",
-    "@mylife/chatbot": "workspace:*"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@types/three": "^0.163.0",
     "typescript": "^5.4.2"
   }
 }

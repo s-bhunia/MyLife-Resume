@@ -1,0 +1,98 @@
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: #000;
+}
+
+.intro-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.intro-stage canvas {
+  display: block;
+}
+
+.intro-gate {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  animation: intro-fade 1s ease 0.2s both;
+}
+
+.intro-gate p,
+.intro-status {
+  margin: 0;
+  font: 500 0.78rem/1.4 var(--font-mono, monospace);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.intro-status {
+  position: absolute;
+  bottom: 18%;
+}
+
+.intro-button {
+  position: relative;
+  padding: 12px 24px;
+  border: 0;
+  background: none;
+  color: rgba(255, 255, 255, 0.75);
+  font: 500 1.15rem/1 var(--font-display, sans-serif);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  cursor: pointer;
+  overflow: hidden;
+  transition: color 0.4s ease;
+}
+
+.intro-button span {
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.intro-button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 6px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: translateX(-101%);
+  transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.intro-button:hover {
+  color: #fff;
+}
+
+.intro-button:hover span {
+  transform: translateY(-2px);
+}
+
+.intro-button:hover::after {
+  transform: translateX(0);
+}
+
+.intro-skip {
+  position: absolute;
+  bottom: 9%;
+  font-size: 0.85rem;
+  animation: intro-fade 1s ease 1.5s both;
+}
+
+@keyframes intro-fade {
+  from {
+    opacity: 0;
+  }
+}

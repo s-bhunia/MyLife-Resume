@@ -1,70 +1,36 @@
-import React, { useState } from "react";
+import React from "react";
 
 export interface ProfileIconProps {
   name: string;
   url: string;
-  pngSrc: string; // Pass your PNG paths here
-  xOffset: number; // Horizontal distance to shoot out
-  yOffset: number; // Vertical distance to shoot out
+  pngSrc: string;
+  xOffset: number;
+  yOffset: number;
   delay: string;
   isMounted: boolean;
+  settled: boolean;
 }
 
-export const ProfileIcon: React.FC<ProfileIconProps> = ({
-  name,
-  url,
-  pngSrc,
-  xOffset,
-  yOffset,
-  delay,
-  isMounted,
-}) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isPressed, setIsPressed] = useState(false);
-
-  // Calculate scale and glow state based on interactions
-  const getScale = () => {
-    if (!isMounted) return 0.2;
-    if (isPressed) return 0.92;
-    if (isHovered) return 1.25;
-    return 1;
-  };
-
-  const scale = getScale();
-
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noreferrer"
-      className={`neon-profile-icon ${isHovered ? "icon-hovered" : ""} ${isPressed ? "icon-pressed" : ""}`}
-      title={name}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        setIsPressed(false);
-      }}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
-      style={{
-        background: "white",
-        transform: isMounted
-          ? `translate(calc(-50% + ${xOffset}px), calc(-50% + ${yOffset}px)) scale(${scale}) rotate(0deg)`
-          : `translate(-50%, -50%) scale(0.2) rotate(-45deg)`,
+export const ProfileIcon: React.FC<ProfileIconProps> = ({ name, url, pngSrc, xOffset, yOffset, delay, isMounted, settled }) => (
+  <a
+    href={url}
+    target={url.startsWith("mailto:") ? undefined : "_blank"}
+    rel="noreferrer"
+    className="neon-profile-icon"
+    title={name}
+    aria-label={name}
+    style={
+      {
+        "--x": `${xOffset}px`,
+        "--y": `${yOffset}px`,
+        transitionDelay: isMounted && !settled ? delay : "0s",
         opacity: isMounted ? 1 : 0,
-        transitionDelay: isMounted ? delay : "0s", 
-        transition: "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease",
-      }}
-    >
-      <img 
-        src={pngSrc} 
-        alt={name} 
-        style={{ width: "5vw", height: "5vh", pointerEvents: "none" }}
-        onError={(e) => {
-          const img = e.target as HTMLImageElement;
-          img.style.display = "none";
-        }}
-      />
-    </a>
-  );
-};
+        transform: isMounted
+          ? `translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(var(--s, 1))`
+          : `translate(-50%, -50%) scale(0.2) rotate(-45deg)`,
+      } as React.CSSProperties
+    }
+  >
+    <img src={pngSrc} alt="" width={26} height={26} />
+  </a>
+);

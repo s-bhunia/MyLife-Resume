@@ -1,131 +1,123 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useWidgetStore } from "../store/useWidgetStore";
 import { ChatbotAPI } from "../lib/api";
+import { FALLBACK, SUGGESTIONS, think, type Thought } from "../lib/localBrain";
 
-type Log = { sender: "user" | "system"; text: string };
+type Log = { id: number; sender: "user" | "system"; text: string };
+
+let nextId = 1;
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function respond(text: string): Promise<Thought> {
+  const local = think(text);
+  if (local) {
+    await wait(260);
+    return local;
+  }
+  try {
+    const remote = await ChatbotAPI.getIntent(text);
+    if (remote.action === "UNKNOWN") return FALLBACK;
+    return { action: remote.action === "CONVERSATION" ? null : remote.action, reply: remote.reply };
+  } catch {
+    return FALLBACK;
+  }
+}
 
 export default function AssistantView() {
   const [input, setInput] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [thinking, setThinking] = useState(false);
   const [logs, setLogs] = useState<Log[]>([
-    { sender: "system", text: "System Online. Where would you like to go?" },
+    { id: 0, sender: "system", text: "Mind online. Ask me anything about Santanu, or tell me where to take you." },
   ]);
-
   const setTargetAction = useWidgetStore((state) => state.setTargetAction);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-scroll to bottom of logs
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [logs, isProcessing]);
+    const node = scrollRef.current;
+    if (node) node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
+  }, [logs, thinking]);
 
-  const handleCommand = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  useEffect(() => {
+    if (window.matchMedia("(pointer: fine)").matches) inputRef.current?.focus();
+  }, []);
 
-    const userText = input;
+  const ask = async (text: string) => {
+    const question = text.trim();
+    if (!question || thinking) return;
     setInput("");
+    setLogs((prev) => [...prev, { id: nextId++, sender: "user", text: question }]);
+    setThinking(true);
+    const thought = await respond(question);
+    setLogs((prev) => [...prev, { id: nextId++, sender: "system", text: thought.reply }]);
+    setThinking(false);
+    if (thought.action) setTargetAction(thought.action);
+  };
 
-    // 1. Append user message to chat logs
-    setLogs((prev) => [...prev, { sender: "user", text: userText }]);
-    setIsProcessing(true);
-
-    try {
-      // 2. Call the FastAPI backend endpoint
-      const response = await ChatbotAPI.getIntent(userText);
-      const { action, reply } = response;
-
-      // 3. Append the AI's descriptive response to chat logs
-      setLogs((prev) => [...prev, { sender: "system", text: reply }]);
-
-      // 4. Handle structural/navigation state updates
-      if (action && action !== "CONVERSATION" && action !== "UNKNOWN") {
-        setTargetAction(action);
-      }
-    } catch (error) {
-      console.error("Failed to fetch intent:", error);
-      setLogs((prev) => [
-        ...prev,
-        {
-          sender: "system",
-          text: "Sorry, I'm having trouble connecting right now. Please try again or use the standard navigation controls!",
-        },
-      ]);
-    } finally {
-      setIsProcessing(false);
-    }
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    ask(input);
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[500px] p-4 bg-white/20 backdrop-blur-lg border border-white/30 rounded-3xl shadow-xl">
-      {/* Scrollable Logs Window */}
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-white/40"
-      >
-        {logs.map((log, index) => (
-          <div
-            key={index}
-            className={`flex ${log.sender === "user" ? "justify-end" : "justify-start"}`}
-          >
+    <div className="flex h-full max-h-[440px] flex-col">
+      <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto pr-1">
+        {logs.map((log) => (
+          <div key={log.id} className={`flex ${log.sender === "user" ? "justify-end" : "justify-start"}`}>
             {log.sender === "system" ? (
-              <div className="flex items-start gap-2 max-w-[85%]">
-                <div className="w-7 h-7 rounded-full bg-blue-600/80 shrink-0 shadow-sm flex items-center justify-center text-[10px] text-white font-bold">
-                  AI
-                </div>
-                <div className="bg-white/80 backdrop-blur-md border border-white/40 text-gray-800 rounded-2xl rounded-tl-sm py-2 px-3 text-sm shadow-sm whitespace-pre-line">
+              <div className="flex max-w-[88%] items-start gap-2">
+                <img src="/logo.webp" alt="" width={26} height={26} className="mt-0.5 shrink-0 mix-blend-multiply" />
+                <div className="whitespace-pre-line rounded-2xl rounded-tl-sm border border-[#c99a4a]/30 bg-white/80 px-3 py-2 text-[13px] leading-relaxed text-[#3b2414] shadow-sm">
                   {log.text}
                 </div>
               </div>
             ) : (
-              <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm py-2 px-3 text-sm shadow-md font-medium max-w-[85%]">
-                {log.text}
-              </div>
+              <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-gradient-to-r from-[#ffb347] to-[#e8642a] px-3 py-2 text-[13px] font-medium text-white shadow-sm">{log.text}</div>
             )}
           </div>
         ))}
-
-        {/* Processing Indicator / Ping Pong Dot Loader Slot */}
-        {isProcessing && (
-          <div className="flex items-center gap-2 mt-2 pl-1">
-            <div className="w-6 h-6 rounded-full bg-blue-500/50 animate-pulse shrink-0" />
-            <div className="text-xs text-gray-500 font-medium italic">
-              Thinking...
-            </div>
+        {thinking && (
+          <div className="flex items-center gap-1.5 pl-8" aria-label="Thinking">
+            {[0, 1, 2].map((i) => (
+              <span key={i} className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#e8642a]" style={{ animationDelay: `${i * 120}ms` }} />
+            ))}
           </div>
         )}
       </div>
 
-      {/* Glass Input Form */}
-      <form onSubmit={handleCommand} className="mt-4 relative shrink-0">
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {SUGGESTIONS.map((suggestion) => (
+          <button
+            key={suggestion}
+            type="button"
+            onClick={() => ask(suggestion)}
+            disabled={thinking}
+            style={{ clipPath: "polygon(8px 0, 100% 0, 100% 100%, 8px 100%, 0 50%)" }}
+            className="bg-[#ffe4c4] py-1 pl-3 pr-2.5 text-[11px] font-medium text-[#6b4426] transition-colors hover:bg-[#e8642a] hover:text-white disabled:opacity-40"
+          >
+            {suggestion}
+          </button>
+        ))}
+      </div>
+
+      <form onSubmit={submit} className="relative mt-3 shrink-0">
         <input
+          ref={inputRef}
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={isProcessing}
-          placeholder="Ask me to navigate or about the project..."
-          className="w-full bg-white/60 backdrop-blur-md border border-white/70 rounded-2xl py-3 pl-4 pr-12 text-sm outline-none focus:bg-white/90 focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 transition-all placeholder-gray-500 text-gray-800 shadow-inner"
+          onChange={(event) => setInput(event.target.value)}
+          disabled={thinking}
+          placeholder="Ask about work, skills, or say “take me to the desk”"
+          className="w-full rounded-xl border border-[#c99a4a]/40 bg-white/70 py-3 pl-4 pr-12 text-[13px] text-[#3b2414] placeholder-[#b08a66] outline-none transition-colors focus:border-[#e8642a]/60 focus:bg-white"
         />
         <button
           type="submit"
-          disabled={isProcessing || !input.trim()}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl text-blue-600 hover:bg-blue-50 disabled:text-gray-400 disabled:hover:bg-transparent transition-colors"
+          disabled={thinking || !input.trim()}
+          aria-label="Send"
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-[#e8642a] transition-colors hover:bg-[#ffe4c4] disabled:text-[#d6c2a8] disabled:hover:bg-transparent"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2.5}
-            stroke="currentColor"
-            className="w-5 h-5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-            />
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </form>

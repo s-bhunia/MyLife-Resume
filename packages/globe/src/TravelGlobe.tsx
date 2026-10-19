@@ -45,8 +45,8 @@ const TravelGlobe: React.FC<TravelGlobeProps> = ({
   const previousMouseX = useRef(0);
 
   const [colorMap, bumpMap] = useTexture([
-    "globe/textures/earth_8k.webp",
-    "globe/textures/earth_bump.webp",
+    "/globe/textures/earth_8k.webp",
+    "/globe/textures/earth_bump_2k.webp",
   ]);
 
   useEffect(() => {
@@ -96,7 +96,7 @@ const TravelGlobe: React.FC<TravelGlobeProps> = ({
   const handlePointerUp = () => {
     isDragging.current = false;
     if (controls) (controls as any).enabled = true;
-    document.body.style.cursor = "auto";
+    document.body.style.cursor = "";
   };
 
   const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
@@ -113,7 +113,7 @@ const TravelGlobe: React.FC<TravelGlobeProps> = ({
     const handleGlobalUp = () => {
       isDragging.current = false;
       if (controls) (controls as any).enabled = true;
-      document.body.style.cursor = "auto";
+      document.body.style.cursor = "";
     };
     window.addEventListener("pointerup", handleGlobalUp);
     return () => window.removeEventListener("pointerup", handleGlobalUp);

@@ -7,7 +7,7 @@ export const COLORS = {
   darkMetal: "#1a1a1a",  // Aged iron for the cage
   glass: "#d2cdcd",
   fuel: "#0044ff",       // Deep Blue Dyed Kerosene (UPDATED)
-  neonOff: "#614c4c17",    
+  neonOff: "#614c4c",    
   neonOn: "#211c1a",     
 };
 

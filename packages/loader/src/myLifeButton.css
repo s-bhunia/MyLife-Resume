@@ -4,104 +4,100 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  background: transparent;
-  border: none;
-  color: #ffffff; /* WCAG AA compliant contrast ratio */
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 1.1rem;
-  font-weight: 600;
   padding: 0.5rem 1rem;
-  /* Smoothly animates any padding or gap changes */
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: none;
+  background: transparent;
+  color: #3b2414;
+  font: 600 1.15rem/1 var(--font-display, sans-serif);
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease;
 }
 
-/* Keyboard focus indicator */
+.house-scanner-btn:disabled {
+  cursor: progress;
+  opacity: 0.55;
+}
+
 .house-scanner-btn:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.8);
-  outline-offset: 2px;
+  outline: 2px solid #e8642a;
+  outline-offset: 4px;
 }
 
-/* The container for your downloaded image */
 .house-wrapper {
-  overflow: hidden;
-  height: 0;
-  opacity: 0;
-  /* The cubic-bezier gives it a slight springy feel as it opens */
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
   display: flex;
-  justify-content: center;
   align-items: flex-end;
+  justify-content: center;
+  height: 88px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translate(-50%, 14px) scale(0.8);
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
 }
 
 .house-img {
-  width: 85px; /* Adjust width as needed */
+  width: 86px;
   height: auto;
-  /* Adds a slight glow to the white sketch so it pops against the dark background */
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+  mix-blend-mode: multiply;
 }
 
-/* The Hover State: expands the image container and pushes text down */
-.house-scanner-btn:hover .house-wrapper {
-  height: 85px; 
+.house-scanner-btn:not(:disabled):is(:hover, :focus-visible) .house-wrapper {
   opacity: 1;
-  margin-bottom: 12px;
+  transform: translate(-50%, 0) scale(1);
 }
 
-.house-scanner-btn:hover {
+.house-scanner-btn:not(:disabled):is(:hover, :focus-visible) {
   transform: translateY(-5px);
 }
 
 .text-wrapper {
   position: relative;
-  padding-bottom: 10px; /* Gives room for the scanner line */
+  padding-bottom: 10px;
 }
 
 .btn-text {
-  letter-spacing: 1px;
+  letter-spacing: 0.06em;
   transition: color 0.3s ease;
 }
 
-.house-scanner-btn:hover .btn-text {
-  color: #ffffff;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+.house-scanner-btn:not(:disabled):hover .btn-text {
+  color: #c2410c;
 }
 
-/* The looping scanner line */
 .scanner-track {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   height: 2px;
-  background: rgba(255, 255, 255, 0.1); /* Faint background track */
-  border-radius: 2px;
   overflow: hidden;
+  border-radius: 2px;
+  background: rgba(120, 72, 30, 0.15);
 }
 
 .scanner-track::before {
-  content: '';
+  content: "";
   position: absolute;
-  top: 0;
-  left: -50%;
+  inset: 0 auto 0 0;
   width: 50%;
-  height: 100%;
-  background: #ffffff;
-  box-shadow: 0 0 10px #ffffff;
-  /* Loops back and forth */
+  background: linear-gradient(90deg, #f0642b, #ffb347);
+  box-shadow: 0 0 10px #ff9a3c;
+  transform: translateX(-100%);
   animation: scan 1.5s ease-in-out infinite alternate;
 }
 
 @keyframes scan {
-  0% { left: -50%; }
-  100% { left: 100%; }
+  to {
+    transform: translateX(200%);
+  }
 }
 
-/* Respect user's motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .house-scanner-btn,
   .house-wrapper,
-  .btn-text,
   .scanner-track::before {
     animation: none;
     transition: none;

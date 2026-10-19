@@ -1,3 +1,3 @@
-// packages/core-engine/src/index.ts
-export { GlobalCanvas } from './GlobalCanvas';
-export { isMobileAtom, isPortraitAtom } from './DeviceManager';
+export { GlobalCanvas, clientPointerEvents } from "./GlobalCanvas";
+export { isMobileAtom, isPortraitAtom } from "./DeviceManager";
+export { hoverStore, useHoverable, useHoverInfo, type HoverInfo } from "./hover";

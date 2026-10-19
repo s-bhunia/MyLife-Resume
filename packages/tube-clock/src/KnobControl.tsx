@@ -43,7 +43,7 @@ export const KnobControl = memo(({ setBrightness }: KnobProps) => {
         rotation={[currentRotation, 0, Math.PI / 2]}
         onClick={handleClick}
         onPointerOver={() => (document.body.style.cursor = "pointer")}
-        onPointerOut={() => (document.body.style.cursor = "auto")}
+        onPointerOut={() => (document.body.style.cursor = "")}
       >
         {/* Main Knob Body */}
         <Cylinder args={[0.2, 0.2, 0.1, 8]}>

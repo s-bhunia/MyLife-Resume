@@ -1,0 +1,406 @@
+[
+  {
+    "id": "seq_003",
+    "audioUrl": "/landing-animation/audio/hey-nath.mp3",
+    "backgroundImage 1": "/landing-animation/images/prahlad_1.webp",
+    "backgroundImage 2": "/landing-animation/images/prahlad_2.webp",
+    "backgroundImage 3": "/landing-animation/images/prahlad_3.webp",
+    "backgroundImage 4": "/landing-animation/images/prahlad_4.webp",
+    "backgroundImage 5": "/landing-animation/images/prahlad_5.webp",
+    "backgroundImage 6": "/landing-animation/images/prahlad_6.webp",
+    "flashEvents": [
+      {
+        "time": 0.8,
+        "duration": 9,
+        "intensity": 1.8
+      },
+      {
+        "time": 9,
+        "duration": 3,
+        "intensity": 1.8
+      },
+      {
+        "time": 12,
+        "duration": 3,
+        "intensity": 1.8
+      },
+      {
+        "time": 15,
+        "duration": 5,
+        "intensity": 1.8
+      },
+      {
+        "time": 22,
+        "duration": 10.5,
+        "intensity": 1
+      },
+      {
+        "time": 30,
+        "duration": 20.5,
+        "intensity": 1
+      }
+    ],
+    "lyrics": [
+      {
+        "text": "MAI ISS YOGYA",
+        "font": "helvetiker",
+        "startTime": 0.2,
+        "holdDuration": 1
+      },
+      {
+        "text": "TOO NAHI",
+        "font": "helvetiker",
+        "startTime": 2,
+        "holdDuration": 1
+      },
+      {
+        "text": "KI APP MUJHSE ",
+        "font": "helvetiker",
+        "startTime": 3.5,
+        "holdDuration": 0.7
+      },
+      {
+        "text": "MILNE AYE ",
+        "font": "helvetiker",
+        "startTime": 5,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "PARANTU",
+        "font": "helvetiker",
+        "startTime": 5.5,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "FIR BHI ",
+        "font": "helvetiker",
+        "startTime": 6.5,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "APKO DEKHNA ",
+        "font": "helvetiker",
+        "startTime": 7.2,
+        "holdDuration": 0.5
+      },
+      {
+        "text": " CHAHTA HUN ",
+        "font": "helvetiker",
+        "startTime": 8.3,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "NATH ",
+        "font": "helvetiker",
+        "startTime": 9,
+        "holdDuration": 0.3
+      },
+      {
+        "text": "KRIPYA MUJHE",
+        "font": "helvetiker",
+        "startTime": 10,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "DARSHAN",
+        "font": "helvetiker",
+        "startTime": 11,
+        "holdDuration": 0.3
+      },
+      {
+        "text": "DEE",
+        "font": "helvetiker",
+        "startTime": 11.5,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "KRIPYA MUJHE",
+        "font": "helvetiker",
+        "startTime": 12.5,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "DARSHAN",
+        "font": "helvetiker",
+        "startTime": 13,
+        "holdDuration": 0.3
+      },
+      {
+        "text": "DIJIYE",
+        "font": "helvetiker",
+        "startTime": 13.5,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "NATH",
+        "font": "helvetiker",
+        "startTime": 14,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "MUJHE",
+        "font": "helvetiker",
+        "startTime": 16,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "DARSHAN",
+        "font": "helvetiker",
+        "startTime": 16.5,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "DIJIYE",
+        "font": "helvetiker",
+        "startTime": 17,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "MUJHE",
+        "font": "helvetiker",
+        "startTime": 18,
+        "holdDuration": 1
+      },
+      {
+        "text": "DARSHAN",
+        "font": "helvetiker",
+        "startTime": 19,
+        "holdDuration": 2
+      },
+      {
+        "text": "DIJIYE",
+        "font": "helvetiker",
+        "startTime": 20.5,
+        "holdDuration": 20
+      },
+      {
+        "text": "BHAGWAN",
+        "font": "helvetiker",
+        "startTime": 47,
+        "holdDuration": 2
+      },
+      {
+        "text": "NAHI",
+        "font": "helvetiker",
+        "startTime": 48.5,
+        "holdDuration": 1
+      },
+      {
+        "text": "DAS!",
+        "font": "helvetiker",
+        "startTime": 50,
+        "holdDuration": 2
+      }
+    ],
+    "chords": []
+  },
+  {
+    "id": "seq_001",
+    "audioUrl": "/landing-animation/audio/1.mp3",
+    "backgroundImage": "/landing-animation/images/shiv.webp",
+    "flashEvents": [
+      {
+        "time": 4.8,
+        "duration": 1.7,
+        "intensity": 1.8
+      },
+      {
+        "time": 9,
+        "duration": 1.7,
+        "intensity": 1.8
+      },
+      {
+        "time": 12,
+        "duration": 10.5,
+        "intensity": 1
+      }
+    ],
+    "lyrics": [
+      {
+        "text": "इश्वर सत्य है",
+        "font": "devanagari",
+        "startTime": 0,
+        "holdDuration": 2.5
+      },
+      {
+        "text": "सत्य ही शिव है",
+        "font": "devanagari",
+        "startTime": 3.5,
+        "holdDuration": 2.5
+      },
+      {
+        "text": "शिव ही सुन्दर है",
+        "font": "devanagari",
+        "startTime": 7,
+        "holdDuration": 2.5
+      },
+      {
+        "text": "सत्यम शिवम सुन्दरम",
+        "font": "devanagari",
+        "startTime": 11,
+        "holdDuration": 4
+      },
+      {
+        "text": "WELCOME TO",
+        "font": "helvetiker",
+        "startTime": 17,
+        "holdDuration": 2
+      },
+      {
+        "text": "MY WORLD",
+        "font": "helvetiker",
+        "startTime": 21,
+        "holdDuration": 2
+      }
+    ],
+    "chords": [
+      [
+        "C4",
+        "E4",
+        "G4"
+      ],
+      [
+        "A3",
+        "C4",
+        "E4"
+      ],
+      [
+        "G3",
+        "B3",
+        "D4"
+      ],
+      [
+        "C4",
+        "E4",
+        "G4"
+      ],
+      [
+        "A3",
+        "C4",
+        "E4"
+      ]
+    ]
+  },
+  {
+    "id": "seq_002",
+    "audioUrl": "/landing-animation/audio/aur-tum-radhe.mp3",
+    "backgroundImage": "/landing-animation/images/krishna.webp",
+    "flashEvents": [
+      {
+        "time": 15,
+        "duration": 2,
+        "intensity": 0.9
+      },
+      {
+        "time": 18,
+        "duration": 10,
+        "intensity": 1
+      }
+    ],
+    "lyrics": [
+      {
+        "text": "AUR TUM RADHE",
+        "font": "helvetiker",
+        "startTime": 0.2,
+        "holdDuration": 2
+      },
+      {
+        "text": "TUM US ANANYA",
+        "font": "helvetiker",
+        "startTime": 3,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "PREM KI ",
+        "font": "helvetiker",
+        "startTime": 4,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "SHIROMONI",
+        "font": "helvetiker",
+        "startTime": 5,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "HO",
+        "font": "helvetiker",
+        "startTime": 5.5,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "SUCH TO ",
+        "font": "helvetiker",
+        "startTime": 6.5,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "YE HA KI",
+        "font": "helvetiker",
+        "startTime": 7.2,
+        "holdDuration": 0.5
+      },
+      {
+        "text": " MAI ",
+        "font": "helvetiker",
+        "startTime": 8.3,
+        "holdDuration": 0.3
+      },
+      {
+        "text": "NA TUMHARE",
+        "font": "helvetiker",
+        "startTime": 8.8,
+        "holdDuration": 0.5
+      },
+      {
+        "text": "PREM KI ",
+        "font": "helvetiker",
+        "startTime": 9.3,
+        "holdDuration": 0.3
+      },
+      {
+        "text": "BARABARI ",
+        "font": "helvetiker",
+        "startTime": 10,
+        "holdDuration": 0.3
+      },
+      {
+        "text": "KAR SAKTA",
+        "font": "helvetiker",
+        "startTime": 10.8,
+        "holdDuration": 0.3
+      },
+      {
+        "text": "HUN",
+        "font": "helvetiker",
+        "startTime": 11.2,
+        "holdDuration": 0.3
+      },
+      {
+        "text": "NA USKA RIN",
+        "font": "helvetiker",
+        "startTime": 12.2,
+        "holdDuration": 0.1
+      },
+      {
+        "text": "UTAR SAKTA HUN",
+        "font": "helvetiker",
+        "startTime": 13,
+        "holdDuration": 0.3
+      },
+      {
+        "text": "KSHAMA KARNA ",
+        "font": "helvetiker",
+        "startTime": 14,
+        "holdDuration": 0.5
+      },
+      {
+        "text": " ँRADHE ँ",
+        "font": "devanagari",
+        "startTime": 16,
+        "holdDuration": 6
+      }
+    ],
+    "chords": []
+  }
+]
